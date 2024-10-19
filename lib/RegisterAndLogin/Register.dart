@@ -1,4 +1,8 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../api/user.dart';
+import '../utils/util.dart';
 
 class RegisterPage extends StatefulWidget {
   _RegisterPageState createState() => _RegisterPageState();
@@ -8,12 +12,48 @@ class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _captchaController = TextEditingController(); // 验证码控制器
 
-  void _register() {
+  void _register() async {
     String username = _usernameController.text;
     String phone = _phoneController.text;
     String password = _passwordController.text;
-    // TODO: 实现注册逻辑，如验证输入内容并保存用户信息
+    String captcha = _captchaController.text; // 获取验证码
+
+    // 验证输入内容
+    if (username.isEmpty || phone.isEmpty || password.isEmpty || captcha.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('请填写所有字段')));
+      return;
+    }
+
+    // 构建请求体，包含验证码
+    Map<String, dynamic> data = {
+      'username': username,
+      'phone': phone,
+      'password': password,
+      'captcha': captcha, // 包含验证码
+    };
+
+    var result = await UserApi().Register(data); // 假设UserApi中有Register方法
+    if (result != null) {
+      var code = result['code'];
+      var message = result['message'];
+      if (code == 200) {
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        String registrationInfo = jsonEncode(result);
+        prefs.setString('registration', registrationInfo);
+        Navigator.pop(context); // 返回到登录页面
+      } else {
+        showInfoDialog(context, message.toString());
+      }
+    } else {
+      showInfoDialog(context, '注册失败');
+    }
+  }
+
+  void _sendCaptcha() {
+    // 发送验证码逻辑，可能需要调用后端API获取验证码
+    // 这里省略具体实现...
   }
 
   @override
@@ -58,6 +98,23 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
               SizedBox(height: 16),
               TextField(
+                controller: _captchaController,
+                decoration: InputDecoration(
+                  labelText: "验证码",
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              // 发送验证码按钮
+              TextButton(
+                child: Text('发送验证码', style: TextStyle(color: Colors.blue)),
+                onPressed: _sendCaptcha,
+                style: TextButton.styleFrom(
+                  backgroundColor: Colors.transparent, // 设置按钮背景颜色
+                  padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20), // 设置按钮内边距
+                ),
+              ),
+              SizedBox(height: 16),
+              TextField(
                 controller: _passwordController,
                 obscureText: true,
                 decoration: InputDecoration(
@@ -67,7 +124,7 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
               SizedBox(height: 16),
               ElevatedButton(
-                  onPressed: (){
+                  onPressed: () {
                     _register();
                   },
                   child: Text("注册")
@@ -105,6 +162,7 @@ class _RegisterPageState extends State<RegisterPage> {
     _usernameController.dispose();
     _phoneController.dispose();
     _passwordController.dispose();
+    _captchaController.dispose(); // 释放验证码控制器资源
     super.dispose();
   }
 }
