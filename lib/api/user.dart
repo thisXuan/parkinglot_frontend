@@ -24,6 +24,14 @@ class UserApi {
     return result;
   }
 
+  // 注册
+  Register(dynamic data) async {
+    var result = await Request().request("/user/register",
+        method: DioMethod.post,
+        data: data);
+    return result;
+  }
+
 
 }
 
