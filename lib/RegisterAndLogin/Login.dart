@@ -18,19 +18,23 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _passwordController = TextEditingController();
 
   void _login() async {
-    String username = _usernameController.text;
+    String phone = _usernameController.text;
     String password = _passwordController.text;
-    dynamic data = {'name': username, 'password': password};
+    dynamic data = {'phone': phone, 'password': password};
 
     var result = await UserApi().Login(data);
     if(result!=null){
       var code = result['code'];
       var message = result['data'];
+      var msg = result['msg'];
       if (code == 200) {
+        var userinfo = await UserApi().GetUserInfo(phone);
+        var username = userinfo['data']['name'];
         SharedPreferences prefs = await SharedPreferences.getInstance();
         Map<String, String> userInfo = {
-          'username': username,
+          'phone': phone,
           'token': message,
+          'username':username
         };
         // 将Map转换为JSON字符串
         String userJson = jsonEncode(userInfo);
@@ -40,7 +44,7 @@ class _LoginPageState extends State<LoginPage> {
           MaterialPageRoute(builder: (context) => Tabs()),
         );
       } else {
-        showInfoDialog(context,message.toString());
+        showInfoDialog(context,msg.toString());
       }
     }
 
@@ -74,7 +78,7 @@ class _LoginPageState extends State<LoginPage> {
                 TextField(
                   controller: _usernameController,
                   decoration: InputDecoration(
-                    labelText: "用户名",
+                    labelText: "手机号",
                     border: OutlineInputBorder(),
                   ),
                 ),
