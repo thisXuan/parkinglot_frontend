@@ -12,7 +12,10 @@ class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController = TextEditingController(); // 确认密码控制器
   final TextEditingController _captchaController = TextEditingController(); // 验证码控制器
+
+  bool _isPasswordMatch = false; // 密码是否匹配
 
   void _register() async {
     String username = _usernameController.text;
@@ -56,6 +59,12 @@ class _RegisterPageState extends State<RegisterPage> {
     // 这里省略具体实现...
   }
 
+  void _checkPassword() {
+    setState(() {
+      _isPasswordMatch = _passwordController.text == _confirmPasswordController.text;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -97,21 +106,27 @@ class _RegisterPageState extends State<RegisterPage> {
                 keyboardType: TextInputType.phone,
               ),
               SizedBox(height: 16),
-              TextField(
-                controller: _captchaController,
-                decoration: InputDecoration(
-                  labelText: "验证码",
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              // 发送验证码按钮
-              TextButton(
-                child: Text('发送验证码', style: TextStyle(color: Colors.blue)),
-                onPressed: _sendCaptcha,
-                style: TextButton.styleFrom(
-                  backgroundColor: Colors.transparent, // 设置按钮背景颜色
-                  padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20), // 设置按钮内边距
-                ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _captchaController,
+                      decoration: InputDecoration(
+                        labelText: "验证码",
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                  ),
+                  TextButton(
+                    child: Text('发送验证码', style: TextStyle(color: Colors.blue)),
+                    onPressed: _sendCaptcha,
+                    style: TextButton.styleFrom(
+                      backgroundColor: Colors.transparent, // 设置按钮背景颜色
+                      padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20), // 设置按钮内边距
+                    ),
+                  ),
+                ],
               ),
               SizedBox(height: 16),
               TextField(
@@ -123,21 +138,29 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
               ),
               SizedBox(height: 16),
+              TextField(
+                controller: _confirmPasswordController,
+                obscureText: true,
+                decoration: InputDecoration(
+                  labelText: "确认密码",
+                  border: OutlineInputBorder(),
+                  suffixIcon: _isPasswordMatch
+                      ? Icon(Icons.check, color: Colors.green)
+                      : Icon(Icons.close, color: Colors.red),
+                ),
+              ),
+              SizedBox(height: 16),
               ElevatedButton(
-                  onPressed: () {
-                    _register();
-                  },
-                  child: Text("注册")
+                onPressed: _isPasswordMatch ? () => _register() : null,
+                child: Text("注册"),
               ),
-              SizedBox(
-                  height: 30
-              ),
+              SizedBox(height: 30),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text("已有账号？"),
                   GestureDetector(
-                    onTap: (){
+                    onTap: () {
                       Navigator.pop(context);
                     },
                     child: Text(
@@ -162,7 +185,15 @@ class _RegisterPageState extends State<RegisterPage> {
     _usernameController.dispose();
     _phoneController.dispose();
     _passwordController.dispose();
-    _captchaController.dispose(); // 释放验证码控制器资源
+    _confirmPasswordController.dispose();
+    _captchaController.dispose();
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _passwordController.addListener(_checkPassword);
+    _confirmPasswordController.addListener(_checkPassword);
   }
 }

@@ -1,8 +1,6 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import '../api/user.dart';
 
 class ForgetpasswordPage extends StatefulWidget {
@@ -13,10 +11,12 @@ class _ForgetpasswordPageState extends State<ForgetpasswordPage> {
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _codeController = TextEditingController();
   final TextEditingController _newPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController = TextEditingController();
   final UserApi _userApi = UserApi(); // 创建UserApi实例
+  bool _isPasswordMatch = false;
 
   void _sendCaptcha() async {
-
+    // 发送验证码逻辑
   }
 
   void _resetPassword() async {
@@ -29,7 +29,11 @@ class _ForgetpasswordPageState extends State<ForgetpasswordPage> {
       return;
     }
 
-    // 构建请求体，重置密码
+    if (!_isPasswordMatch) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('密码不一致')));
+      return;
+    }
+
     Map<String, dynamic> data = {
       'phone': phone,
       'captcha': code,
@@ -45,13 +49,19 @@ class _ForgetpasswordPageState extends State<ForgetpasswordPage> {
         String registrationInfo = jsonEncode(result);
         prefs.setString('registration', registrationInfo);
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('密码重置成功')));
-        Navigator.pop(context); // 返回登录页面
+        Navigator.pop(context);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
       }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('重置密码失败')));
     }
+  }
+
+  void _checkPassword() {
+    setState(() {
+      _isPasswordMatch = _newPasswordController.text == _confirmPasswordController.text;
+    });
   }
 
   @override
@@ -88,23 +98,26 @@ class _ForgetpasswordPageState extends State<ForgetpasswordPage> {
               ),
               SizedBox(height: 16),
               Row(
-                mainAxisAlignment: MainAxisAlignment.end,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  ElevatedButton(
-                    onPressed: () {
-                      _sendCaptcha();
-                    },
+                  Expanded(
+                    child: TextField(
+                      controller: _codeController,
+                      decoration: InputDecoration(
+                        labelText: "验证码",
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                  ),
+                  TextButton(
                     child: Text("发送验证码"),
+                    onPressed: () => _sendCaptcha(),
+                    style: TextButton.styleFrom(
+                      backgroundColor: Colors.transparent,
+                      padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                    ),
                   ),
                 ],
-              ),
-              SizedBox(height: 16),
-              TextField(
-                controller: _codeController,
-                decoration: InputDecoration(
-                  labelText: "验证码",
-                  border: OutlineInputBorder(),
-                ),
               ),
               SizedBox(height: 16),
               TextField(
@@ -116,10 +129,20 @@ class _ForgetpasswordPageState extends State<ForgetpasswordPage> {
                 ),
               ),
               SizedBox(height: 16),
+              TextField(
+                controller: _confirmPasswordController,
+                obscureText: true,
+                decoration: InputDecoration(
+                  labelText: "确认密码",
+                  border: OutlineInputBorder(),
+                  suffixIcon: _isPasswordMatch
+                      ? Icon(Icons.check, color: Colors.green)
+                      : Icon(Icons.close, color: Colors.red),
+                ),
+              ),
+              SizedBox(height: 16),
               ElevatedButton(
-                onPressed: () {
-                  _resetPassword();
-                },
+                onPressed: _isPasswordMatch ? () => _resetPassword() : null,
                 child: Text("重置密码"),
               ),
               SizedBox(height: 30),
@@ -153,6 +176,14 @@ class _ForgetpasswordPageState extends State<ForgetpasswordPage> {
     _phoneController.dispose();
     _codeController.dispose();
     _newPasswordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _newPasswordController.addListener(_checkPassword);
+    _confirmPasswordController.addListener(_checkPassword);
   }
 }
