@@ -1,6 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:parkinglot_frontend/RegisterAndLogin/ForgetPassword.dart';
 import 'package:parkinglot_frontend/RegisterAndLogin/Register.dart';
+import 'package:parkinglot_frontend/api/user.dart';
+import 'package:parkinglot_frontend/mainPages/Tabs.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:parkinglot_frontend/utils/util.dart';
 
 class LoginPage extends StatefulWidget {
   _LoginPageState createState() => _LoginPageState();
@@ -11,9 +17,33 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-  void _login() {
+  void _login() async {
     String username = _usernameController.text;
     String password = _passwordController.text;
+    dynamic data = {'name': username, 'password': password};
+
+    var result = await UserApi().Login(data);
+    if(result!=null){
+      var code = result['code'];
+      var message = result['data'];
+      if (code == 200) {
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        Map<String, String> userInfo = {
+          'username': username,
+          'token': message,
+        };
+        // 将Map转换为JSON字符串
+        String userJson = jsonEncode(userInfo);
+        prefs.setString('user', userJson);
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => Tabs()),
+        );
+      } else {
+        showInfoDialog(context,message.toString());
+      }
+    }
+
 
   }
 
@@ -27,7 +57,7 @@ class _LoginPageState extends State<LoginPage> {
           child: Container(
             padding: const EdgeInsets.all(16),
             constraints: BoxConstraints(
-              minHeight: MediaQuery.of(context).size.height
+                minHeight: MediaQuery.of(context).size.height
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,

@@ -1,4 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../api/user.dart';
 
 class ForgetpasswordPage extends StatefulWidget {
   _ForgetpasswordPageState createState() => _ForgetpasswordPageState();
@@ -8,17 +13,45 @@ class _ForgetpasswordPageState extends State<ForgetpasswordPage> {
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _codeController = TextEditingController();
   final TextEditingController _newPasswordController = TextEditingController();
+  final UserApi _userApi = UserApi(); // 创建UserApi实例
 
-  void _resetPassword() {
+  void _sendCaptcha() async {
+
+  }
+
+  void _resetPassword() async {
     String phone = _phoneController.text;
     String code = _codeController.text;
     String newPassword = _newPasswordController.text;
-    // TODO: 实现发送验证码和重置密码的逻辑
-  }
 
-  void _sendCode() {
-    String phone = _phoneController.text;
-    // TODO: 实现发送验证码的逻辑
+    if (phone.isEmpty || code.isEmpty || newPassword.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('请填写所有字段')));
+      return;
+    }
+
+    // 构建请求体，重置密码
+    Map<String, dynamic> data = {
+      'phone': phone,
+      'captcha': code,
+      'newPassword': newPassword,
+    };
+
+    var result = await _userApi.ForgetPassword(data);
+    if (result != null) {
+      var code = result['code'];
+      var message = result['message'];
+      if (code == 200) {
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        String registrationInfo = jsonEncode(result);
+        prefs.setString('registration', registrationInfo);
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('密码重置成功')));
+        Navigator.pop(context); // 返回登录页面
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('重置密码失败')));
+    }
   }
 
   @override
@@ -59,7 +92,7 @@ class _ForgetpasswordPageState extends State<ForgetpasswordPage> {
                 children: [
                   ElevatedButton(
                     onPressed: () {
-                      _sendCode();
+                      _sendCaptcha();
                     },
                     child: Text("发送验证码"),
                   ),
