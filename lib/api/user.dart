@@ -39,6 +39,13 @@ class UserApi {
         data: data);
     return result;
   }
+
+  // 获取用户信息
+  GetUserInfo(dynamic data) async{
+    var result = await Request().request("/user/getUserInfo?phone=$data",
+      method:DioMethod.get);
+    return result;
+  }
 }
 
 // 导出全局使用这一个实例
