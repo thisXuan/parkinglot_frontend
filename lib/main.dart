@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:parkinglot_frontend/mainPages/Tabs.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 
 void main() {
   // if (Platform.isIOS) {
@@ -27,7 +28,8 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: Tabs()
+      home: Tabs(),
+      builder: EasyLoading.init(),
     );
   }
 }

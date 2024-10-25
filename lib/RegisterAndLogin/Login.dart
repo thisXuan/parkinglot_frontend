@@ -22,13 +22,13 @@ class _LoginPageState extends State<LoginPage> {
     String password = _passwordController.text;
     dynamic data = {'phone': phone, 'password': password};
 
-    var result = await UserApi().Login(data);
+    var result = await UserApi().Login(data,context);
     if(result!=null){
       var code = result['code'];
       var message = result['data'];
       var msg = result['msg'];
       if (code == 200) {
-        var userinfo = await UserApi().GetUserInfo(phone);
+        var userinfo = await UserApi().GetUserInfo(phone,context);
         var username = userinfo['data']['name'];
         SharedPreferences prefs = await SharedPreferences.getInstance();
         Map<String, String> userInfo = {
@@ -44,7 +44,7 @@ class _LoginPageState extends State<LoginPage> {
           MaterialPageRoute(builder: (context) => Tabs()),
         );
       } else {
-        showInfoDialog(context,msg.toString());
+        ElToast.info(msg.toString());
       }
     }
 

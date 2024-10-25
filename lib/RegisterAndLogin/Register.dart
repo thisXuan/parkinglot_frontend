@@ -37,7 +37,7 @@ class _RegisterPageState extends State<RegisterPage> {
       'captcha': captcha, // 包含验证码
     };
 
-    var result = await UserApi().Register(data);
+    var result = await UserApi().Register(data,context);
     if (result != null) {
       var code = result['code'];
       var message = result['message'];
@@ -47,10 +47,10 @@ class _RegisterPageState extends State<RegisterPage> {
         prefs.setString('registration', registrationInfo);
         Navigator.pop(context); // 返回到登录页面
       } else {
-        showInfoDialog(context, message.toString());
+        ElToast.info(message.toString());
       }
     } else {
-      showInfoDialog(context, '注册失败');
+      ElToast.info('注册失败');
     }
   }
 

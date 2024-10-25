@@ -1,7 +1,8 @@
 import 'dart:convert';
-
+import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:parkinglot_frontend/utils/util.dart';
 
 enum DioMethod {
   get,
@@ -30,7 +31,7 @@ class Request {
   Request._internal() {
     // 初始化基本选项
     BaseOptions options = BaseOptions(
-        baseUrl: 'http://192.168.1.8:8081',
+        baseUrl: 'http://192.168.1.175:8081',
         connectTimeout: const Duration(seconds: 5),
         receiveTimeout: const Duration(seconds: 5));
     _instance = this;
@@ -72,12 +73,54 @@ class Request {
  
   /// 错误处理: 网络错误等
   void _onError(DioException error, ErrorInterceptorHandler handler) {
-    handler.next(error);
+    final response = error.response;
+    final httpStatus = error.response?.statusCode;
+    if (httpStatus == null) {
+      ElToast.info('服务器暂时无法响应，请稍后再试');
+    } else {
+      switch (httpStatus) {
+        case 401:
+          ElToast.info('登录状态失效，请重新登录');
+          break;
+        case 500:
+          final code = response?.data['code'];
+          switch (code) {
+          // 无权访问跳转到首页
+            case 402:
+              ElToast.info('您无权访问该资源');
+              break;
+          // 服务器出错
+            default:
+              ElToast.info('服务器暂时无法响应，请稍后再试');
+              break;
+          }
+      }
+    }
+    //handler.next(error);
+    handler.reject(error);
   }
+
+  /// 显示加载动画
+  void showLoadingDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return Center(child: CircularProgressIndicator());
+      },
+    );
+  }
+
+  /// 隐藏加载动画
+  void hideLoadingDialog(BuildContext context) {
+    Navigator.of(context, rootNavigator: true).pop();
+  }
+
  
   /// 请求类：支持异步请求操作
   Future<T>  request<T>(
     String path, {
+      required BuildContext context,
     DioMethod method = DioMethod.get,
     Map<String, dynamic>? params,
     dynamic data,
@@ -96,6 +139,7 @@ class Request {
     };
     // 默认配置选项
     options ??= Options(method: _methodValues[method]);
+    showLoadingDialog(context);
     try {
       Response response;
       // 开始发送请求
@@ -110,6 +154,8 @@ class Request {
     } on DioException catch (e) {
       print("发送请求异常: $e");
       rethrow;
+    }finally{
+      hideLoadingDialog(context);
     }
   }
 

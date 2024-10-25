@@ -1,3 +1,5 @@
+import 'package:flutter/cupertino.dart';
+
 import '../utils/request.dart';
 
 // 创建一个关于user相关请求的对象
@@ -17,32 +19,36 @@ class UserApi {
   }
 
   // 登录
-  Login(dynamic data) async {
+  Login(dynamic data,BuildContext context) async {
     var result = await Request().request("/user/login",
+        context: context,
         method: DioMethod.post,
         data: data);
     return result;
   }
 
   // 注册
-  Register(dynamic data) async {
+  Register(dynamic data,BuildContext context) async {
     var result = await Request().request("/user/register",
+        context: context,
         method: DioMethod.post,
         data: data);
     return result;
   }
 
   // 重置密码
-  ForgetPassword(dynamic data) async {
+  ForgetPassword(dynamic data,BuildContext context) async {
     var result = await Request().request("/user/reset-password",
+        context: context,
         method: DioMethod.post,
         data: data);
     return result;
   }
 
   // 获取用户信息
-  GetUserInfo(dynamic data) async{
+  GetUserInfo(dynamic data,BuildContext context) async{
     var result = await Request().request("/user/getUserInfo?phone=$data",
+      context: context,
       method:DioMethod.get);
     return result;
   }
