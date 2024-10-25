@@ -49,6 +49,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.8"
+  device_info_plus:
+    dependency: transitive
+    description:
+      name: device_info_plus
+      sha256: "77f757b789ff68e4eaf9c56d1752309bd9f7ad557cb105b938a7f8eb89e59110"
+      url: "https://pub.dev"
+    source: hosted
+    version: "9.1.2"
+  device_info_plus_platform_interface:
+    dependency: transitive
+    description:
+      name: device_info_plus_platform_interface
+      sha256: "282d3cf731045a2feb66abfe61bbc40870ae50a3ed10a4d3d217556c35c8c2ba"
+      url: "https://pub.dev"
+    source: hosted
+    version: "7.0.1"
   dio:
     dependency: "direct main"
     description:
@@ -94,6 +110,46 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_baidu_mapapi_base:
+    dependency: transitive
+    description:
+      name: flutter_baidu_mapapi_base
+      sha256: "30af828fa8fb7f738a5cb36e27e50cd512fe4fe76343df3761fbcc345378d5d4"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.8.1"
+  flutter_baidu_mapapi_map:
+    dependency: "direct main"
+    description:
+      name: flutter_baidu_mapapi_map
+      sha256: af0fe1d680f690fd8044121e5f0cd31009fb84b50968b305b0d74802365ef4c7
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.8.1"
+  flutter_baidu_mapapi_search:
+    dependency: "direct main"
+    description:
+      name: flutter_baidu_mapapi_search
+      sha256: a3fa4d9c8d1ea0491493bbaa6b15fc55d6e0e0303ff6c1325a329261bce887cb
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.8.1"
+  flutter_baidu_mapapi_utils:
+    dependency: "direct main"
+    description:
+      name: flutter_baidu_mapapi_utils
+      sha256: "6d9523d5691ca320eb574478e293a801ae4d583f39a735432d52a612aafae159"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.8.1"
+  flutter_bmflocation:
+    dependency: "direct main"
+    description:
+      name: flutter_bmflocation
+      sha256: "74a9d96c4e95cbcd1c8dadc0d05004c48032bda1eee6fa2dbddf9ff0cfbd94f7"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.6.0"
   flutter_lints:
     dependency: "direct dev"
     description:
@@ -102,6 +158,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.0.0"
+  flutter_plugin_android_lifecycle:
+    dependency: transitive
+    description:
+      name: flutter_plugin_android_lifecycle
+      sha256: "9b78450b89f059e96c9ebb355fa6b3df1d6b330436e0b885fb49594c41721398"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.23"
   flutter_test:
     dependency: "direct dev"
     description: flutter
@@ -365,6 +429,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.0"
+  win32:
+    dependency: transitive
+    description:
+      name: win32
+      sha256: e1d0cc62e65dc2561f5071fcbccecf58ff20c344f8f3dc7d4922df372a11df1f
+      url: "https://pub.dev"
+    source: hosted
+    version: "5.7.1"
+  win32_registry:
+    dependency: transitive
+    description:
+      name: win32_registry
+      sha256: "21ec76dfc731550fd3e2ce7a33a9ea90b828fdf19a5c3bcf556fa992cfa99852"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.5"
   xdg_directories:
     dependency: transitive
     description:
