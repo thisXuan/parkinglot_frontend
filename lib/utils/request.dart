@@ -120,7 +120,6 @@ class Request {
   /// 请求类：支持异步请求操作
   Future<T>  request<T>(
     String path, {
-      required BuildContext context,
     DioMethod method = DioMethod.get,
     Map<String, dynamic>? params,
     dynamic data,
@@ -139,7 +138,6 @@ class Request {
     };
     // 默认配置选项
     options ??= Options(method: _methodValues[method]);
-    showLoadingDialog(context);
     try {
       Response response;
       // 开始发送请求
@@ -154,8 +152,6 @@ class Request {
     } on DioException catch (e) {
       print("发送请求异常: $e");
       rethrow;
-    }finally{
-      hideLoadingDialog(context);
     }
   }
 

@@ -19,36 +19,32 @@ class UserApi {
   }
 
   // 登录
-  Login(dynamic data,BuildContext context) async {
+  Login(dynamic data) async {
     var result = await Request().request("/user/login",
-        context: context,
         method: DioMethod.post,
         data: data);
     return result;
   }
 
   // 注册
-  Register(dynamic data,BuildContext context) async {
+  Register(dynamic data) async {
     var result = await Request().request("/user/register",
-        context: context,
         method: DioMethod.post,
         data: data);
     return result;
   }
 
   // 重置密码
-  ForgetPassword(dynamic data,BuildContext context) async {
+  ForgetPassword(dynamic data) async {
     var result = await Request().request("/user/reset-password",
-        context: context,
         method: DioMethod.post,
         data: data);
     return result;
   }
 
   // 获取用户信息
-  GetUserInfo(dynamic data,BuildContext context) async{
+  GetUserInfo(dynamic data) async{
     var result = await Request().request("/user/getUserInfo?phone=$data",
-      context: context,
       method:DioMethod.get);
     return result;
   }

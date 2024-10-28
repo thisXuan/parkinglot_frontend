@@ -40,7 +40,7 @@ class _ForgetpasswordPageState extends State<ForgetpasswordPage> {
       'newPassword': newPassword,
     };
 
-    var result = await _userApi.ForgetPassword(data,context);
+    var result = await _userApi.ForgetPassword(data);
     if (result != null) {
       var code = result['code'];
       var message = result['message'];

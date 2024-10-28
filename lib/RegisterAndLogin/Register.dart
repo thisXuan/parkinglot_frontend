@@ -37,7 +37,7 @@ class _RegisterPageState extends State<RegisterPage> {
       'captcha': captcha, // 包含验证码
     };
 
-    var result = await UserApi().Register(data,context);
+    var result = await UserApi().Register(data);
     if (result != null) {
       var code = result['code'];
       var message = result['message'];

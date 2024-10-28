@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:parkinglot_frontend/mainPages/mapNavigation.dart';
 import 'package:parkinglot_frontend/mainPages/storeSearch.dart';
-import 'package:parkinglot_frontend/mainPages/discountSearch.dart';
+import 'package:parkinglot_frontend/mainPages/CarSearch.dart';
 import 'package:parkinglot_frontend/mainPages/AccountManagement.dart';
 
 class Tabs extends StatefulWidget{
@@ -14,7 +14,7 @@ class _TabsState extends State<Tabs>{
   List _pageList=[
     IndoorMapPage(),
     StoreSearchPage(),
-    discountPage(),
+    CarPage(),
     accountPage()
   ];
   @override
@@ -48,8 +48,8 @@ class _TabsState extends State<Tabs>{
                 label: "店铺搜索"
             ),
             BottomNavigationBarItem(
-                icon: Icon(Icons.discount),
-                label: "今日折扣"
+                icon: Icon(Icons.car_crash),
+                label: "反向寻车"
             ),
             BottomNavigationBarItem(
                 icon: Icon(Icons.home),
