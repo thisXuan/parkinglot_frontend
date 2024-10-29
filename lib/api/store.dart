@@ -15,9 +15,14 @@ class StoreApi {
     // 初始化基本选项
   }
 
-  // 登录
   GetStoreInfo(dynamic data) async {
     var result = await Request().request("/store/getStoreInfo?page=$data",
+        method: DioMethod.get);
+    return result;
+  }
+
+  QueryStoreInfo(dynamic data) async {
+    var result = await Request().request("/store/queryStoreInfo?query=$data",
         method: DioMethod.get);
     return result;
   }

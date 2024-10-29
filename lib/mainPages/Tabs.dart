@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:parkinglot_frontend/mainPages/mapNavigation.dart';
-import 'package:parkinglot_frontend/mainPages/storeSearch.dart';
+import 'package:parkinglot_frontend/Store/storeTotal.dart';
 import 'package:parkinglot_frontend/mainPages/CarSearch.dart';
-import 'package:parkinglot_frontend/mainPages/AccountManagement.dart';
+import 'package:parkinglot_frontend/RegisterAndLogin/AccountManagement.dart';
 
 class Tabs extends StatefulWidget{
   _TabsState createState()=>_TabsState();
@@ -13,7 +13,7 @@ class _TabsState extends State<Tabs>{
   //下面的三个方法都是三个界面的方法
   List _pageList=[
     IndoorMapPage(),
-    StoreSearchPage(),
+    StoreTotalPage(),
     CarPage(),
     accountPage()
   ];
