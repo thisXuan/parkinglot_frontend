@@ -27,6 +27,12 @@ class StoreApi {
     return result;
   }
 
+  GetServiceCategory(dynamic data) async {
+    var result = await Request().request("/store/getServiceCategory?query=$data",
+        method: DioMethod.get);
+    return result;
+  }
+
 }
 
 // 导出全局使用这一个实例
