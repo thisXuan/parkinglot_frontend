@@ -15,33 +15,30 @@ class Store {
   String recommendedServices;
   String image;
 
-
-  Store({
-    required this.id,
-    required this.storeName,
-    required this.serviceCategory,
-    required this.serviceType,
-    required this.businessHours,
-    required this.address,
-    required this.floorNumber,
-    this.description = '',
-    this.recommendedServices = '',
-    required this.image
-  });
+  Store(
+      {required this.id,
+      required this.storeName,
+      required this.serviceCategory,
+      required this.serviceType,
+      required this.businessHours,
+      required this.address,
+      required this.floorNumber,
+      this.description = '',
+      this.recommendedServices = '',
+      required this.image});
 
   factory Store.fromJson(Map<String, dynamic> json) {
     return Store(
-      id: json['id'],
-      storeName: json['storeName'] ?? '',
-      serviceCategory: json['serviceCategory'] ?? '',
-      serviceType: json['serviceType'] ?? '',
-      businessHours: json['businessHours'] ?? '',
-      address: json['address'] ?? '',
-      floorNumber: json['floorNumber'] ?? 0,
-      description: json['description'] ?? '',
-      recommendedServices: json['recommendedServices'] ?? '',
-      image: json['image']??''
-    );
+        id: json['id'],
+        storeName: json['storeName'] ?? '',
+        serviceCategory: json['serviceCategory'] ?? '',
+        serviceType: json['serviceType'] ?? '',
+        businessHours: json['businessHours'] ?? '',
+        address: json['address'] ?? '天街商场',
+        floorNumber: json['floorNumber'] ?? 0,
+        description: json['description'] ?? '',
+        recommendedServices: json['recommendedServices'] ?? '',
+        image: json['image'] ?? '');
   }
 }
 
@@ -66,6 +63,7 @@ class _StoreTotalPageState extends State<StoreTotalPage> {
         this._fetchStoreInfo();
       }
     });
+    _preloadImages();
   }
 
   Future<void> _fetchStoreInfo() async {
@@ -90,12 +88,16 @@ class _StoreTotalPageState extends State<StoreTotalPage> {
     }
   }
 
-  Future<void> _refreshData() async {
-    await Future.delayed(Duration(milliseconds: 2000), () {
-      print('请求数据完成');
-      _fetchStoreInfo();
-    });
+  void _preloadImages() {
+    for (var store in _storeInfo) {
+      if (store.image.isNotEmpty) {
+        precacheImage(NetworkImage(store.image), context);
+      } else {
+        precacheImage(AssetImage('assets/image_lost.jpg'), context);
+      }
+    }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -112,7 +114,7 @@ class _StoreTotalPageState extends State<StoreTotalPage> {
                 borderRadius: BorderRadius.circular(8.0),
               ),
             ),
-            onTap: (){
+            onTap: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => StoreSearchPage()),
@@ -125,71 +127,75 @@ class _StoreTotalPageState extends State<StoreTotalPage> {
         Expanded(
           child: this._storeInfo.length > 0
               ? RefreshIndicator(
-            onRefresh: _refreshData,
-            child: ListView.builder(
-              controller: _scrollController,
-              itemCount: _storeInfo.length,
-              itemBuilder: (context, index) {
-                var store = _storeInfo[index];
-                if (index == this._storeInfo.length - 1) {
-                  return Column(
-                    children: <Widget>[
-                      ListTile(
-                        title: Text(store.storeName),
-                        subtitle: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text("服务类型: ${store.serviceCategory}"),
-                                Text("具体种类: ${store.serviceType}"),
-                                Text("营业时间: ${store.businessHours}"),
-                                Text("店铺位置: ${store.address}"),
-                                Text("所处楼层: ${store.floorNumber}F"),
-                              ],
+                  onRefresh: _fetchStoreInfo,
+                  child: ListView.builder(
+                    controller: _scrollController,
+                    itemCount: _storeInfo.length,
+                    itemBuilder: (context, index) {
+                      var store = _storeInfo[index];
+                      if (index == this._storeInfo.length - 1) {
+                        return Column(
+                          children: <Widget>[
+                            ListTile(
+                              title: Text(store.storeName),
+                              subtitle: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text("${store.serviceCategory}+“ ”+${store.serviceType}"),
+                                      Text("营业中：${store.businessHours}"),
+                                      Text("${store.address}"),
+                                      Text("${store.floorNumber}F"),
+                                    ],
+                                  ),
+                                  store.image.isNotEmpty
+                                      ? Image.network(store.image, width: 80)
+                                      : Image.asset('assets/image_lost.jpg',
+                                          width: 100),
+                                ],
+                              ),
                             ),
-                            store.image.isNotEmpty
-                                ? Image.network(store.image, width: 100)
-                                : Image.asset('assets/image_lost.jpg', width: 100),
+                            Divider(),
+                            _getMoreWidget()
                           ],
-                        ),
-                      ),
-                      Divider(),
-                      _getMoreWidget()
-                    ],
-                  );
-                } else {
-                  return Column(
-                    children: <Widget>[
-                      ListTile(
-                        title: Text(store.storeName),
-                        subtitle: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text("服务类型: ${store.serviceCategory}"),
-                                Text("具体种类: ${store.serviceType}"),
-                                Text("营业时间: ${store.businessHours}"),
-                                Text("店铺位置: ${store.address}"),
-                                Text("所处楼层: ${store.floorNumber}F"),
-                              ],
+                        );
+                      } else {
+                        return Column(
+                          children: <Widget>[
+                            ListTile(
+                              title: Text(store.storeName),
+                              subtitle: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(store.serviceCategory+"  "+store.serviceType),
+                                      Text("营业中：${store.businessHours}"),
+                                      Text("${store.address}"),
+                                      Text("${store.floorNumber}F"),
+                                    ],
+                                  ),
+                                  store.image.isNotEmpty
+                                      ? Image.network(store.image, width: 80)
+                                      : Image.asset('assets/image_lost.jpg',
+                                          width: 100),
+                                ],
+                              ),
                             ),
-                            store.image.isNotEmpty
-                                ? Image.network(store.image, width: 100)
-                                : Image.asset('assets/image_lost.jpg', width: 100),
+                            Divider(),
                           ],
-                        ),
-                      ),
-                      Divider(),
-                    ],
-                  );
-                }
-              },
-            ),
-          )
+                        );
+                      }
+                    },
+                  ),
+                )
               : _getMoreWidget(),
         ),
       ],
@@ -201,16 +207,21 @@ class _StoreTotalPageState extends State<StoreTotalPage> {
     if (_hasMore) {
       return Center(
         child: Padding(
-          padding: EdgeInsets.all(10.0),
-          child:  CircularProgressIndicator(
-            strokeWidth: 1.0,
-          )
-        ),
+            padding: EdgeInsets.all(10.0),
+            child: CircularProgressIndicator(
+              strokeWidth: 1.0,
+            )),
       );
     } else {
       return Center(
         child: Text("--我是有底线的--"),
       );
     }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _storeInfo = [];
   }
 }

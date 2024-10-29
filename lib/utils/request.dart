@@ -63,7 +63,7 @@ class Request {
     // 请求成功是对数据做基本处理
     if (response.statusCode == 200) {
       // 处理成功的响应
-      print("响应结果: $response");
+      // print("响应结果: $response");
     } else {
       // 处理异常结果
       print("响应异常: $response");
