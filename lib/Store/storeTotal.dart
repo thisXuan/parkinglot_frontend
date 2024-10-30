@@ -56,6 +56,7 @@ class _StoreTotalPageState extends State<StoreTotalPage> {
   bool _hasMore = true; //判断有没有数据
   ScrollController _scrollController = new ScrollController();
   int _selectedIndex = 0; // 用于跟踪当前选中的Tab
+  bool _isloading = false;
 
   @override
   void initState() {
@@ -64,13 +65,16 @@ class _StoreTotalPageState extends State<StoreTotalPage> {
     //监听滚动条事件
     _scrollController.addListener(() {
       if (_scrollController.position.pixels >
-          _scrollController.position.maxScrollExtent - 40) {
+          _scrollController.position.maxScrollExtent - 40&&!_isloading) {
         this._fetchStoreInfo();
       }
     });
   }
 
   Future<void> _fetchStoreInfo() async {
+    setState(() {
+      _isloading = true;
+    });
     if (this._hasMore) {
       var result = await StoreApi().GetStoreInfo(_page);
       if (result != null && result['code'] == 200 && result['data'] != null) {
@@ -90,6 +94,9 @@ class _StoreTotalPageState extends State<StoreTotalPage> {
         });
       }
     }
+    setState(() {
+      _isloading = false;
+    });
   }
 
   Future<void> _refreshData() async {
