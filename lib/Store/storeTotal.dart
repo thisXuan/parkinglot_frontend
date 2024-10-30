@@ -192,27 +192,59 @@ class _StoreTotalPageState extends State<StoreTotalPage> {
                 itemCount: _storeInfo.length,
                 itemBuilder: (context, index) {
                   var store = _storeInfo[index];
-                  return ListTile(
-                    title: Text(store.storeName),
-                    subtitle: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text("服务类型: ${store.serviceCategory}"),
-                            Text("具体种类: ${store.serviceType}"),
-                            Text("营业时间: ${store.businessHours}"),
-                            Text("店铺位置: ${store.address}"),
-                            Text("所处楼层: ${store.floorNumber}F"),
-                          ],
+                  if (index == this._storeInfo.length - 1) {
+                    return Column(
+                      children: <Widget>[
+                        ListTile(
+                          title: Text(store.storeName),
+                          subtitle: Row(
+                            mainAxisAlignment:
+                            MainAxisAlignment.spaceBetween,
+                            children: [
+                              Column(
+                                crossAxisAlignment:
+                                CrossAxisAlignment.start,
+                                children: [
+                                  Text("${store.serviceCategory}+“ ”+${store.serviceType}"),
+                                  Text("营业中：${store.businessHours}"),
+                                  Text("${store.address}"),
+                                  Text("${store.floorNumber}F"),
+                                ],
+                              ),
+                              store.image.isNotEmpty
+                                  ? Image.network(store.image, width: 80)
+                                  : Image.asset('assets/image_lost.jpg',
+                                  width: 100),
+                            ],
+                          ),
                         ),
-                        store.image.isNotEmpty
-                            ? Image.network(store.image, width: 100)
-                            : Image.asset('assets/image_lost.jpg', width: 100),
+                        Divider(),
+                        _getMoreWidget()
                       ],
-                    ),
-                  );
+                    );
+                  }else{
+                    return ListTile(
+                      title: Text(store.storeName),
+                      subtitle: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text("服务类型: ${store.serviceCategory}"),
+                              Text("具体种类: ${store.serviceType}"),
+                              Text("营业时间: ${store.businessHours}"),
+                              Text("店铺位置: ${store.address}"),
+                              Text("所处楼层: ${store.floorNumber}F"),
+                            ],
+                          ),
+                          store.image.isNotEmpty
+                              ? Image.network(store.image, width: 100)
+                              : Image.asset('assets/image_lost.jpg', width: 100),
+                        ],
+                      ),
+                    );
+                  }
                 },
               ),
             )

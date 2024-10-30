@@ -31,7 +31,7 @@ class Request {
   Request._internal() {
     // 初始化基本选项
     BaseOptions options = BaseOptions(
-        baseUrl: 'http://192.168.1.8:8081',
+        baseUrl: 'http://192.168.1.158:8081',
         connectTimeout: const Duration(seconds: 5),
         receiveTimeout: const Duration(seconds: 5));
     _instance = this;
@@ -63,7 +63,7 @@ class Request {
     // 请求成功是对数据做基本处理
     if (response.statusCode == 200) {
       // 处理成功的响应
-      // print("响应结果: $response");
+      print("响应结果: $response");
     } else {
       // 处理异常结果
       print("响应异常: $response");
