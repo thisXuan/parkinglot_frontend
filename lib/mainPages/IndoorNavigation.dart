@@ -3,14 +3,13 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'dart:ui' as ui;
 import 'package:parkinglot_frontend/api/navigation.dart';
 
-// 建立Point实体类
+// 定义点的实体类
 class Point {
   final int x;
   final int y;
 
   Point({required this.x, required this.y});
 
-  // 工厂构造函数用于从 JSON 解析为 Point 对象
   factory Point.fromJson(Map<String, dynamic> json) {
     return Point(
       x: json['x'] as int,
@@ -36,10 +35,18 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage> {
   Offset? point2;
   ui.Image? backgroundImage;
 
+  final TransformationController _transformationController = TransformationController();
+  double _scale = 1.0;
+
   @override
   void initState() {
     super.initState();
     _loadBackgroundImage();
+    _transformationController.addListener(() {
+      setState(() {
+        _scale = _transformationController.value.getMaxScaleOnAxis();
+      });
+    });
   }
 
   Future<void> _loadBackgroundImage() async {
@@ -57,28 +64,27 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage> {
   }
 
   Future<void> getCoordinates(String id1, String id2) async {
-    // TODO:根据店铺id返回点坐标值
     double startX = 125;
     double startY = 400;
-    double endX  = 150;
+    double endX = 150;
     double endY = 300;
     setState(() {
       point1 = Offset(startX, startY);
       point2 = Offset(endX, endY);
     });
-    dynamic data = {'startX': startX, 'startY': startY,'endX':endX,'endY':endY};
+    dynamic data = {'startX': startX, 'startY': startY, 'endX': endX, 'endY': endY};
     setState(() {
       _isLoading = true;
     });
     var result;
-    try{
+    try {
       result = await NavigationApi().GetPath(data);
       setState(() {
         points = (result['data'] as List)
             .map((pointJson) => Point.fromJson(pointJson))
             .toList();
       });
-    }finally{
+    } finally {
       setState(() {
         _isLoading = false;
       });
@@ -95,28 +101,39 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage> {
               Container(
                 padding: const EdgeInsets.all(16),
                 child: Column(
-                 children: [
-                   TextField(
-                     controller: idController1,
-                     decoration: InputDecoration(labelText: '出发点'),
-                   ),
-                   TextField(
-                     controller: idController2,
-                     decoration: InputDecoration(labelText: '终点'),
-                   ),
-                   ElevatedButton(
-                     onPressed: () {
-                       getCoordinates(idController1.text, idController2.text);
-                     },
-                     child: Text('开始导航'),
-                   ),
-                 ],
+                  children: [
+                    TextField(
+                      controller: idController1,
+                      decoration: InputDecoration(labelText: '出发点'),
+                    ),
+                    TextField(
+                      controller: idController2,
+                      decoration: InputDecoration(labelText: '终点'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        getCoordinates(idController1.text, idController2.text);
+                      },
+                      child: Text('开始导航'),
+                    ),
+                  ],
                 ),
               ),
               Expanded(
-                child: CustomPaint(
-                  size: Size(double.infinity, double.infinity),
-                  painter: IndoorMapPainter(point1: point1, point2: point2, backgroundImage: backgroundImage,points: points),
+                child: InteractiveViewer(
+                  transformationController: _transformationController,
+                  minScale: 1.0,
+                  maxScale: 5.0,
+                  child: CustomPaint(
+                    size: Size(double.infinity, double.infinity),
+                    painter: IndoorMapPainter(
+                      point1: point1,
+                      point2: point2,
+                      backgroundImage: backgroundImage,
+                      points: points,
+                      scale: _scale,
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -129,7 +146,7 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage> {
               ),
             ),
         ],
-      )
+      ),
     );
   }
 }
@@ -139,12 +156,19 @@ class IndoorMapPainter extends CustomPainter {
   Offset? point2;
   List<Point>? points;
   ui.Image? backgroundImage;
+  final double scale;
 
-  IndoorMapPainter({this.point1, this.point2, this.backgroundImage,this.points});
+  IndoorMapPainter({
+    this.point1,
+    this.point2,
+    this.backgroundImage,
+    this.points,
+    required this.scale,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
-    // 绘制背景图片
+    // 绘制背景图
     if (backgroundImage != null) {
       paintImage(
         canvas: canvas,
@@ -156,20 +180,19 @@ class IndoorMapPainter extends CustomPainter {
 
     if (points!.isEmpty) return;
 
-    final path = Path();
-    path.moveTo(points![0].x.toDouble(), points![0].y.toDouble());
+    final scaledPath = Path();
+    scaledPath.moveTo(points![0].x * scale, points![0].y * scale);
 
     for (int i = 1; i < points!.length; i++) {
-      path.lineTo(points![i].x.toDouble(), points![i].y.toDouble());
+      scaledPath.lineTo(points![i].x * scale, points![i].y * scale);
     }
 
     final pathPaint = Paint()
       ..color = Colors.red
-      ..strokeWidth = 4
+      ..strokeWidth = 4 / scale // 根据缩放调整线宽
       ..style = PaintingStyle.stroke;
 
-    canvas.drawPath(path, pathPaint);
-
+    canvas.drawPath(scaledPath, pathPaint);
   }
 
   @override
