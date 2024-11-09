@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:parkinglot_frontend/mainPages/mapNavigation.dart';
+import 'package:parkinglot_frontend/mainPages/IndoorNavigation.dart';
 import 'package:parkinglot_frontend/Store/storeTotal.dart';
 import 'package:parkinglot_frontend/mainPages/CarSearch.dart';
 import 'package:parkinglot_frontend/RegisterAndLogin/AccountManagement.dart';
@@ -12,7 +12,7 @@ class _TabsState extends State<Tabs>{
   int _currentIndex=0;
   //下面的三个方法都是三个界面的方法
   List _pageList=[
-    IndoorMapPage(),
+    IndoorNavigationPage(),
     StoreTotalPage(),
     CarPage(),
     accountPage()
