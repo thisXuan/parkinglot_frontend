@@ -31,9 +31,9 @@ class Request {
   Request._internal() {
     // 初始化基本选项
     BaseOptions options = BaseOptions(
-        baseUrl: 'http://192.168.1.2:8081',
-        connectTimeout: const Duration(seconds: 10),
-        receiveTimeout: const Duration(seconds: 10));
+        baseUrl: 'http://192.168.1.14:8081',
+        connectTimeout: const Duration(seconds: 5),
+        receiveTimeout: const Duration(seconds: 5));
     _instance = this;
     // 初始化dio
     _dio = Dio(options);

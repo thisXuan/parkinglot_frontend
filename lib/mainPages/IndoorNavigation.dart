@@ -25,17 +25,16 @@ class IndoorNavigationPage extends StatefulWidget {
   }
 }
 
+final TransformationController _transformationController = TransformationController();
+
 class IndoorNavigationPageState extends State<IndoorNavigationPage> {
   final TextEditingController idController1 = TextEditingController();
   final TextEditingController idController2 = TextEditingController();
   List<Point> points = [];
   bool _isLoading = false;
 
-  Offset? point1;
-  Offset? point2;
   ui.Image? backgroundImage;
 
-  final TransformationController _transformationController = TransformationController();
   double _scale = 1.0;
 
   @override
@@ -64,15 +63,12 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage> {
   }
 
   Future<void> getCoordinates(String id1, String id2) async {
-    double startX = 125;
-    double startY = 400;
-    double endX = 150;
-    double endY = 300;
-    setState(() {
-      point1 = Offset(startX, startY);
-      point2 = Offset(endX, endY);
-    });
-    dynamic data = {'startX': startX, 'startY': startY, 'endX': endX, 'endY': endY};
+    // TODO：根据店铺id返回店铺所在点（占屏幕的百分比）
+    double startXPercent = 32;
+    double startYPercent = 55;
+    double endXPercent  = 54;
+    double endYPercent = 60;
+    dynamic data = {'startX': startXPercent, 'startY': startYPercent, 'endX': endXPercent, 'endY': endYPercent};
     setState(() {
       _isLoading = true;
     });
@@ -127,8 +123,6 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage> {
                   child: CustomPaint(
                     size: Size(double.infinity, double.infinity),
                     painter: IndoorMapPainter(
-                      point1: point1,
-                      point2: point2,
                       backgroundImage: backgroundImage,
                       points: points,
                       scale: _scale,
@@ -152,15 +146,11 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage> {
 }
 
 class IndoorMapPainter extends CustomPainter {
-  Offset? point1;
-  Offset? point2;
   List<Point>? points;
   ui.Image? backgroundImage;
   final double scale;
 
   IndoorMapPainter({
-    this.point1,
-    this.point2,
     this.backgroundImage,
     this.points,
     required this.scale,
@@ -168,31 +158,39 @@ class IndoorMapPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    if (backgroundImage == null) return;
+
+    canvas.save();
+    canvas.transform(_transformationController.value.storage);
+
     // 绘制背景图
-    if (backgroundImage != null) {
-      paintImage(
-        canvas: canvas,
-        rect: Rect.fromLTWH(0, 0, size.width, size.height),
-        image: backgroundImage!,
-        fit: BoxFit.fitWidth,
-      );
+    paintImage(
+      canvas: canvas,
+      rect: Rect.fromLTWH(0, 0, size.width, size.height),
+      image: backgroundImage!,
+      fit: BoxFit.fitWidth,
+    );
+
+    // 绘制路径
+    if (points!.isNotEmpty) {
+      final path = Path();
+      path.moveTo(size.width * (points![0].x.toDouble() / 100), size.width * (points![0].y.toDouble() / 100));
+
+      for (int i = 1; i < points!.length; i++) {
+        double x = size.width * (points![i].x.toDouble() / 100);
+        double y = size.height * (points![i].y.toDouble() / 100);
+        path.lineTo(x, y);
+      }
+
+      final pathPaint = Paint()
+        ..color = Colors.red
+        ..strokeWidth = 4.0
+        ..style = PaintingStyle.stroke;
+
+      canvas.drawPath(path, pathPaint);
     }
 
-    if (points!.isEmpty) return;
-
-    final scaledPath = Path();
-    scaledPath.moveTo(points![0].x * scale, points![0].y * scale);
-
-    for (int i = 1; i < points!.length; i++) {
-      scaledPath.lineTo(points![i].x * scale, points![i].y * scale);
-    }
-
-    final pathPaint = Paint()
-      ..color = Colors.red
-      ..strokeWidth = 4 / scale // 根据缩放调整线宽
-      ..style = PaintingStyle.stroke;
-
-    canvas.drawPath(scaledPath, pathPaint);
+    canvas.restore();
   }
 
   @override
