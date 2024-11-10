@@ -64,10 +64,10 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage> {
 
   Future<void> getCoordinates(String id1, String id2) async {
     // TODO：根据店铺id返回店铺所在点（占屏幕的百分比）
-    double startXPercent = 32;
-    double startYPercent = 55;
-    double endXPercent  = 54;
-    double endYPercent = 60;
+    double startXPercent = 15;
+    double startYPercent = 63;
+    double endXPercent  = 59;
+    double endYPercent = 34;
     dynamic data = {'startX': startXPercent, 'startY': startYPercent, 'endX': endXPercent, 'endY': endYPercent};
     setState(() {
       _isLoading = true;
@@ -174,8 +174,7 @@ class IndoorMapPainter extends CustomPainter {
     // 绘制路径
     if (points!.isNotEmpty) {
       final path = Path();
-      path.moveTo(size.width * (points![0].x.toDouble() / 100), size.width * (points![0].y.toDouble() / 100));
-
+      path.moveTo(size.width * (points![0].x.toDouble() / 100), size.height * (points![0].y.toDouble() / 100));
       for (int i = 1; i < points!.length; i++) {
         double x = size.width * (points![i].x.toDouble() / 100);
         double y = size.height * (points![i].y.toDouble() / 100);
