@@ -1,9 +1,11 @@
+import 'dart:collection';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'dart:ui' as ui;
 import 'package:parkinglot_frontend/api/navigation.dart';
+import 'package:parkinglot_frontend/utils/util.dart';
 
-// 定义点的实体类
 class Point {
   final int x;
   final int y;
@@ -27,20 +29,28 @@ class IndoorNavigationPage extends StatefulWidget {
 
 final TransformationController _transformationController = TransformationController();
 
-class IndoorNavigationPageState extends State<IndoorNavigationPage> {
+class IndoorNavigationPageState extends State<IndoorNavigationPage> with SingleTickerProviderStateMixin {
   final TextEditingController idController1 = TextEditingController();
   final TextEditingController idController2 = TextEditingController();
   List<Point> points = [];
   bool _isLoading = false;
 
   ui.Image? backgroundImage;
-
   double _scale = 1.0;
+
+  late AnimationController _animationController;
+  String _selectedFloor = 'L3';
 
   @override
   void initState() {
     super.initState();
-    _loadBackgroundImage();
+    _loadBackgroundImage(_selectedFloor);
+    _animationController = AnimationController(
+      vsync: this,
+      duration: Duration(seconds: 2),
+    )..addListener(() {
+      setState(() {});
+    });
     _transformationController.addListener(() {
       setState(() {
         _scale = _transformationController.value.getMaxScaleOnAxis();
@@ -48,9 +58,9 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage> {
     });
   }
 
-  Future<void> _loadBackgroundImage() async {
+  Future<void> _loadBackgroundImage(String floor) async {
     try {
-      final data = await rootBundle.load('assets/Mall_L3.jpg');
+      final data = await rootBundle.load("assets/floor/Mall_${floor}.jpg");
       final list = data.buffer.asUint8List();
       final image = await decodeImageFromList(list);
 
@@ -59,12 +69,13 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage> {
       });
     } catch (e) {
       print('Error loading image: $e');
+      ElToast.info("${floor}图片加载失败");
     }
   }
 
   Future<void> getCoordinates(String id1, String id2) async {
     // TODO：根据店铺id返回店铺所在点（占屏幕的百分比）
-    double startXPercent = 15;
+    double startXPercent = 1;
     double startYPercent = 63;
     double endXPercent  = 59;
     double endYPercent = 34;
@@ -75,15 +86,31 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage> {
     var result;
     try {
       result = await NavigationApi().GetPath(data);
+      var code = result['code'];
+      var msg = result['msg'];
+      if(code!=200){
+        ElToast.info(msg.toString());
+        return;
+      }
       setState(() {
-        points = (result['data'] as List)
-            .map((pointJson) => Point.fromJson(pointJson))
-            .toList();
+        points = (result['data'] as List).map((pointJson) => Point.fromJson(pointJson)).toList();
+        _animationController.reset();
+        _animationController.forward(); // 动画启动
       });
     } finally {
       setState(() {
         _isLoading = false;
       });
+    }
+  }
+
+  // 用来处理楼层选择
+  void _onFloorSelected(String? floor) {
+    if (floor != null) {
+      setState(() {
+        _selectedFloor = floor;
+      });
+      _loadBackgroundImage(_selectedFloor); // 切换楼层时加载相应的图片
     }
   }
 
@@ -126,6 +153,7 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage> {
                       backgroundImage: backgroundImage,
                       points: points,
                       scale: _scale,
+                      progress: _animationController.value,
                     ),
                   ),
                 ),
@@ -139,21 +167,62 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage> {
                 child: CircularProgressIndicator(),
               ),
             ),
+          Positioned(
+            bottom: 30,
+            right: 30,
+            child: DropdownButton<String>(
+              value: _selectedFloor,
+              onChanged: _onFloorSelected,
+              items: [
+                DropdownMenuItem(
+                  value: 'B2',
+                  child: Text('B2'),
+                ),
+                DropdownMenuItem(
+                  value: 'LG',
+                  child: Text('LG'),
+                ),
+                DropdownMenuItem(
+                  value: 'L1',
+                  child: Text('L1'),
+                ),
+                DropdownMenuItem(
+                  value: 'L2',
+                  child: Text('L2'),
+                ),
+                DropdownMenuItem(
+                  value: 'L3',
+                  child: Text('L3'),
+                ),
+                DropdownMenuItem(
+                  value: 'L4',
+                  child: Text('L4'),
+                ),
+                DropdownMenuItem(
+                  value: 'L5',
+                  child: Text('L5'),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
   }
 }
 
+
 class IndoorMapPainter extends CustomPainter {
   List<Point>? points;
   ui.Image? backgroundImage;
   final double scale;
+  final double progress; // 新增参数，用于控制路径绘制进度
 
   IndoorMapPainter({
     this.backgroundImage,
     this.points,
     required this.scale,
+    required this.progress,
   });
 
   @override
@@ -172,10 +241,13 @@ class IndoorMapPainter extends CustomPainter {
     );
 
     // 绘制路径
-    if (points!.isNotEmpty) {
+    if (points != null && points!.isNotEmpty) {
       final path = Path();
       path.moveTo(size.width * (points![0].x.toDouble() / 100), size.height * (points![0].y.toDouble() / 100));
-      for (int i = 1; i < points!.length; i++) {
+
+      int endIndex = (points!.length * progress).clamp(0, points!.length).toInt();
+
+      for (int i = 1; i < endIndex; i++) {
         double x = size.width * (points![i].x.toDouble() / 100);
         double y = size.height * (points![i].y.toDouble() / 100);
         path.lineTo(x, y);
