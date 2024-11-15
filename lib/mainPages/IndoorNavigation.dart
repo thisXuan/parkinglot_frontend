@@ -39,7 +39,7 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage> with SingleT
   double _scale = 1.0;
 
   late AnimationController _animationController;
-  String _selectedFloor = 'L3';
+  String _selectedFloor = 'F3';
 
   @override
   void initState() {
@@ -60,7 +60,7 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage> with SingleT
 
   Future<void> _loadBackgroundImage(String floor) async {
     try {
-      final data = await rootBundle.load("assets/floor/Mall_${floor}.jpg");
+      final data = await rootBundle.load("assets/floor/${floor}.jpg");
       final list = data.buffer.asUint8List();
       final image = await decodeImageFromList(list);
 
@@ -75,8 +75,8 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage> with SingleT
 
   Future<void> getCoordinates(String id1, String id2) async {
     // TODO：根据店铺id返回店铺所在点（占屏幕的百分比）
-    double startXPercent = 1;
-    double startYPercent = 63;
+    double startXPercent = 43;
+    double startYPercent = 48;
     double endXPercent  = 59;
     double endYPercent = 34;
     dynamic data = {'startX': startXPercent, 'startY': startYPercent, 'endX': endXPercent, 'endY': endYPercent};
@@ -175,31 +175,31 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage> with SingleT
               onChanged: _onFloorSelected,
               items: [
                 DropdownMenuItem(
-                  value: 'B2',
-                  child: Text('B2'),
+                  value: 'B1',
+                  child: Text('B1'),
                 ),
                 DropdownMenuItem(
-                  value: 'LG',
-                  child: Text('LG'),
+                  value: 'M',
+                  child: Text('M'),
                 ),
                 DropdownMenuItem(
-                  value: 'L1',
+                  value: 'F1',
                   child: Text('L1'),
                 ),
                 DropdownMenuItem(
-                  value: 'L2',
+                  value: 'F2',
                   child: Text('L2'),
                 ),
                 DropdownMenuItem(
-                  value: 'L3',
+                  value: 'F3',
                   child: Text('L3'),
                 ),
                 DropdownMenuItem(
-                  value: 'L4',
+                  value: 'F4',
                   child: Text('L4'),
                 ),
                 DropdownMenuItem(
-                  value: 'L5',
+                  value: 'F5',
                   child: Text('L5'),
                 ),
               ],
