@@ -75,11 +75,10 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage> with SingleT
 
   Future<void> getCoordinates(String id1, String id2) async {
     // TODO：根据店铺id返回店铺所在点（占屏幕的百分比）
-    double startXPercent = 35;
-    double startYPercent = 52;
-    double endXPercent  = 18;
-    double endYPercent = 61;
-    dynamic data = {'startX': startXPercent, 'startY': startYPercent, 'endX': endXPercent, 'endY': endYPercent};
+    int startId = 222;
+    int endId = 308;
+
+    dynamic data = {'startId':startId,'endId':endId};
     setState(() {
       _isLoading = true;
     });
