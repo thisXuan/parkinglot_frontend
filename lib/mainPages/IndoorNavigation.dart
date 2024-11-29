@@ -7,15 +7,15 @@ import 'package:parkinglot_frontend/api/navigation.dart';
 import 'package:parkinglot_frontend/utils/util.dart';
 
 class Point {
-  final int x;
-  final int y;
+  final double x;
+  final double y;
 
   Point({required this.x, required this.y});
 
   factory Point.fromJson(Map<String, dynamic> json) {
     return Point(
-      x: json['x'] as int,
-      y: json['y'] as int,
+      x: json['x'].toDouble() as double,
+      y: json['y'].toDouble() as double,
     );
   }
 }
@@ -75,10 +75,10 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage> with SingleT
 
   Future<void> getCoordinates(String id1, String id2) async {
     // TODO：根据店铺id返回店铺所在点（占屏幕的百分比）
-    double startXPercent = 43;
-    double startYPercent = 48;
-    double endXPercent  = 59;
-    double endYPercent = 34;
+    double startXPercent = 35;
+    double startYPercent = 52;
+    double endXPercent  = 18;
+    double endYPercent = 61;
     dynamic data = {'startX': startXPercent, 'startY': startYPercent, 'endX': endXPercent, 'endY': endYPercent};
     setState(() {
       _isLoading = true;
@@ -243,13 +243,13 @@ class IndoorMapPainter extends CustomPainter {
     // 绘制路径
     if (points != null && points!.isNotEmpty) {
       final path = Path();
-      path.moveTo(size.width * (points![0].x.toDouble() / 100), size.height * (points![0].y.toDouble() / 100));
+      path.moveTo(size.width * points![0].x / 100, size.height * points![0].y / 100);
 
       int endIndex = (points!.length * progress).clamp(0, points!.length).toInt();
 
       for (int i = 1; i < endIndex; i++) {
-        double x = size.width * (points![i].x.toDouble() / 100);
-        double y = size.height * (points![i].y.toDouble() / 100);
+        double x = size.width * points![i].x/ 100;
+        double y = size.height * points![i].y / 100;
         path.lineTo(x, y);
       }
 
