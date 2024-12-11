@@ -75,6 +75,8 @@ flutter:
     - assets/floor/F4.jpg
     - assets/floor/F5.jpg
     - assets/floor/M.jpg
+    - assets/regularImage/IMG1.jpg
+    - assets/regularImage/IMG2.jpg
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg
