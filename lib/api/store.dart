@@ -33,6 +33,12 @@ class StoreApi {
     return result;
   }
 
+  GetStoreName() async{
+    var result = await Request().request("/store/getStoreName",
+        method: DioMethod.get);
+    return result;
+  }
+
 }
 
 // 导出全局使用这一个实例

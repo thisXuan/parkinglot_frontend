@@ -6,24 +6,21 @@ import 'dart:ui' as ui;
 import 'dart:async';
 import 'package:parkinglot_frontend/api/navigation.dart';
 import 'package:parkinglot_frontend/utils/util.dart';
+import 'package:parkinglot_frontend/api/store.dart';
+import 'dart:convert';
 
 class Point {
   final double x;
   final double y;
   final String floor;
 
-  Point({
-    required this.x,
-    required this.y,
-    required this.floor
-  });
+  Point({required this.x, required this.y, required this.floor});
 
   factory Point.fromJson(Map<String, dynamic> json) {
     return Point(
-      x: json['x'].toDouble() as double,
-      y: json['y'].toDouble() as double,
-      floor: json['floor'] as String
-    );
+        x: json['x'].toDouble() as double,
+        y: json['y'].toDouble() as double,
+        floor: json['floor'] as String);
   }
 }
 
@@ -36,12 +33,14 @@ class IndoorNavigationPage extends StatefulWidget {
   }
 }
 
-final TransformationController _transformationController = TransformationController();
+final TransformationController _transformationController =
+    TransformationController();
 
-class IndoorNavigationPageState extends State<IndoorNavigationPage> with SingleTickerProviderStateMixin {
+class IndoorNavigationPageState extends State<IndoorNavigationPage>
+    with SingleTickerProviderStateMixin {
   final TextEditingController idController1 = TextEditingController(); // 出发点
   final TextEditingController idController2 = TextEditingController(); // 终点
-  Map<String,List<Point>> map = new HashMap();
+  Map<String, List<Point>> map = new HashMap();
   bool _isLoading = false;
   Map<String, ui.Image?> floorBackgrounds = {};
   ui.Image? backgroundImage;
@@ -50,9 +49,127 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage> with SingleT
   late AnimationController _animationController;
   late Animation<double> _progressAnimation;
 
+ List<String> _allSuggestions = [];
+
+  final LayerLink _layerLink1 = LayerLink();
+  final LayerLink _layerLink2 = LayerLink();
+
+  List<String> _filteredSuggestions1 = [];
+  List<String> _filteredSuggestions2 = [];
+
+  OverlayEntry? _overlayEntry1;
+  OverlayEntry? _overlayEntry2;
+
+  void _showOverlay(int fieldIndex) {
+    if (fieldIndex == 1) {
+      if (_overlayEntry1 != null) _overlayEntry1!.remove();
+      _overlayEntry1 = _createOverlayEntry(1);
+      Overlay.of(context)!.insert(_overlayEntry1!);
+    } else {
+      if (_overlayEntry2 != null) _overlayEntry2!.remove();
+      _overlayEntry2 = _createOverlayEntry(2);
+      Overlay.of(context)!.insert(_overlayEntry2!);
+    }
+  }
+
+  void _hideOverlay(int fieldIndex) {
+    if (fieldIndex == 1) {
+      _overlayEntry1?.remove();
+      _overlayEntry1 = null;
+    } else {
+      _overlayEntry2?.remove();
+      _overlayEntry2 = null;
+    }
+  }
+
+  OverlayEntry _createOverlayEntry(int fieldIndex) {
+    final suggestions = fieldIndex == 1 ? _filteredSuggestions1 : _filteredSuggestions2;
+    final layerLink = fieldIndex == 1 ? _layerLink1 : _layerLink2;
+
+    double containerHeight = (suggestions.length * 50).toDouble();
+    containerHeight = containerHeight > 250 ? 250 : containerHeight;
+
+    return OverlayEntry(
+      builder: (context) => Positioned(
+        width: MediaQuery.of(context).size.width - 32,
+        child: CompositedTransformFollower(
+          link: layerLink,
+          showWhenUnlinked: false,
+          offset: Offset(0.0, 40.0), // 下拉框位置
+          child: Material(
+            elevation: 4.0,
+            borderRadius: BorderRadius.circular(8.0),
+            child: Container(
+              height: containerHeight,
+              child: ListView.builder(
+                padding: EdgeInsets.zero,
+                itemCount: suggestions.length,
+                itemBuilder: (context, index) {
+                  return ListTile(
+                    title: Text(suggestions[index]),
+                    onTap: () {
+                      if (fieldIndex == 1) {
+                        idController1.text = suggestions[index];
+                        _hideOverlay(1);
+                      } else {
+                        idController2.text = suggestions[index];
+                        _hideOverlay(2);
+                      }
+                    },
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _filterSuggestions(String input, int fieldIndex) {
+    if (input.isEmpty) {
+      if (fieldIndex == 1) {
+        setState(() => _filteredSuggestions1.clear());
+        _hideOverlay(1);
+      } else {
+        setState(() => _filteredSuggestions2.clear());
+        _hideOverlay(2);
+      }
+    } else {
+      final filtered = _allSuggestions
+          .where((suggestion) => suggestion.contains(input))
+          .toList();
+      setState(() {
+        if (fieldIndex == 1) {
+          _filteredSuggestions1 = filtered;
+        } else {
+          _filteredSuggestions2 = filtered;
+        }
+      });
+      if (filtered.isNotEmpty) {
+        _showOverlay(fieldIndex);
+      } else {
+        _hideOverlay(fieldIndex);
+      }
+    }
+  }
+
+  bool _validateInput(String? value, int fieldIndex) {
+    if (value == null || value.isEmpty) {
+      return false;
+    }
+    if (!_allSuggestions.contains(value)) {
+      return false;
+    }
+    return true;
+  }
+
+
   @override
   void dispose() {
     _animationController.dispose();
+    idController1.dispose();
+    idController2.dispose();
     super.dispose();
   }
 
@@ -60,6 +177,7 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage> with SingleT
   void initState() {
     super.initState();
     _loadAllBackgroundImages();
+    _getStoreNames();
     _transformationController.addListener(() {
       setState(() {
         _scale = _transformationController.value.getMaxScaleOnAxis();
@@ -71,10 +189,17 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage> with SingleT
     )..repeat(reverse: false);
     // 添加监听器来触发重绘
     _animationController.addListener(() {
-      setState(() {
-      });
+      setState(() {});
     });
-    _progressAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(_animationController);
+    _progressAnimation =
+        Tween<double>(begin: 0.0, end: 1.0).animate(_animationController);
+  }
+
+  Future<void> _getStoreNames() async{
+    var result = await StoreApi().GetStoreName();
+    setState(() {
+        _allSuggestions = List<String>.from(result['data']);
+    });
   }
 
   Future<void> _loadAllBackgroundImages() async {
@@ -92,13 +217,10 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage> with SingleT
     }
   }
 
-  Future<void> getCoordinates(String id1, String id2) async {
+  Future<void> getCoordinates(String storeName1, String storeName2) async {
     map.clear();
-    // TODO：根据店铺id返回店铺所在点（占屏幕的百分比）
-    int startId = 10;
-    int endId = 215;
 
-    dynamic data = {'startId':startId,'endId':endId};
+    dynamic data = {'startName': storeName1, 'endName': storeName2};
     setState(() {
       _isLoading = true;
     });
@@ -107,7 +229,7 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage> with SingleT
       result = await NavigationApi().GetPath(data);
       var code = result['code'];
       var msg = result['msg'];
-      if(code!=200){
+      if (code != 200) {
         ElToast.info(msg.toString());
         return;
       }
@@ -139,10 +261,10 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage> with SingleT
     if (floor != null) {
       setState(() {
         _selectedFloor = floor;
-        _progressAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(_animationController);
+        _progressAnimation =
+            Tween<double>(begin: 0.0, end: 1.0).animate(_animationController);
       });
     }
-
   }
 
   @override
@@ -156,17 +278,43 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage> with SingleT
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   children: [
-                    TextField(
-                      controller: idController1,
-                      decoration: InputDecoration(labelText: '出发点'),
+                    CompositedTransformTarget(
+                      link: _layerLink1,
+                      child: TextField(
+                        controller: idController1,
+                        decoration: InputDecoration(
+                          hintText: "出发点",
+                          border: OutlineInputBorder(),
+                          prefixIcon: Icon(Icons.search),
+                        ),
+                        onChanged: (value) => _filterSuggestions(value, 1),
+                      ),
                     ),
-                    TextField(
-                      controller: idController2,
-                      decoration: InputDecoration(labelText: '终点'),
+                    SizedBox(height: 8,),
+                    CompositedTransformTarget(
+                      link: _layerLink2,
+                      child: TextField(
+                        controller: idController2,
+                        decoration: InputDecoration(
+                          hintText: "终点",
+                          border: OutlineInputBorder(),
+                          prefixIcon: Icon(Icons.search),
+                        ),
+                        onChanged: (value) => _filterSuggestions(value, 2),
+                      ),
                     ),
                     ElevatedButton(
                       onPressed: () {
-                        getCoordinates(idController1.text, idController2.text);
+                        if(idController1.text==idController2.text){
+                          ElToast.info("起始点和终点不能相同");
+                          return;
+                        }
+                       if( _validateInput(idController1.text,1)&& _validateInput(idController2.text,2)) {
+                         getCoordinates(idController1.text, idController2.text);
+                         return;
+                       }else{
+                         ElToast.info("起始点输入错误");
+                       }
                       },
                       child: Text('开始导航'),
                     ),
@@ -203,27 +351,28 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage> with SingleT
             right: 20,
             child: map.isEmpty
                 ? Text(
-              '',
-              style: TextStyle(color: Colors.grey),
-            )
+                    '',
+                    style: TextStyle(color: Colors.grey),
+                  )
                 : Wrap(
-              spacing: 8.0,
-              children: map.keys.map((String floorKey) {
-                return ElevatedButton(
-                  onPressed: () {
-                    _onFloorSelected(floorKey);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor:
-                    _selectedFloor == floorKey ? Colors.deepPurple : Colors.grey,
+                    spacing: 8.0,
+                    children: map.keys.map((String floorKey) {
+                      return ElevatedButton(
+                        onPressed: () {
+                          _onFloorSelected(floorKey);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: _selectedFloor == floorKey
+                              ? Colors.deepPurple
+                              : Colors.grey,
+                        ),
+                        child: Text(
+                          floorKey,
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      );
+                    }).toList(),
                   ),
-                  child: Text(
-                    floorKey,
-                    style: TextStyle(color: Colors.white),
-                  ),
-                );
-              }).toList(),
-            ),
           ),
         ],
       ),
@@ -231,19 +380,17 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage> with SingleT
   }
 }
 
-
 class IndoorMapPainter extends CustomPainter {
   final Map<String, ui.Image?> floorBackgrounds; // 每层楼的背景图
   final List<Point>? points;
   final double scale;
   final double animationProgress;
 
-  IndoorMapPainter({
-    required this.floorBackgrounds,
-    this.points,
-    required this.scale,
-    required this.animationProgress
-  });
+  IndoorMapPainter(
+      {required this.floorBackgrounds,
+      this.points,
+      required this.scale,
+      required this.animationProgress});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -315,7 +462,8 @@ class IndoorMapPainter extends CustomPainter {
       cumulativeLength += segmentLengths[i];
     }
 
-    double localProgress = (currentLength - cumulativeLength) / segmentLengths[segmentIndex];
+    double localProgress =
+        (currentLength - cumulativeLength) / segmentLengths[segmentIndex];
 
     for (int i = 0; i < segmentIndex; i++) {
       double x1 = size.width * points![i].x / 100;
@@ -347,7 +495,8 @@ class IndoorMapPainter extends CustomPainter {
         ..color = Colors.deepPurple
         ..style = PaintingStyle.fill;
 
-      canvas.drawCircle(Offset(currentX, currentY), 5.0 / scale, animationPaint);
+      canvas.drawCircle(
+          Offset(currentX, currentY), 5.0 / scale, animationPaint);
     }
 
     canvas.restore();
