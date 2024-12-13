@@ -13,7 +13,6 @@ class _CarPageState extends State<CarPage> {
   String _parkingTime = '';
 
   final PageController _pageController = PageController(initialPage: 1000);
-  int _currentPage = 0;
   late Timer _timer;
 
   @override

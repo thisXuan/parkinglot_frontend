@@ -3,6 +3,7 @@ import 'dart:collection';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'dart:ui' as ui;
+import 'dart:async';
 import 'package:parkinglot_frontend/api/navigation.dart';
 import 'package:parkinglot_frontend/utils/util.dart';
 
@@ -38,27 +39,18 @@ class IndoorNavigationPage extends StatefulWidget {
 final TransformationController _transformationController = TransformationController();
 
 class IndoorNavigationPageState extends State<IndoorNavigationPage> with SingleTickerProviderStateMixin {
-  final TextEditingController idController1 = TextEditingController();
-  final TextEditingController idController2 = TextEditingController();
-  List<Point> points = [];
+  final TextEditingController idController1 = TextEditingController(); // 出发点
+  final TextEditingController idController2 = TextEditingController(); // 终点
+  Map<String,List<Point>> map = new HashMap();
   bool _isLoading = false;
   Map<String, ui.Image?> floorBackgrounds = {};
-
   ui.Image? backgroundImage;
   double _scale = 1.0;
-
-  late AnimationController _animationController;
 
   @override
   void initState() {
     super.initState();
     _loadAllBackgroundImages();
-    _animationController = AnimationController(
-      vsync: this,
-      duration: Duration(seconds: 2),
-    )..addListener(() {
-      setState(() {});
-    });
     _transformationController.addListener(() {
       setState(() {
         _scale = _transformationController.value.getMaxScaleOnAxis();
@@ -82,6 +74,7 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage> with SingleT
   }
 
   Future<void> getCoordinates(String id1, String id2) async {
+    map.clear();
     // TODO：根据店铺id返回店铺所在点（占屏幕的百分比）
     int startId = 10;
     int endId = 200;
@@ -100,9 +93,20 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage> with SingleT
         return;
       }
       setState(() {
-        points = (result['data'] as List).map((pointJson) => Point.fromJson(pointJson)).toList();
-        _animationController.reset();
-        _animationController.forward(); // 动画启动
+        List<dynamic> dataList = result['data'];
+        for (var item in dataList) {
+          Point point = Point(
+            x: item['x'],
+            y: item['y'],
+            floor: item['floor'],
+          );
+          // 将 point 添加到对应楼层的列表中
+          if (!map.containsKey(point.floor)) {
+            map[point.floor] = [];
+          }
+          map[point.floor]!.add(point);
+        }
+        _selectedFloor = map.keys.first;
       });
     } finally {
       setState(() {
@@ -116,7 +120,6 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage> with SingleT
     if (floor != null) {
       setState(() {
         _selectedFloor = floor;
-        points = [];
       });
     }
 
@@ -159,9 +162,8 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage> with SingleT
                     size: Size(double.infinity, double.infinity),
                     painter: IndoorMapPainter(
                       floorBackgrounds: floorBackgrounds,
-                      points: points,
+                      points: map[_selectedFloor],
                       scale: _scale,
-                      progress: _animationController.value,
                     ),
                   ),
                 ),
@@ -176,41 +178,24 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage> with SingleT
               ),
             ),
           Positioned(
-            bottom: 30,
-            right: 30,
-            child: DropdownButton<String>(
-              value: _selectedFloor,
-              onChanged: _onFloorSelected,
-              items: [
-                DropdownMenuItem(
-                  value: 'B1',
-                  child: Text('B1'),
-                ),
-                DropdownMenuItem(
-                  value: 'M',
-                  child: Text('M'),
-                ),
-                DropdownMenuItem(
-                  value: 'F1',
-                  child: Text('L1'),
-                ),
-                DropdownMenuItem(
-                  value: 'F2',
-                  child: Text('L2'),
-                ),
-                DropdownMenuItem(
-                  value: 'F3',
-                  child: Text('L3'),
-                ),
-                DropdownMenuItem(
-                  value: 'F4',
-                  child: Text('L4'),
-                ),
-                DropdownMenuItem(
-                  value: 'F5',
-                  child: Text('L5'),
-                ),
-              ],
+            bottom: 20,
+            right: 20,
+            child: Wrap(
+              spacing: 8.0, // 按钮之间的水平间距
+              children: map.keys.map((String floorKey) {
+                return ElevatedButton(
+                  onPressed: () {
+                    _onFloorSelected(floorKey);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: _selectedFloor == floorKey ? Colors.deepPurple : Colors.grey,
+                  ),
+                  child: Text(
+                    floorKey,
+                    style: TextStyle(color: Colors.white),
+                  ),
+                );
+              }).toList(),
             ),
           ),
         ],
@@ -224,13 +209,11 @@ class IndoorMapPainter extends CustomPainter {
   final Map<String, ui.Image?> floorBackgrounds; // 每层楼的背景图
   final List<Point>? points;
   final double scale;
-  final double progress;
 
   IndoorMapPainter({
     required this.floorBackgrounds,
     this.points,
     required this.scale,
-    required this.progress,
   });
 
   @override
@@ -266,65 +249,22 @@ class IndoorMapPainter extends CustomPainter {
       );
     }
 
-    // 绘制路径
-    Path path = Path();
-    bool hasPathStarted = false; // 标记路径是否已开始
-    int endIndex = (points!.length * progress).clamp(0, points!.length).toInt();
+    // 设置路径的画笔
+    final Paint pathPaint = Paint()
+      ..color = Colors.deepPurple
+      ..strokeWidth = 4.0
+      ..style = PaintingStyle.stroke;
 
-    for (int i = 0; i < endIndex; i++) {
+    for (int i = 0; i < points!.length; i++) {
       double x = size.width * points![i].x / 100;
       double y = size.height * points![i].y / 100;
 
-      // 检查当前点的楼层是否切换
-      if (i > 0 && points![i].floor != points![i - 1].floor) {
-        // 在楼层切换时，绘制前一段路径
-        if (hasPathStarted) {
-          final pathPaint = Paint()
-            ..color = Colors.red
-            ..strokeWidth = 4.0
-            ..style = PaintingStyle.stroke;
-          canvas.drawPath(path, pathPaint);
-        }
-
-        //TODO：切换楼层
-
-        // 清除路径并切换背景图
-        path = Path();
-        hasPathStarted = false; // 重置标记
-        canvas.restore();
-        canvas.save();
-
-        // 更新楼层和背景图
-        _selectedFloor = points![i].floor;
-        currentBackground = floorBackgrounds[_selectedFloor];
-        if (currentBackground != null) {
-          paintImage(
-            canvas: canvas,
-            rect: Rect.fromLTWH(0, 0, size.width, size.height),
-            image: currentBackground,
-            fit: BoxFit.fitWidth,
-          );
-        }
-      }
-
-      // 更新路径
-      if (!hasPathStarted) {
-        path.moveTo(x, y);
-        hasPathStarted = true; // 标记路径已开始
-      } else {
-        path.lineTo(x, y);
+      if (i < points!.length - 1) {
+        double nextX = size.width * points![i + 1].x / 100;
+        double nextY = size.height * points![i + 1].y / 100;
+        canvas.drawLine(Offset(x, y), Offset(nextX, nextY), pathPaint);
       }
     }
-
-    // 绘制最后一段路径
-    if (hasPathStarted) {
-      final pathPaint = Paint()
-        ..color = Colors.red
-        ..strokeWidth = 4.0
-        ..style = PaintingStyle.stroke;
-      canvas.drawPath(path, pathPaint);
-    }
-
     canvas.restore();
   }
 
