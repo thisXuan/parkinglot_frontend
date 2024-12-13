@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:parkinglot_frontend/mainPages/IndoorNavigation.dart';
+import 'package:parkinglot_frontend/Navigation/IndoorNavigation.dart';
 import 'package:parkinglot_frontend/Store/storeTotal.dart';
 import 'package:parkinglot_frontend/mainPages/CarSearch.dart';
 import 'package:parkinglot_frontend/RegisterAndLogin/AccountManagement.dart';

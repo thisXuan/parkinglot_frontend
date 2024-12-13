@@ -1,5 +1,5 @@
 import 'dart:collection';
-
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'dart:ui' as ui;
@@ -47,6 +47,15 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage> with SingleT
   ui.Image? backgroundImage;
   double _scale = 1.0;
 
+  late AnimationController _animationController;
+  late Animation<double> _progressAnimation;
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
   @override
   void initState() {
     super.initState();
@@ -56,6 +65,16 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage> with SingleT
         _scale = _transformationController.value.getMaxScaleOnAxis();
       });
     });
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2), // 行走动画时间
+    )..repeat(reverse: false);
+    // 添加监听器来触发重绘
+    _animationController.addListener(() {
+      setState(() {
+      });
+    });
+    _progressAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(_animationController);
   }
 
   Future<void> _loadAllBackgroundImages() async {
@@ -77,7 +96,7 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage> with SingleT
     map.clear();
     // TODO：根据店铺id返回店铺所在点（占屏幕的百分比）
     int startId = 10;
-    int endId = 200;
+    int endId = 215;
 
     dynamic data = {'startId':startId,'endId':endId};
     setState(() {
@@ -120,6 +139,7 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage> with SingleT
     if (floor != null) {
       setState(() {
         _selectedFloor = floor;
+        _progressAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(_animationController);
       });
     }
 
@@ -164,6 +184,7 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage> with SingleT
                       floorBackgrounds: floorBackgrounds,
                       points: map[_selectedFloor],
                       scale: _scale,
+                      animationProgress: _progressAnimation.value,
                     ),
                   ),
                 ),
@@ -180,15 +201,21 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage> with SingleT
           Positioned(
             bottom: 20,
             right: 20,
-            child: Wrap(
-              spacing: 8.0, // 按钮之间的水平间距
+            child: map.isEmpty
+                ? Text(
+              '',
+              style: TextStyle(color: Colors.grey),
+            )
+                : Wrap(
+              spacing: 8.0,
               children: map.keys.map((String floorKey) {
                 return ElevatedButton(
                   onPressed: () {
                     _onFloorSelected(floorKey);
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: _selectedFloor == floorKey ? Colors.deepPurple : Colors.grey,
+                    backgroundColor:
+                    _selectedFloor == floorKey ? Colors.deepPurple : Colors.grey,
                   ),
                   child: Text(
                     floorKey,
@@ -209,11 +236,13 @@ class IndoorMapPainter extends CustomPainter {
   final Map<String, ui.Image?> floorBackgrounds; // 每层楼的背景图
   final List<Point>? points;
   final double scale;
+  final double animationProgress;
 
   IndoorMapPainter({
     required this.floorBackgrounds,
     this.points,
     required this.scale,
+    required this.animationProgress
   });
 
   @override
@@ -249,22 +278,78 @@ class IndoorMapPainter extends CustomPainter {
       );
     }
 
-    // 设置路径的画笔
-    final Paint pathPaint = Paint()
-      ..color = Colors.deepPurple
+    // 绘制灰色路径
+    final Paint backgroundPathPaint = Paint()
+      ..color = Colors.grey
       ..strokeWidth = 4.0
       ..style = PaintingStyle.stroke;
 
-    for (int i = 0; i < points!.length; i++) {
-      double x = size.width * points![i].x / 100;
-      double y = size.height * points![i].y / 100;
+    final Paint animationPathPaint = Paint()
+      ..color = Colors.purple
+      ..strokeWidth = 4.0
+      ..style = PaintingStyle.stroke;
 
-      if (i < points!.length - 1) {
-        double nextX = size.width * points![i + 1].x / 100;
-        double nextY = size.height * points![i + 1].y / 100;
-        canvas.drawLine(Offset(x, y), Offset(nextX, nextY), pathPaint);
-      }
+    double totalLength = 0.0;
+    List<double> segmentLengths = [];
+
+    for (int i = 0; i < points!.length - 1; i++) {
+      double x1 = size.width * points![i].x / 100;
+      double y1 = size.height * points![i].y / 100;
+      double x2 = size.width * points![i + 1].x / 100;
+      double y2 = size.height * points![i + 1].y / 100;
+      double length = sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2));
+      segmentLengths.add(length);
+      totalLength += length;
+      canvas.drawLine(Offset(x1, y1), Offset(x2, y2), backgroundPathPaint);
     }
+
+    double currentLength = totalLength * animationProgress;
+    // 找到当前所在的路径段
+    double cumulativeLength = 0.0;
+    int segmentIndex = 0;
+    for (int i = 0; i < segmentLengths.length; i++) {
+      if (cumulativeLength + segmentLengths[i] >= currentLength) {
+        segmentIndex = i;
+        break;
+      }
+      cumulativeLength += segmentLengths[i];
+    }
+
+    double localProgress = (currentLength - cumulativeLength) / segmentLengths[segmentIndex];
+
+    for (int i = 0; i < segmentIndex; i++) {
+      double x1 = size.width * points![i].x / 100;
+      double y1 = size.height * points![i].y / 100;
+      double x2 = size.width * points![i + 1].x / 100;
+      double y2 = size.height * points![i + 1].y / 100;
+      canvas.drawLine(Offset(x1, y1), Offset(x2, y2), animationPathPaint);
+    }
+
+    if (segmentIndex < points!.length - 1) {
+      double startX = size.width * points![segmentIndex].x / 100;
+      double startY = size.height * points![segmentIndex].y / 100;
+      double endX = size.width * points![segmentIndex + 1].x / 100;
+      double endY = size.height * points![segmentIndex + 1].y / 100;
+
+      // 动态线段终点
+      double currentX = startX + (endX - startX) * localProgress;
+      double currentY = startY + (endY - startY) * localProgress;
+
+      // 绘制动态线段
+      canvas.drawLine(
+        Offset(startX, startY),
+        Offset(currentX, currentY),
+        animationPathPaint,
+      );
+
+      // 动态行走点
+      final Paint animationPaint = Paint()
+        ..color = Colors.deepPurple
+        ..style = PaintingStyle.fill;
+
+      canvas.drawCircle(Offset(currentX, currentY), 5.0 / scale, animationPaint);
+    }
+
     canvas.restore();
   }
 
