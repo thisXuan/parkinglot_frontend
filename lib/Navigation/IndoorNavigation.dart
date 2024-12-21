@@ -33,8 +33,6 @@ class IndoorNavigationPage extends StatefulWidget {
   }
 }
 
-final TransformationController _transformationController =
-    TransformationController();
 
 class IndoorNavigationPageState extends State<IndoorNavigationPage>
     with SingleTickerProviderStateMixin {
@@ -46,10 +44,12 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage>
   ui.Image? backgroundImage;
   double _scale = 1.0;
 
+  TransformationController _transformationController = TransformationController();
+
   late AnimationController _animationController;
   late Animation<double> _progressAnimation;
 
- List<String> _allSuggestions = [];
+  List<String> _allSuggestions = [];
 
   final LayerLink _layerLink1 = LayerLink();
   final LayerLink _layerLink2 = LayerLink();
@@ -127,6 +127,7 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage>
   }
 
   void _filterSuggestions(String input, int fieldIndex) {
+    _getStoreNames();
     if (input.isEmpty) {
       if (fieldIndex == 1) {
         setState(() => _filteredSuggestions1.clear());
@@ -203,7 +204,7 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage>
   }
 
   Future<void> _loadAllBackgroundImages() async {
-    List<String> floors = ['B1', 'M', 'F1', 'F2', 'F3', 'F4', 'F5'];
+    List<String> floors = ['B2','B1', 'M', 'F1', 'F2', 'F3', 'F4', 'F5'];
     for (String floor in floors) {
       try {
         final data = await rootBundle.load("assets/floor/${floor}.jpg");
@@ -288,6 +289,9 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage>
                           prefixIcon: Icon(Icons.search),
                         ),
                         onChanged: (value) => _filterSuggestions(value, 1),
+                        onTap: (){
+                          map.clear();
+                        },
                       ),
                     ),
                     SizedBox(height: 8,),
@@ -301,10 +305,21 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage>
                           prefixIcon: Icon(Icons.search),
                         ),
                         onChanged: (value) => _filterSuggestions(value, 2),
+                        onTap: (){
+                          map.clear();
+                        },
                       ),
                     ),
                     ElevatedButton(
                       onPressed: () {
+                        // 收起键盘
+                        FocusScope.of(context).unfocus();
+
+                        if(idController1.text.length==0||idController2.text.length==0){
+                          ElToast.info("请输入起始点和终点");
+                          return;
+                        }
+
                         if(idController1.text==idController2.text){
                           ElToast.info("起始点和终点不能相同");
                           return;
@@ -313,7 +328,7 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage>
                          getCoordinates(idController1.text, idController2.text);
                          return;
                        }else{
-                         ElToast.info("起始点输入错误");
+                         ElToast.info("输入错误");
                        }
                       },
                       child: Text('开始导航'),
@@ -333,6 +348,8 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage>
                       points: map[_selectedFloor],
                       scale: _scale,
                       animationProgress: _progressAnimation.value,
+                      transformationController: _transformationController,
+                      availableHeight: MediaQuery.of(context).size.height,
                     ),
                   ),
                 ),
@@ -385,17 +402,23 @@ class IndoorMapPainter extends CustomPainter {
   final List<Point>? points;
   final double scale;
   final double animationProgress;
+  final TransformationController transformationController;
+  double availableHeight;
 
   IndoorMapPainter(
       {required this.floorBackgrounds,
       this.points,
       required this.scale,
-      required this.animationProgress});
+      required this.animationProgress,
+      required this.transformationController,
+      required this.availableHeight});
 
   @override
   void paint(Canvas canvas, Size size) {
     canvas.save();
-    canvas.transform(_transformationController.value.storage);
+    canvas.transform(transformationController.value.storage);
+
+    double nowHeight = 526;
 
     // 如果 points 为 null 或为空，显示指定的默认背景图
     if (points == null || points!.isEmpty) {
@@ -403,9 +426,9 @@ class IndoorMapPainter extends CustomPainter {
       if (defaultBackground != null) {
         paintImage(
           canvas: canvas,
-          rect: Rect.fromLTWH(0, 0, size.width, size.height),
+          rect: Rect.fromLTWH(0, 0, size.width, nowHeight),
           image: defaultBackground,
-          fit: BoxFit.fitWidth,
+          fit: BoxFit.fitHeight,
         );
       }
       canvas.restore();
@@ -419,9 +442,9 @@ class IndoorMapPainter extends CustomPainter {
     if (currentBackground != null) {
       paintImage(
         canvas: canvas,
-        rect: Rect.fromLTWH(0, 0, size.width, size.height),
+        rect: Rect.fromLTWH(0, 0, size.width, nowHeight),
         image: currentBackground,
-        fit: BoxFit.fitWidth,
+        fit: BoxFit.fitHeight,
       );
     }
 

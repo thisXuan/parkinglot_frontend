@@ -72,6 +72,7 @@ flutter:
   assets:
     - assets/user.png
     - assets/image_lost.jpg
+    - assets/floor/B2.jpg
     - assets/floor/B1.jpg
     - assets/floor/F1.jpg
     - assets/floor/F2.jpg
