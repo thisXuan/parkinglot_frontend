@@ -4,7 +4,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 class DisplayQRCodePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    String content = "A3AA0"; // 二维码内容
+    String content = "A10"; // 二维码内容
 
     return Scaffold(
       appBar: AppBar(

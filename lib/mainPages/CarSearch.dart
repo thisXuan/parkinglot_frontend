@@ -61,8 +61,8 @@ class _CarPageState extends State<CarPage> {
 
   Widget _buildSquareInput(int index) {
     return SizedBox(
-      width: 36.0,
-      height: 36.0,
+      width: 48.0,
+      height: 54.0,
       child: TextField(
         controller: _controllers[index],
         maxLength: 1,
