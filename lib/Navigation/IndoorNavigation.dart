@@ -27,6 +27,10 @@ class Point {
 String _selectedFloor = 'M';
 
 class IndoorNavigationPage extends StatefulWidget {
+  String? location;
+
+  IndoorNavigationPage({this.location, Key? key}) : super(key: key);
+
   @override
   State<StatefulWidget> createState() {
     return IndoorNavigationPageState();
@@ -171,12 +175,16 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage>
     _animationController.dispose();
     idController1.dispose();
     idController2.dispose();
+    widget.location = "";
     super.dispose();
   }
 
   @override
   void initState() {
     super.initState();
+    if(widget.location!=null){
+      idController2.text = widget.location!;
+    }
     _loadAllBackgroundImages();
     _getStoreNames();
     _transformationController.addListener(() {

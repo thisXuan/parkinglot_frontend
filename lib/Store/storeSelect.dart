@@ -15,19 +15,17 @@ class Store {
   String recommendedServices;
   String image;
 
-
-  Store({
-    required this.id,
-    required this.storeName,
-    required this.serviceCategory,
-    required this.serviceType,
-    required this.businessHours,
-    required this.address,
-    required this.floorNumber,
-    this.description = '',
-    this.recommendedServices = '',
-    required this.image
-  });
+  Store(
+      {required this.id,
+      required this.storeName,
+      required this.serviceCategory,
+      required this.serviceType,
+      required this.businessHours,
+      required this.address,
+      required this.floorNumber,
+      this.description = '',
+      this.recommendedServices = '',
+      required this.image});
 
   factory Store.fromJson(Map<String, dynamic> json) {
     return Store(
@@ -40,8 +38,7 @@ class Store {
         floorNumber: json['floorNumber'] ?? 0,
         description: json['description'] ?? '',
         recommendedServices: json['recommendedServices'] ?? '',
-        image: json['image']??''
-    );
+        image: json['image'] ?? '');
   }
 }
 
@@ -72,9 +69,8 @@ class _StoreSelectPageState extends State<StoreSelectPage> {
       var data = result['data'];
       if (data != null) {
         setState(() {
-          _storeInfo = (data as List)
-              .map((json) => Store.fromJson(json))
-              .toList();
+          _storeInfo =
+              (data as List).map((json) => Store.fromJson(json)).toList();
           _isLoading = false;
         });
       }
@@ -93,35 +89,35 @@ class _StoreSelectPageState extends State<StoreSelectPage> {
       ),
       body: _isLoading
           ? Center(
-        child: CircularProgressIndicator(),
-      )
+              child: CircularProgressIndicator(),
+            )
           : ListView.builder(
-        itemCount: _storeInfo.length,
-        itemBuilder: (context, index) {
-          var store = _storeInfo[index];
-          return ListTile(
-            title: Text(store.storeName),
-            subtitle: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text("服务类型: ${store.serviceCategory}"),
-                    Text("具体种类: ${store.serviceType}"),
-                    Text("营业时间: ${store.businessHours}"),
-                    Text("店铺位置: ${store.address}"),
-                    Text("所处楼层: ${store.floorNumber}F"),
-                  ],
-                ),
-                store.image.isNotEmpty
-                    ? Image.network(store.image, width: 100)
-                    : Image.asset('assets/image_lost.jpg', width: 100),
-              ],
+              itemCount: _storeInfo.length,
+              itemBuilder: (context, index) {
+                var store = _storeInfo[index];
+                return ListTile(
+                  title: Text(store.storeName),
+                  subtitle: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text("服务类型: ${store.serviceCategory}"),
+                          Text("具体种类: ${store.serviceType}"),
+                          Text("营业时间: ${store.businessHours}"),
+                          Text("店铺位置: ${store.address}"),
+                          Text("所处楼层: ${store.floorNumber}F"),
+                        ],
+                      ),
+                      store.image.isNotEmpty
+                          ? Image.network(store.image, width: 100)
+                          : Image.asset('assets/image_lost.jpg', width: 100),
+                    ],
+                  ),
+                );
+              },
             ),
-          );
-        },
-      ),
     );
   }
 }

@@ -31,7 +31,7 @@ class Request {
   Request._internal() {
     // 初始化基本选项
     BaseOptions options = BaseOptions(
-        baseUrl: 'http://192.168.10.31:8081',
+        baseUrl: 'http://192.168.0.134:8081',
         connectTimeout: const Duration(seconds: 5),
         receiveTimeout: const Duration(seconds: 5));
     _instance = this;
@@ -50,7 +50,7 @@ class Request {
     if (userJson != null) {
       Map<String, String> userInfo = Map<String, String>.from(jsonDecode(userJson));
       String token = userInfo['token'] ?? '';
-      options.headers['Authorization'] = token; // 往请求头加token
+      options.headers['token'] = token; // 往请求头加token
     }
     // 更多业务需求
     handler.next(options);

@@ -1,10 +1,10 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:parkinglot_frontend/RegisterAndLogin/ForgetPassword.dart';
-import 'package:parkinglot_frontend/RegisterAndLogin/Register.dart';
+import 'package:parkinglot_frontend/AccountManager/ForgetPassword.dart';
+import 'package:parkinglot_frontend/AccountManager/Register.dart';
 import 'package:parkinglot_frontend/api/user.dart';
-import 'package:parkinglot_frontend/mainPages/Tabs.dart';
+import 'package:parkinglot_frontend/Tabs.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:parkinglot_frontend/utils/util.dart';
 

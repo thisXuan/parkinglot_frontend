@@ -1,9 +1,9 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:parkinglot_frontend/RegisterAndLogin/Login.dart';
-import 'package:parkinglot_frontend/mainPages/Tabs.dart';
-import 'package:parkinglot_frontend/mainPages/mapNavigation.dart';
+import 'package:parkinglot_frontend/AccountManager/Login.dart';
+import 'package:parkinglot_frontend/Tabs.dart';
+import 'package:parkinglot_frontend/Navigation/mapNavigation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class accountPage extends StatefulWidget {

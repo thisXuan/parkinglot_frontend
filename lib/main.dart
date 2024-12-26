@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:parkinglot_frontend/mainPages/Tabs.dart';
+import 'package:parkinglot_frontend/Tabs.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 
 void main() {

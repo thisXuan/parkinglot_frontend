@@ -1,30 +1,45 @@
 import 'package:flutter/material.dart';
+import 'package:parkinglot_frontend/AccountManager/Account.dart';
 import 'package:parkinglot_frontend/Navigation/IndoorNavigation.dart';
 import 'package:parkinglot_frontend/Store/storeTotal.dart';
-import 'package:parkinglot_frontend/mainPages/CarSearch.dart';
-import 'package:parkinglot_frontend/RegisterAndLogin/AccountManagement.dart';
+import 'package:parkinglot_frontend/CarSearch/CarSearch.dart';
+import 'package:parkinglot_frontend/AccountManager/AccountManagement.dart';
+import 'package:parkinglot_frontend/AccountManager/Account.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart'; // 引入二维码扫描包
 import 'package:parkinglot_frontend/QRcode/QRScanPage.dart';
 
 class Tabs extends StatefulWidget{
+  String? location;
+
+  Tabs({this.location, Key? key}) : super(key: key);
+
   _TabsState createState()=>_TabsState();
 }
 
 class _TabsState extends State<Tabs>{
   int _currentIndex=0;
   //下面的三个方法都是三个界面的方法
-  List _pageList=[
-    IndoorNavigationPage(),
-    StoreTotalPage(),
-    CarPage(),
-    accountPage()
-  ];
+  List _pageList=[];
+  List<String> titles = ["地图导览","店铺搜索","反向寻车","我的账户"];
+
+  @override
+  void initState() {
+    super.initState();
+    _pageList=[
+      IndoorNavigationPage(location: widget.location,),
+      StoreTotalPage(),
+      CarPage(),
+      //accountPage()
+      MemeberPage()
+    ];
+  }
   @override
   Widget build(BuildContext context) {
     return
       Scaffold(
         appBar: AppBar(
-          title: Text('停车场定位系统'),
+          title: Text(titles[_currentIndex]),
+          automaticallyImplyLeading: false,
           // 添加右上角扫描二维码的功能按钮
           actions: [
             IconButton(

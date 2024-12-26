@@ -1,5 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:parkinglot_frontend/CarSearch/FindMyCar.dart';
+import 'package:parkinglot_frontend/CarSearch/Payment.dart';
+import 'package:parkinglot_frontend/Navigation/IndoorNavigation.dart';
 import 'dart:async';
+import 'package:parkinglot_frontend/api/parking.dart';
+import 'package:parkinglot_frontend/Tabs.dart';
+import 'package:parkinglot_frontend/utils/util.dart';
+import 'package:intl/intl.dart';
+import 'package:parkinglot_frontend/api/parking.dart';
 
 class CarPage extends StatefulWidget {
   @override
@@ -10,7 +18,6 @@ class _CarPageState extends State<CarPage> {
   final List<TextEditingController> _controllers = List.generate(8, (index) => TextEditingController());
   bool _isNewEnergy = false; // 标识是否为新能源车
   String _errorText = '';
-  String _parkingTime = '';
 
   final PageController _pageController = PageController(initialPage: 1000);
   late Timer _timer;
@@ -61,8 +68,8 @@ class _CarPageState extends State<CarPage> {
 
   Widget _buildSquareInput(int index) {
     return SizedBox(
-      width: 48.0,
-      height: 54.0,
+      width: 40.0,
+      height: 50.0,
       child: TextField(
         controller: _controllers[index],
         maxLength: 1,
@@ -80,8 +87,9 @@ class _CarPageState extends State<CarPage> {
     );
   }
 
-  //TODO：查询停车时间
-  void handleConfirm() {
+  void handleConfirm() async{
+    FocusScope.of(context).unfocus();
+
     final plateLength = _isNewEnergy ? 8 : 7;
     final plate = _controllers
         .take(plateLength)
@@ -91,15 +99,70 @@ class _CarPageState extends State<CarPage> {
     if (!isValidPlate(plate, _isNewEnergy)) {
       setState(() {
         _errorText = '请输入有效的中国车牌号';
-        _parkingTime = '';
       });
       return;
     }
 
-    setState(() {
-      _errorText = '';
-      _parkingTime = '停车时间：2024-12-11 14:30';
-    });
+    var result = await ParkingApi().GetParkingTimeAndLocation(plate);
+
+    if(result!=null){
+      var code = result['code'];
+      var message = result['data'];
+      var msg = result['msg'];
+      if (code == 200) {
+        var parkingTime = message['parkingTime'];
+        var location = message['location'];
+
+        DateTime parsedTime = DateTime.parse(parkingTime);
+        String formattedTime = DateFormat('yyyy年MM月dd日 HH:mm:ss').format(parsedTime);
+
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text("停车信息"),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text("进场时间: $formattedTime"),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Text("停车位置: $location"),
+                    SizedBox(width: 8,),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => Tabs(location: location),
+                          ),
+                        );
+                      },
+                      child: Text(
+                        "到这去",
+                        style: TextStyle(
+                          color: Colors.deepPurple,
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text("确定"),
+              ),
+            ],
+          ),
+        );
+      } else {
+        ElToast.info(msg.toString());
+      }
+    }
+
   }
 
   void showParkingRules(BuildContext context) {
@@ -156,26 +219,79 @@ class _CarPageState extends State<CarPage> {
     );
   }
 
-  Widget _buildIconWithLabel(String label, IconData icon) {
-    return Column(
-      children: [
-        Center(
-          child: Icon(
-            icon,
-            color: Colors.black,
-            size: 25,
+  Widget _buildIconWithLabel(String label, IconData icon, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap, // 点击触发回调
+      child: Column(
+        children: [
+          Center(
+            child: Icon(
+              icon,
+              color: Colors.black,
+              size: 25,
+            ),
           ),
-        ),
-        SizedBox(height: 6), // 图标和文字的间距
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 10,
-            color: Colors.black,
+          SizedBox(height: 6), // 图标和文字的间距
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 10,
+              color: Colors.black,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
+  }
+
+  Future<void> ifPayment() async {
+    var result = await ParkingApi().GetPayment();
+    if(result!=null){
+      var code = result['code'];
+      var msg = result['msg'];
+      var data = result['data'];
+      if(code==200){
+        if(data.isEmpty){
+          ElToast.info("未找到缴费记录");
+          return;
+        }else{
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => PaymentPage(),
+            ),
+          );
+        }
+      }else{
+        ElToast.info(msg);
+        return;
+      }
+    }
+  }
+
+  Future<void> ifHasCar() async {
+    var result = await ParkingApi().GetMyCar();
+    if(result!=null){
+      var code = result['code'];
+      var msg = result['msg'];
+      var data = result['data'];
+      if(code==200){
+        if(data.isEmpty){
+          ElToast.info("未找到车辆绑定记录");
+          return;
+        }else{
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => FindmycarPage(),
+            ),
+          );
+        }
+      }else{
+        ElToast.info(msg);
+        return;
+      }
+    }
   }
 
   @override
@@ -241,7 +357,7 @@ class _CarPageState extends State<CarPage> {
               Center(
                 child: ElevatedButton(
                   onPressed: handleConfirm,
-                  child: Text('查询停车费'),
+                  child: Text('查询'),
                 ),
               ),
               SizedBox(height: 8,),
@@ -256,22 +372,25 @@ class _CarPageState extends State<CarPage> {
                   ),
                 ),
               ),
-              if (_parkingTime.isNotEmpty) ...[
-                SizedBox(height: 16.0),
-                Text(
-                  _parkingTime,
-                  style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
-                ),
-              ],
               SizedBox(height: 30,),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  _buildIconWithLabel('缴费记录', Icons.receipt_long),
-                  _buildIconWithLabel('我的车辆', Icons.directions_car),
-                  _buildIconWithLabel('开具发票', Icons.receipt),
-                  _buildIconWithLabel('月租办理', Icons.calendar_today),
-                  _buildIconWithLabel('免密支付', Icons.lock_open),
+                  _buildIconWithLabel('缴费记录', Icons.receipt_long,(){
+                    ifPayment();
+                  }),
+                  _buildIconWithLabel('我的车辆', Icons.directions_car,(){
+                    ifHasCar();
+                  }),
+                  _buildIconWithLabel('开具发票', Icons.receipt,(){
+                    ElToast.info("敬请期待");
+                  }),
+                  _buildIconWithLabel('月租办理', Icons.calendar_today,(){
+                    ElToast.info("敬请期待");
+                  }),
+                  _buildIconWithLabel('免密支付', Icons.lock_open,(){
+                    ElToast.info("敬请期待");
+                  }),
                 ],
               ),
             ],

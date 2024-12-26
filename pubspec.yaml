@@ -46,6 +46,7 @@ dependencies:
   qr_flutter: ^4.0.0
   screenshot: ^3.0.0
   path_provider: ^2.0.14
+  intl: ^0.18.0
 
 dev_dependencies:
   flutter_test:
@@ -71,6 +72,9 @@ flutter:
 
   assets:
     - assets/user.png
+    - assets/user.jpg
+    - assets/iqiyi.jpg
+    - assets/multipleAD.jpg
     - assets/image_lost.jpg
     - assets/floor/B2.jpg
     - assets/floor/B1.jpg
