@@ -29,11 +29,6 @@ class QRCodeApi {
         data: {
           "qrCodeContent": qrCodeContent,
         },
-        options: Options(
-          headers: {
-            "Authorization": "Bearer $token",
-          },
-        ),
       );
       print("请求成功: $result");
       return result;
