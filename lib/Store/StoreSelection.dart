@@ -90,7 +90,12 @@ class _BrandSelectionPageState extends State<BrandSelectionPage> {
       _isloading = true;
     });
     if (this._hasMore) {
-      var result = await StoreApi().GetStoreInfo(_page);
+      var result = await StoreApi().GetStoreInfoWithFilters(
+        selectedCategory,  // 传递选择的类别
+        selectedFloor,     // 传递选择的楼层
+        _page,
+        10,                 // 传递 size，假设每页显示 10 个商铺
+      );
       if (result != null && result['code'] == 200 && result['data'] != null) {
         setState(() {
           _storeInfo.addAll((result['data'] as List)
@@ -99,9 +104,10 @@ class _BrandSelectionPageState extends State<BrandSelectionPage> {
           _page++;
         });
       }
-      List<Store> storeList =
-          (result['data'] as List).map((json) => Store.fromJson(json)).toList();
-      //判断是否是最后一页
+      // 判断是否是最后一页
+      List<Store> storeList = (result['data'] as List)
+          .map((json) => Store.fromJson(json))
+          .toList();
       if (storeList.length < 10) {
         setState(() {
           this._hasMore = false;
@@ -112,6 +118,8 @@ class _BrandSelectionPageState extends State<BrandSelectionPage> {
       _isloading = false;
     });
   }
+
+
 
   Future<void> _refreshData() async {
     await Future.delayed(Duration(milliseconds: 2000), () {
@@ -214,12 +222,15 @@ class _BrandSelectionPageState extends State<BrandSelectionPage> {
                       return GestureDetector(
                         onTap: () {
                           setState(() {
-                            selectedCategory = category;
+                            selectedCategory = category; // 更新选择的类别
+                            _storeInfo.clear(); // 清空当前商铺列表
+                            _page = 1; // 重置页码
+                            _hasMore = true; // 重新设置是否还有更多数据
+                            _fetchStoreInfo(); // 重新加载数据
                           });
                         },
                         child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 8),
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                           margin: const EdgeInsets.only(right: 8),
                           decoration: BoxDecoration(
                             border: isSelected
@@ -352,14 +363,7 @@ class _BrandSelectionPageState extends State<BrandSelectionPage> {
 
   void _showFloorMenu(BuildContext context) async {
     final List<String> floors = [
-      "全部楼层",
-      "1F",
-      "2F",
-      "3F",
-      "4F",
-      "5F",
-      "B1",
-      "B2"
+      "全部楼层", "B1", "M", "1F", "2F", "3F", "4F", "5F"
     ];
     String? result = await showMenu<String>(
       context: context,
@@ -367,35 +371,39 @@ class _BrandSelectionPageState extends State<BrandSelectionPage> {
       items: floors
           .map(
             (floor) => PopupMenuItem<String>(
-              value: floor,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    floor,
-                    style: TextStyle(
-                      color:
-                          floor == selectedFloor ? Colors.deepPurple : Colors.black,
-                    ),
-                  ),
-                  if (floor == selectedFloor)
-                    const Icon(
-                      Icons.check,
-                      color: Colors.deepPurple,
-                      size: 16,
-                    ),
-                ],
+          value: floor,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                floor,
+                style: TextStyle(
+                  color: floor == selectedFloor ? Colors.deepPurple : Colors.black,
+                ),
               ),
-            ),
-          )
+              if (floor == selectedFloor)
+                const Icon(
+                  Icons.check,
+                  color: Colors.deepPurple,
+                  size: 16,
+                ),
+            ],
+          ),
+        ),
+      )
           .toList(),
     );
     if (result != null && result != selectedFloor) {
       setState(() {
-        selectedFloor = result;
+        selectedFloor = result;  // 更新选择的楼层
+        _storeInfo.clear();  // 清空当前商铺列表
+        _page = 1;  // 重置页码
+        _hasMore = true;  // 重新设置是否还有更多数据
+        _fetchStoreInfo();  // 重新加载数据
       });
     }
   }
+
 
   //加载中的圈圈
   Widget _getMoreWidget() {

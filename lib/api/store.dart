@@ -39,6 +39,16 @@ class StoreApi {
     return result;
   }
 
+  GetStoreInfoWithFilters(String category, String floor, int page, int size) async {
+    var result = await Request().request(
+        "/store/get_stores?category=$category&floor=$floor&page=$page&size=$size",
+        method: DioMethod.get
+    );
+    return result;
+  }
+
+
+
 }
 
 // 导出全局使用这一个实例
