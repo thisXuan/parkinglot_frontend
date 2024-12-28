@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:parkinglot_frontend/AccountManager/Account.dart';
 import 'package:parkinglot_frontend/Navigation/IndoorNavigation.dart';
+import 'package:parkinglot_frontend/Store/StoreSelection.dart';
 import 'package:parkinglot_frontend/Store/storeTotal.dart';
 import 'package:parkinglot_frontend/CarSearch/CarSearch.dart';
 import 'package:parkinglot_frontend/AccountManager/AccountManagement.dart';
@@ -27,7 +28,7 @@ class _TabsState extends State<Tabs>{
     super.initState();
     _pageList=[
       IndoorNavigationPage(location: widget.location,),
-      StoreTotalPage(),
+      BrandSelectionPage(),
       CarPage(),
       //accountPage()
       MemeberPage()
@@ -38,6 +39,7 @@ class _TabsState extends State<Tabs>{
     return
       Scaffold(
         appBar: AppBar(
+          backgroundColor: Colors.white,
           title: Text(titles[_currentIndex]),
           automaticallyImplyLeading: false,
           // 添加右上角扫描二维码的功能按钮

@@ -16,19 +16,17 @@ class Store {
   String recommendedServices;
   String image;
 
-
-  Store({
-    required this.id,
-    required this.storeName,
-    required this.serviceCategory,
-    required this.serviceType,
-    required this.businessHours,
-    required this.address,
-    required this.floorNumber,
-    this.description = '',
-    this.recommendedServices = '',
-    required this.image
-  });
+  Store(
+      {required this.id,
+      required this.storeName,
+      required this.serviceCategory,
+      required this.serviceType,
+      required this.businessHours,
+      required this.address,
+      required this.floorNumber,
+      this.description = '',
+      this.recommendedServices = '',
+      required this.image});
 
   factory Store.fromJson(Map<String, dynamic> json) {
     return Store(
@@ -41,8 +39,7 @@ class Store {
         floorNumber: json['floorNumber'] ?? 0,
         description: json['description'] ?? '',
         recommendedServices: json['recommendedServices'] ?? '',
-        image: json['image']??''
-    );
+        image: json['image'] ?? '');
   }
 }
 
@@ -65,7 +62,8 @@ class _StoreTotalPageState extends State<StoreTotalPage> {
     //监听滚动条事件
     _scrollController.addListener(() {
       if (_scrollController.position.pixels >
-          _scrollController.position.maxScrollExtent - 40&&!_isloading) {
+              _scrollController.position.maxScrollExtent - 40 &&
+          !_isloading) {
         this._fetchStoreInfo();
       }
     });
@@ -86,7 +84,7 @@ class _StoreTotalPageState extends State<StoreTotalPage> {
         });
       }
       List<Store> storeList =
-      (result['data'] as List).map((json) => Store.fromJson(json)).toList();
+          (result['data'] as List).map((json) => Store.fromJson(json)).toList();
       //判断是否是最后一页
       if (storeList.length < 10) {
         setState(() {
@@ -180,91 +178,102 @@ class _StoreTotalPageState extends State<StoreTotalPage> {
                 context,
                 MaterialPageRoute(
                   builder: (context) => StoreSelectPage(
-                    category: categories[_selectedIndex], // 假设categories是一个包含所有类别的列表
+                    category:
+                        categories[_selectedIndex], // 假设categories是一个包含所有类别的列表
                   ),
                 ),
               );
             },
             elevation: 0, // 取消阴影效果
             unselectedItemColor: Colors.black, // 设置未选中项的颜色为黑色
-            selectedItemColor: Theme.of(context).colorScheme.secondary, // 设置选中项的颜色为系统紫色
+            selectedItemColor:
+                Theme.of(context).colorScheme.secondary, // 设置选中项的颜色为系统紫色
           ),
           // 列表
           Expanded(
             child: this._storeInfo.length > 0
                 ? RefreshIndicator(
-              onRefresh: _refreshData,
-              child: ListView.builder(
-                controller: _scrollController,
-                itemCount: _storeInfo.length,
-                itemBuilder: (context, index) {
-                  var store = _storeInfo[index];
-                  if (index == this._storeInfo.length - 1) {
-                    return Column(
-                      children: <Widget>[
-                        ListTile(
-                          title: Text(store.storeName),
-                          subtitle: Row(
-                            mainAxisAlignment:
-                            MainAxisAlignment.spaceBetween,
-                            children: [
-                              Column(
-                                crossAxisAlignment:
-                                CrossAxisAlignment.start,
-                                children: [
-                                  Text("${store.serviceCategory}+“ ”+${store.serviceType}"),
-                                  Text("营业中：${store.businessHours}"),
-                                  Text("${store.address}"),
-                                  Text("${store.floorNumber}F"),
-                                ],
+                    onRefresh: _refreshData,
+                    child: ListView.builder(
+                      controller: _scrollController,
+                      itemCount: _storeInfo.length,
+                      itemBuilder: (context, index) {
+                        var store = _storeInfo[index];
+                        if (index == this._storeInfo.length - 1) {
+                          return Column(
+                            children: <Widget>[
+                              ListTile(
+                                title: Text(store.storeName),
+                                subtitle: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                            "${store.serviceCategory}+“ ”+${store.serviceType}"),
+                                        Text("营业中：${store.businessHours}"),
+                                        Text("${store.address}"),
+                                        Text("${store.floorNumber}F"),
+                                      ],
+                                    ),
+                                    store.image.isNotEmpty
+                                        ? Image.network(store.image, width: 80)
+                                        : Image.asset('assets/image_lost.jpg',
+                                            width: 100),
+                                  ],
+                                ),
                               ),
-                              store.image.isNotEmpty
-                                  ? Image.network(store.image, width: 80)
-                                  : Image.asset('assets/image_lost.jpg',
-                                  width: 100),
+                              Divider(),
+                              _getMoreWidget()
                             ],
-                          ),
-                        ),
-                        Divider(),
-                        _getMoreWidget()
-                      ],
-                    );
-                  }else{
-                    return ListTile(
-                      title: Text(store.storeName),
-                      subtitle: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text("服务类型: ${store.serviceCategory}"),
-                              Text("具体种类: ${store.serviceType}"),
-                              Text("营业时间: ${store.businessHours}"),
-                              Text("店铺位置: ${store.address}"),
-                              Text("所处楼层: ${store.floorNumber}F"),
-                            ],
-                          ),
-                          store.image.isNotEmpty
-                              ? Image.network(store.image, width: 100)
-                              : Image.asset('assets/image_lost.jpg', width: 100),
-                        ],
-                      ),
-                    );
-                  }
-                },
-              ),
-            )
+                          );
+                        } else {
+                          return ListTile(
+                            title: Text(store.storeName),
+                            subtitle: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text("服务类型: ${store.serviceCategory}"),
+                                    Text("具体种类: ${store.serviceType}"),
+                                    Text("营业时间: ${store.businessHours}"),
+                                    Text("店铺位置: ${store.address}"),
+                                    Text("所处楼层: ${store.floorNumber}F"),
+                                  ],
+                                ),
+                                store.image.isNotEmpty
+                                    ? Image.network(store.image, width: 100)
+                                    : Image.asset('assets/image_lost.jpg',
+                                        width: 100),
+                              ],
+                            ),
+                          );
+                        }
+                      },
+                    ),
+                  )
                 : _getMoreWidget(),
           ),
         ],
       ),
-
     );
   }
 
   final List<String> categories = [
-    '全部', '美食', '购物', '休闲玩乐', '丽人美发', '亲子遛娃', '运动健身', '学习培训', '生活服务',
+    '全部',
+    '美食',
+    '购物',
+    '休闲玩乐',
+    '丽人美发',
+    '亲子遛娃',
+    '运动健身',
+    '学习培训',
+    '生活服务',
   ];
   //加载中的圈圈
   Widget _getMoreWidget() {
@@ -272,10 +281,9 @@ class _StoreTotalPageState extends State<StoreTotalPage> {
       return Center(
         child: Padding(
             padding: EdgeInsets.all(10.0),
-            child:  CircularProgressIndicator(
+            child: CircularProgressIndicator(
               strokeWidth: 1.0,
-            )
-        ),
+            )),
       );
     } else {
       return Center(

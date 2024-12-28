@@ -98,7 +98,7 @@ class _StoreSearchPageState extends State<StoreSearchPage> {
                     }
                     _performSearch(_searchController.text);
                   }, // 点击按钮执行搜索
-                ),
+                )
               ],
             ),
           ),

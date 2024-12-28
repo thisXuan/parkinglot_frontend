@@ -275,6 +275,17 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage>
       });
     }
   }
+  
+  Widget _buildSectionWrapper(Widget child) {
+    return Container(
+      padding: EdgeInsets.all(16), // 内边距
+      decoration: BoxDecoration(
+        color: Colors.white, // 淡灰色背景
+        borderRadius: BorderRadius.circular(0), // 圆角
+      ),
+      child: child,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -283,67 +294,64 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage>
         children: [
           Column(
             children: [
-              Container(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  children: [
-                    CompositedTransformTarget(
-                      link: _layerLink1,
-                      child: TextField(
-                        controller: idController1,
-                        decoration: InputDecoration(
-                          hintText: "出发点",
-                          border: OutlineInputBorder(),
-                          prefixIcon: Icon(Icons.search),
-                        ),
-                        onChanged: (value) => _filterSuggestions(value, 1),
-                        onTap: (){
-                          map.clear();
-                        },
+              _buildSectionWrapper(Column(
+                children: [
+                  CompositedTransformTarget(
+                    link: _layerLink1,
+                    child: TextField(
+                      controller: idController1,
+                      decoration: InputDecoration(
+                        hintText: "出发点",
+                        border: OutlineInputBorder(),
+                        prefixIcon: Icon(Icons.search),
                       ),
-                    ),
-                    SizedBox(height: 8,),
-                    CompositedTransformTarget(
-                      link: _layerLink2,
-                      child: TextField(
-                        controller: idController2,
-                        decoration: InputDecoration(
-                          hintText: "终点",
-                          border: OutlineInputBorder(),
-                          prefixIcon: Icon(Icons.search),
-                        ),
-                        onChanged: (value) => _filterSuggestions(value, 2),
-                        onTap: (){
-                          map.clear();
-                        },
-                      ),
-                    ),
-                    ElevatedButton(
-                      onPressed: () {
-                        // 收起键盘
-                        FocusScope.of(context).unfocus();
-
-                        if(idController1.text.length==0||idController2.text.length==0){
-                          ElToast.info("请输入起始点和终点");
-                          return;
-                        }
-
-                        if(idController1.text==idController2.text){
-                          ElToast.info("起始点和终点不能相同");
-                          return;
-                        }
-                       if( _validateInput(idController1.text,1)&& _validateInput(idController2.text,2)) {
-                         getCoordinates(idController1.text, idController2.text);
-                         return;
-                       }else{
-                         ElToast.info("输入错误");
-                       }
+                      onChanged: (value) => _filterSuggestions(value, 1),
+                      onTap: (){
+                        map.clear();
                       },
-                      child: Text('开始导航'),
                     ),
-                  ],
-                ),
-              ),
+                  ),
+                  SizedBox(height: 8,),
+                  CompositedTransformTarget(
+                    link: _layerLink2,
+                    child: TextField(
+                      controller: idController2,
+                      decoration: InputDecoration(
+                        hintText: "终点",
+                        border: OutlineInputBorder(),
+                        prefixIcon: Icon(Icons.search),
+                      ),
+                      onChanged: (value) => _filterSuggestions(value, 2),
+                      onTap: (){
+                        map.clear();
+                      },
+                    ),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      // 收起键盘
+                      FocusScope.of(context).unfocus();
+
+                      if(idController1.text.length==0||idController2.text.length==0){
+                        ElToast.info("请输入起始点和终点");
+                        return;
+                      }
+
+                      if(idController1.text==idController2.text){
+                        ElToast.info("起始点和终点不能相同");
+                        return;
+                      }
+                      if( _validateInput(idController1.text,1)&& _validateInput(idController2.text,2)) {
+                        getCoordinates(idController1.text, idController2.text);
+                        return;
+                      }else{
+                        ElToast.info("输入错误");
+                      }
+                    },
+                    child: Text('开始导航'),
+                  ),
+                ],
+              )),
               Expanded(
                 child: InteractiveViewer(
                   transformationController: _transformationController,
