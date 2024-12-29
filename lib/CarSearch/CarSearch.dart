@@ -9,6 +9,8 @@ import 'package:parkinglot_frontend/utils/util.dart';
 import 'package:intl/intl.dart';
 import 'package:parkinglot_frontend/api/parking.dart';
 
+import '../api/qrcode.dart';
+
 class CarPage extends StatefulWidget {
   @override
   _CarPageState createState() => _CarPageState();
@@ -295,6 +297,65 @@ class _CarPageState extends State<CarPage> {
     }
   }
 
+  Future<void> ifHasQRcode() async {
+    var result = await QRCodeApi().getQRCodeContent();
+    if (result != null) {
+      var code = result['code'];
+      var msg = result['msg'];
+      var data = result['data'];
+      if (code == 200) {
+        var location = data;
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text("二维码定位"),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+
+                Row(
+                  children: [
+                    Text("二维码位置: $location"),
+                    SizedBox(
+                      width: 8,
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => Tabs(location: location),
+                          ),
+                        );
+                      },
+                      child: Text(
+                        "到这去",
+                        style: TextStyle(
+                          color: Colors.deepPurple,
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text("确定"),
+              ),
+            ],
+          ),
+        );
+
+      } else {
+        ElToast.info(msg);
+        return;
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -415,8 +476,8 @@ class _CarPageState extends State<CarPage> {
                     _buildIconWithLabel('我的车辆', Icons.directions_car, () {
                       ifHasCar();
                     }),
-                    _buildIconWithLabel('开具发票', Icons.receipt, () {
-                      ElToast.info("敬请期待");
+                    _buildIconWithLabel('车辆位置', Icons.qr_code_scanner, () {
+                      ifHasQRcode();
                     }),
                     _buildIconWithLabel('月租办理', Icons.calendar_today, () {
                       ElToast.info("敬请期待");

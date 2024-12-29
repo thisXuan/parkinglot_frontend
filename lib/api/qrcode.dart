@@ -37,4 +37,11 @@ class QRCodeApi {
       rethrow;
     }
   }
+
+  getQRCodeContent() async {
+    var result = await Request().request("/qrcode/getQR",
+        method: DioMethod.get);
+    return result;
+  }
+
 }
