@@ -3,8 +3,6 @@ import 'package:parkinglot_frontend/AccountManager/Account.dart';
 import 'package:parkinglot_frontend/Navigation/IndoorNavigation.dart';
 import 'package:parkinglot_frontend/Store/StoreSelection.dart';
 import 'package:parkinglot_frontend/CarSearch/CarSearch.dart';
-import 'package:parkinglot_frontend/AccountManager/AccountManagement.dart';
-import 'package:parkinglot_frontend/AccountManager/Account.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart'; // 引入二维码扫描包
 import 'package:parkinglot_frontend/QRcode/QRScanPage.dart';
 

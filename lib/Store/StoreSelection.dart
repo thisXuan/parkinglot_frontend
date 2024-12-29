@@ -2,46 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:parkinglot_frontend/Store/StoreDetail.dart';
 import 'package:parkinglot_frontend/api/store.dart';
 import 'package:parkinglot_frontend/utils/util.dart';
-
-// Store 模型类
-class Store {
-  int id;
-  String storeName;
-  String serviceCategory;
-  String serviceType;
-  String businessHours;
-  String address;
-  int floorNumber;
-  String description;
-  String recommendedServices;
-  String image;
-
-  Store(
-      {required this.id,
-      required this.storeName,
-      required this.serviceCategory,
-      required this.serviceType,
-      required this.businessHours,
-      required this.address,
-      required this.floorNumber,
-      this.description = '',
-      this.recommendedServices = '',
-      required this.image});
-
-  factory Store.fromJson(Map<String, dynamic> json) {
-    return Store(
-        id: json['id'],
-        storeName: json['storeName'] ?? '',
-        serviceCategory: json['serviceCategory'] ?? '',
-        serviceType: json['serviceType'] ?? '',
-        businessHours: json['businessHours'] ?? '',
-        address: json['address'] ?? '',
-        floorNumber: json['floorNumber'] ?? 0,
-        description: json['description'] ?? '',
-        recommendedServices: json['recommendedServices'] ?? '',
-        image: json['image'] ?? '');
-  }
-}
+import 'package:parkinglot_frontend/entity/Store.dart';
 
 class BrandSelectionPage extends StatefulWidget {
   @override

@@ -8,21 +8,7 @@ import 'package:parkinglot_frontend/api/navigation.dart';
 import 'package:parkinglot_frontend/utils/util.dart';
 import 'package:parkinglot_frontend/api/store.dart';
 import 'dart:convert';
-
-class Point {
-  final double x;
-  final double y;
-  final String floor;
-
-  Point({required this.x, required this.y, required this.floor});
-
-  factory Point.fromJson(Map<String, dynamic> json) {
-    return Point(
-        x: json['x'].toDouble() as double,
-        y: json['y'].toDouble() as double,
-        floor: json['floor'] as String);
-  }
-}
+import 'package:parkinglot_frontend/entity/Point.dart';
 
 String _selectedFloor = 'M';
 
