@@ -47,6 +47,12 @@ class StoreApi {
     return result;
   }
 
+  GetStoreInfoById(dynamic data) async{
+    var result = await Request().request("/store/getStoreInfoById?id=$data",
+        method: DioMethod.get
+    );
+    return result;
+  }
 
 
 }

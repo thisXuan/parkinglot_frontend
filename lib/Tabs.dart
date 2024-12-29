@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:parkinglot_frontend/AccountManager/Account.dart';
 import 'package:parkinglot_frontend/Navigation/IndoorNavigation.dart';
 import 'package:parkinglot_frontend/Store/StoreSelection.dart';
-import 'package:parkinglot_frontend/Store/storeTotal.dart';
 import 'package:parkinglot_frontend/CarSearch/CarSearch.dart';
 import 'package:parkinglot_frontend/AccountManager/AccountManagement.dart';
 import 'package:parkinglot_frontend/AccountManager/Account.dart';
@@ -21,7 +20,7 @@ class _TabsState extends State<Tabs>{
   int _currentIndex=0;
   //下面的三个方法都是三个界面的方法
   List _pageList=[];
-  List<String> titles = ["地图导览","店铺搜索","反向寻车","我的账户"];
+  List<String> titles = ["地图导览","品牌筛选","停车缴费","我的账户"];
 
   @override
   void initState() {

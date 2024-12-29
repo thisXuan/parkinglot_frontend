@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:parkinglot_frontend/Store/StoreDetail.dart';
 import 'package:parkinglot_frontend/api/store.dart';
 import 'package:parkinglot_frontend/utils/util.dart';
-import 'package:parkinglot_frontend/Store/storeSearch.dart';
 
 // Store 模型类
 class Store {
@@ -180,10 +180,14 @@ class _BrandSelectionPageState extends State<BrandSelectionPage> {
                           }
                         },
                         decoration: InputDecoration(
-                          hintText: '输入搜索内容',
+                          hintText: "请输入",
+                          prefixIcon: const Icon(Icons.search),
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8.0),
+                            borderRadius: BorderRadius.circular(12.0),
+                            borderSide: BorderSide.none,
                           ),
+                          filled: true,
+                          fillColor: Colors.grey[100],
                         ),
                       ),
                     ),
@@ -206,9 +210,9 @@ class _BrandSelectionPageState extends State<BrandSelectionPage> {
                     children: [
                       Text(
                         selectedFloor,
-                        style: const TextStyle(color: Colors.deepPurple),
+                        style: const TextStyle(color: Colors.orange),
                       ),
-                      const Icon(Icons.arrow_drop_down, color: Colors.deepPurple),
+                      const Icon(Icons.arrow_drop_down, color: Colors.orange),
                     ],
                   ),
                 ),
@@ -236,14 +240,14 @@ class _BrandSelectionPageState extends State<BrandSelectionPage> {
                             border: isSelected
                                 ? Border(
                               bottom: BorderSide(
-                                  color: Colors.deepPurple, width: 2),
+                                  color: Colors.orange, width: 2),
                             )
                                 : null,
                           ),
                           child: Text(
                             category,
                             style: TextStyle(
-                              color: isSelected ? Colors.deepPurple : Colors.black,
+                              color: isSelected ? Colors.orange : Colors.black,
                             ),
                           ),
                         ),
@@ -254,6 +258,7 @@ class _BrandSelectionPageState extends State<BrandSelectionPage> {
               ),
             ],
           )),
+          // 商店具体信息
           Expanded(
               child: this._storeInfo.length > 0
                   ? RefreshIndicator(
@@ -263,93 +268,78 @@ class _BrandSelectionPageState extends State<BrandSelectionPage> {
                         itemCount: _storeInfo.length,
                         itemBuilder: (context, index) {
                           final brand = _storeInfo[index];
-                          if (index == this._storeInfo.length - 1) {
+
+                          // 包装 Card 为 InkWell 添加点击事件
+                          Widget cardContent = Card(
+                            margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            color: Colors.white,
+                            child: ListTile(
+                              leading: brand.image.isNotEmpty
+                                  ? Image.network(
+                                brand.image,
+                                width: 70,
+                                height: 70,
+                                fit: BoxFit.cover,
+                              )
+                                  : Image.asset(
+                                'assets/image_lost.jpg',
+                                width: 70,
+                              ),
+                              title: Text(brand.storeName),
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(brand.serviceCategory),
+                                  SizedBox(height: 2),
+                                  Container(
+                                    margin: const EdgeInsets.only(right: 4),
+                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color: Colors.orange[100],
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: Text(
+                                      brand.businessHours.isEmpty ? "营业时间未知" : brand.businessHours,
+                                      style: const TextStyle(color: Colors.orange, fontSize: 12),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              trailing: Text(brand.floorNumber.toString() + "F"),
+                            ),
+                          );
+
+                          if (index == _storeInfo.length - 1) {
                             return Column(
                               children: [
-                                Card(
-                                  margin: const EdgeInsets.symmetric(
-                                      horizontal: 12, vertical: 6),
-                                  color: Colors.white,
-                                  child: ListTile(
-                                    leading:brand.image.isNotEmpty
-                                        ? Image.network(brand.image, width: 70,height: 70,fit:BoxFit.cover,)
-                                        : Image.asset('assets/image_lost.jpg',
-                                        width: 70),
-                                    title: Text(brand.storeName),
-                                    subtitle: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(brand.serviceCategory),
-                                        SizedBox(height: 2,),
-                                        Container(
-                                          margin: const EdgeInsets.only(
-                                              right: 4),
-                                          padding:
-                                          const EdgeInsets.symmetric(
-                                              horizontal: 6,
-                                              vertical: 2),
-                                          decoration: BoxDecoration(
-                                            color: Color(0xFFd0c0f9),
-                                            borderRadius:
-                                            BorderRadius.circular(12),
-                                          ),
-                                          child: Text(
-                                            brand.businessHours.isEmpty?"营业时间未知":brand.businessHours,
-                                            style: const TextStyle(
-                                                color: Colors.deepPurple,
-                                                fontSize: 12),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    trailing:
-                                    Text(brand.floorNumber.toString() + "F"),
-                                  ),
+                                InkWell(
+                                  onTap: () {
+                                    //点击事件：跳转到详情页面
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => StoreDetailPage(storeId: brand.id),
+                                      ),
+                                    );
+                                  },
+                                  child: cardContent,
                                 ),
                                 Divider(),
-                                _getMoreWidget()
+                                _getMoreWidget(),
                               ],
                             );
-                          }else{
-                            return Card(
-                              margin: const EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 6),
-                              color: Colors.white,
-                              child: ListTile(
-                                leading: brand.image.isNotEmpty
-                                    ? Image.network(brand.image, width: 70,height: 70,fit:BoxFit.cover,)
-                                    : Image.asset('assets/image_lost.jpg',
-                                    width: 70),
-                                title: Text(brand.storeName),
-                                subtitle: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(brand.serviceCategory),
-                                    SizedBox(height: 2,),
-                                    Container(
-                                      margin: const EdgeInsets.only(
-                                          right: 4),
-                                      padding:
-                                      const EdgeInsets.symmetric(
-                                          horizontal: 6,
-                                          vertical: 2),
-                                      decoration: BoxDecoration(
-                                        color: Color(0xffdacdfb),
-                                        borderRadius:
-                                        BorderRadius.circular(12),
-                                      ),
-                                      child: Text(
-                                        brand.businessHours.isEmpty?"营业时间未知":brand.businessHours,
-                                        style: const TextStyle(
-                                            color: Colors.deepPurple,
-                                            fontSize: 12),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                trailing:
-                                Text(brand.floorNumber.toString() + "F"),
-                              ),
+                          } else {
+                            return InkWell(
+                              onTap: () {
+                                // 点击事件：跳转到详情页面
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => StoreDetailPage(storeId: brand.id),
+                                  ),
+                                );
+                              },
+                              child: cardContent,
                             );
                           }
                         },

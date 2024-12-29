@@ -323,18 +323,18 @@ class _CarPageState extends State<CarPage> {
               children: [
                 _buildSectionWrapper(Column(
                   children: [
-                    Row(
+                    const Row(
                       mainAxisAlignment:MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          '请输入车牌号：',
+                          '请输入车牌号',
                           style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
                         ),
                         Row(
                           children: [
-                            Icon(Icons.add_call),
+                            Icon(Icons.add_call,color: Colors.brown,),
                             SizedBox(width: 3,),
-                            Text("联系客服")
+                            Text("联系客服",style: TextStyle(color: Colors.brown),)
                           ],
                         )
                       ],
@@ -373,7 +373,18 @@ class _CarPageState extends State<CarPage> {
                     Center(
                       child: ElevatedButton(
                         onPressed: handleConfirm,
-                        child: Text('查询'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.brown[300], // 设置按钮背景为棕色
+                          foregroundColor: Colors.white, // 设置文字颜色为白色
+                          fixedSize: const Size(400, 50), // 自定义按钮的宽度和高度
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(40), // 设置圆角半径
+                          ),
+                        ),
+                        child: const Text(
+                          '查询',
+                          style: TextStyle(fontSize: 16), // 自定义文字大小
+                        ),
                       ),
                     ),
                     SizedBox(
