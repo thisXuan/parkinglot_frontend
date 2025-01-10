@@ -34,6 +34,14 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage>
   ui.Image? backgroundImage;
   double _scale = 1.0;
 
+// 添加一个变量控制弹窗的显示与隐藏
+  bool _showPopup = true;
+  List<String> _storeNames = [];
+  bool _isPopupHidden = false; // 控制弹窗是否收起
+  // 定义弹窗的可见性和位置
+  double _popupPosition = 20.0;
+
+
   TransformationController _transformationController = TransformationController();
 
   late AnimationController _animationController;
@@ -49,6 +57,13 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage>
 
   OverlayEntry? _overlayEntry1;
   OverlayEntry? _overlayEntry2;
+
+  void _togglePopup() {
+    setState(() {
+      _showPopup = !_showPopup;
+      _isPopupHidden = !_isPopupHidden;
+    });
+  }
 
   void _showOverlay(int fieldIndex) {
     if (fieldIndex == 1) {
@@ -218,6 +233,7 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage>
     dynamic data = {'startName': storeName1, 'endName': storeName2};
     setState(() {
       _isLoading = true;
+      _showPopup = false;  // 清除弹窗
     });
     var result;
     try {
@@ -229,7 +245,7 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage>
         return;
       }
       setState(() {
-        List<dynamic> dataList = result['data'];
+        List<dynamic> dataList = result['data']['filteredPath'];
         for (var item in dataList) {
           Point point = Point(
             x: item['x'],
@@ -243,6 +259,10 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage>
           map[point.floor]!.add(point);
         }
         _selectedFloor = map.keys.first;
+
+        // 获取storeNames并展示弹窗
+        _storeNames = List<String>.from(result['data']['storeNames']);
+        _showPopup = true; // 显示弹窗
       });
     } finally {
       setState(() {
@@ -261,7 +281,7 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage>
       });
     }
   }
-  
+
   Widget _buildSectionWrapper(Widget child) {
     return Container(
       padding: EdgeInsets.all(16), // 内边距
@@ -393,6 +413,78 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage>
                     }).toList(),
                   ),
           ),
+          // 弹窗
+          // 弹窗
+          Positioned(
+            left: _isPopupHidden ? -200 : _popupPosition, // 弹窗从左侧滑出
+            bottom: 60,
+            child: AnimatedOpacity(
+              opacity: _showPopup ? 1.0 : 0.5, // 半透明效果
+              duration: Duration(milliseconds: 300),
+              child: GestureDetector(
+                onHorizontalDragUpdate: (details) {
+                  setState(() {
+                    // 拖动控制弹窗位置
+                    _popupPosition += details.primaryDelta!;
+                  });
+                },
+                onHorizontalDragEnd: (details) {
+                  // 当滑动结束时，根据弹窗位置决定是否收起
+                  if (_popupPosition < -150) {
+                    _togglePopup(); // 收起弹窗
+                  } else {
+                    setState(() {
+                      _popupPosition = 20.0; // 恢复弹窗位置
+                    });
+                  }
+                },
+                child: Material(
+                  elevation: 4,
+                  borderRadius: BorderRadius.circular(8),
+                  child: Container(
+                    padding: EdgeInsets.all(10),
+                    color: Colors.white.withOpacity(0.8), // 半透明背景
+                    child: Column(
+                      children: [
+                        Row(
+                          children: [
+                            GestureDetector(
+                              onTap: _togglePopup, // 点击箭头触发弹窗显示或隐藏
+                              child: Icon(
+                                _isPopupHidden ? Icons.arrow_right : Icons.arrow_left,
+                                color: Colors.black,
+                              ),
+                            ),
+                            SizedBox(width: 10),
+                            Text("途径路线:"),
+                          ],
+                        ),
+                        for (var store in _storeNames)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 5),
+                            child: Text(store),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          // 收起后的向右箭头
+          if (_isPopupHidden)
+            Positioned(
+              left: 0,
+              bottom: 60,
+              child: GestureDetector(
+                onTap: _togglePopup, // 点击向右箭头恢复弹窗
+                child: Icon(
+                  Icons.arrow_right,
+                  color: Colors.black,
+                  size: 30,
+                ),
+              ),
+            ),
         ],
       ),
     );
