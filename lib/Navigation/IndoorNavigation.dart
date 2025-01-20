@@ -5,12 +5,13 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'dart:ui' as ui;
 import 'dart:async';
 import 'package:parkinglot_frontend/api/navigation.dart';
+import 'package:parkinglot_frontend/entity/StoreDTO.dart';
 import 'package:parkinglot_frontend/utils/util.dart';
 import 'package:parkinglot_frontend/api/store.dart';
+import 'package:parkinglot_frontend/api/shopLocation.dart';
 import 'dart:convert';
 import 'package:parkinglot_frontend/entity/Point.dart';
 
-String _selectedFloor = 'M';
 
 class IndoorNavigationPage extends StatefulWidget {
   String? location;
@@ -23,6 +24,7 @@ class IndoorNavigationPage extends StatefulWidget {
   }
 }
 
+String _selectedFloor = 'F4';
 
 class IndoorNavigationPageState extends State<IndoorNavigationPage>
     with SingleTickerProviderStateMixin {
@@ -57,6 +59,8 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage>
 
   OverlayEntry? _overlayEntry1;
   OverlayEntry? _overlayEntry2;
+
+  List<StoreDTO> _storeLocations = [];
 
   void _togglePopup() {
     setState(() {
@@ -188,6 +192,7 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage>
     }
     _loadAllBackgroundImages();
     _getStoreNames();
+     _getStoreLocations(_selectedFloor);
     _transformationController.addListener(() {
       setState(() {
         _scale = _transformationController.value.getMaxScaleOnAxis();
@@ -258,7 +263,9 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage>
           }
           map[point.floor]!.add(point);
         }
-        _selectedFloor = map.keys.first;
+       setState(() {
+         _selectedFloor = map.keys.first;
+       });
 
         // 获取storeNames并展示弹窗
         _storeNames = List<String>.from(result['data']['storeNames']);
@@ -271,11 +278,32 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage>
     }
   }
 
+  // 获取店铺数据
+  void _getStoreLocations(String selectedFloor) async {
+    var result = await ShopLocationApi().GetShopsByFloor(selectedFloor);
+    if (result != null) {
+      var code = result['code'];
+      var msg = result['msg'];
+      if (code == 200) {
+        setState(() {
+          _storeLocations.addAll((result['data'] as List)
+              .map((json) => StoreDTO.fromJson(json))
+              .toList());
+          _isLoading = false;
+        });
+      } else {
+        ElToast.info(msg);
+      }
+    }
+  }
+
+
   // 用来处理楼层选择
   void _onFloorSelected(String? floor) {
     if (floor != null) {
       setState(() {
         _selectedFloor = floor;
+        _getStoreLocations(_selectedFloor);
         _progressAnimation =
             Tween<double>(begin: 0.0, end: 1.0).animate(_animationController);
       });
@@ -349,6 +377,7 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage>
                       }
                       if( _validateInput(idController1.text,1)&& _validateInput(idController2.text,2)) {
                         getCoordinates(idController1.text, idController2.text);
+                        _getStoreLocations(_selectedFloor);
                         return;
                       }else{
                         ElToast.info("输入错误");
@@ -372,6 +401,7 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage>
                       animationProgress: _progressAnimation.value,
                       transformationController: _transformationController,
                       availableHeight: MediaQuery.of(context).size.height,
+                      storeLocations: _storeLocations,
                     ),
                   ),
                 ),
@@ -414,27 +444,25 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage>
                   ),
           ),
           // 弹窗
-          // 弹窗
+          if (_storeNames.isNotEmpty)
           Positioned(
-            left: _isPopupHidden ? -200 : _popupPosition, // 弹窗从左侧滑出
+            left: _isPopupHidden ? -200 : _popupPosition,
             bottom: 60,
             child: AnimatedOpacity(
-              opacity: _showPopup ? 1.0 : 0.5, // 半透明效果
+              opacity: _showPopup ? 1.0 : 0.5,
               duration: Duration(milliseconds: 300),
               child: GestureDetector(
                 onHorizontalDragUpdate: (details) {
                   setState(() {
-                    // 拖动控制弹窗位置
                     _popupPosition += details.primaryDelta!;
                   });
                 },
                 onHorizontalDragEnd: (details) {
-                  // 当滑动结束时，根据弹窗位置决定是否收起
                   if (_popupPosition < -150) {
-                    _togglePopup(); // 收起弹窗
+                    _togglePopup();
                   } else {
                     setState(() {
-                      _popupPosition = 20.0; // 恢复弹窗位置
+                      _popupPosition = 20.0;
                     });
                   }
                 },
@@ -443,13 +471,16 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage>
                   borderRadius: BorderRadius.circular(8),
                   child: Container(
                     padding: EdgeInsets.all(10),
-                    color: Colors.white.withOpacity(0.8), // 半透明背景
+                    width: 200, // 固定宽度
+                    height: 150, // 固定高度
+                    color: Colors.white.withOpacity(0.8),
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
                           children: [
                             GestureDetector(
-                              onTap: _togglePopup, // 点击箭头触发弹窗显示或隐藏
+                              onTap: _togglePopup,
                               child: Icon(
                                 _isPopupHidden ? Icons.arrow_right : Icons.arrow_left,
                                 color: Colors.black,
@@ -459,11 +490,20 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage>
                             Text("途径路线:"),
                           ],
                         ),
-                        for (var store in _storeNames)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 5),
-                            child: Text(store),
+                        Expanded(
+                          child: SingleChildScrollView(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                for (var store in _storeNames)
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 5),
+                                    child: Text(store),
+                                  ),
+                              ],
+                            ),
                           ),
+                        ),
                       ],
                     ),
                   ),
@@ -498,14 +538,18 @@ class IndoorMapPainter extends CustomPainter {
   final double animationProgress;
   final TransformationController transformationController;
   double availableHeight;
+  
+  List<StoreDTO>? storeLocations; // 新增店铺位置列表
 
-  IndoorMapPainter(
-      {required this.floorBackgrounds,
-      this.points,
-      required this.scale,
-      required this.animationProgress,
-      required this.transformationController,
-      required this.availableHeight});
+  IndoorMapPainter({
+    required this.floorBackgrounds,
+    this.points,
+    required this.scale,
+    required this.animationProgress,
+    required this.transformationController,
+    required this.availableHeight,
+    required this.storeLocations,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -615,6 +659,41 @@ class IndoorMapPainter extends CustomPainter {
       canvas.drawCircle(
           Offset(currentX, currentY), 5.0 / scale, animationPaint);
     }
+
+    // 添加绘制店铺名称的逻辑
+  // 只在放大到一定程度时显示店铺名称
+      final textPainter = TextPainter(
+        textDirection: TextDirection.ltr,
+      );
+
+      for (var store in storeLocations!) {
+        if (store.floorNumber == _selectedFloor) {
+          double x = size.width * store.x / 100; // 根据比例计算 x 坐标
+          double y = size.height * store.y / 100; // 根据比例计算 y 坐标
+
+          // 根据缩放比例调整文字大小
+          double fontSize = 10 / scale; // 字体大小随缩放比例变化
+          
+          textPainter.text = TextSpan(
+            text: store.name,
+            style: TextStyle(
+              color: Colors.black,
+              fontSize: fontSize,
+              fontWeight: FontWeight.bold,
+              backgroundColor: Colors.white.withOpacity(0.7),
+            ),
+          );
+
+          textPainter.layout();
+          
+          // 绘制文字，稍微偏移以避免遮挡点位
+          textPainter.paint(
+            canvas,
+            Offset(x+1 , y-2), // 计算绘制位置
+          );
+        }
+      }
+
 
     canvas.restore();
   }

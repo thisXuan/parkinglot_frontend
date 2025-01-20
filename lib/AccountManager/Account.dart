@@ -4,6 +4,7 @@ import 'package:parkinglot_frontend/Tabs.dart';
 import 'package:parkinglot_frontend/utils/util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+import 'package:parkinglot_frontend/AccountManager/VipPrivilegePage.dart';
 
 class MemeberPage extends StatefulWidget{
   @override
@@ -200,7 +201,6 @@ class MemberPageState extends State<MemeberPage> {
       padding: EdgeInsets.all(16.0),
       decoration: BoxDecoration(
         color: Color(0xFFd0c0f9),
-        //borderRadius: BorderRadius.vertical(bottom: Radius.circular(16)),
       ),
       child: GestureDetector(
         child: Center(
@@ -210,7 +210,10 @@ class MemberPageState extends State<MemeberPage> {
           ),
         ),
         onTap: (){
-          ElToast.info("敬请期待");
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => VipPrivilegePage()),
+          );
         },
       )
     );

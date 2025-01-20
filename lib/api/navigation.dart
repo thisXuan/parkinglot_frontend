@@ -20,7 +20,6 @@ class NavigationApi {
     return result;
   }
 
-
 }
 
 // 导出全局使用这一个实例
