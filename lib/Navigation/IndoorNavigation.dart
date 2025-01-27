@@ -667,7 +667,7 @@ class IndoorMapPainter extends CustomPainter {
       );
 
       for (var store in storeLocations!) {
-        if (store.floorNumber == _selectedFloor) {
+        if (store.floorNumber == _selectedFloor && store.scale <= scale) {
           double x = size.width * store.x / 100; // 根据比例计算 x 坐标
           double y = size.height * store.y / 100; // 根据比例计算 y 坐标
 
