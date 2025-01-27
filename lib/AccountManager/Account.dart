@@ -16,6 +16,23 @@ class MemeberPage extends StatefulWidget{
 class MemberPageState extends State<MemeberPage> {
   String username = "点击头像登录";
 
+  // VIP等级对应的主题色
+  final List<Color> vipColors = [
+    Color(0xFFDAE1EC),
+    Color(0xFFEEE4CE),
+    Color(0xFFF3E6DF),
+    Color(0xFFD0D5EF),
+    Color(0xFFBBAEA3),
+  ];
+
+  final List<Color> backgroudColors = [
+    Color(0xFF1E3F7C),
+    Color(0xFFC1925A),
+    Color(0xFF6F4A23),
+    Color(0xFF4A5185),
+    Color(0xFF282219),
+  ];
+
   Future<void> _loadUserName() async {
     String name = await getUserName(); // 调用获取用户名的函数
     setState(() {
@@ -42,11 +59,10 @@ class MemberPageState extends State<MemeberPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[60],
+      backgroundColor: vipColors[0],
       body: ListView(
         children: [
           _buildHeaderSection(),
-          _buildBenefit(),
           _buildSectionWrapper(_buildBenefitsSection()),
           _buildSectionWrapper(_buildEarningSection()),
           _buildSectionWrapper(_buildSpendingSection()),
@@ -69,10 +85,9 @@ class MemberPageState extends State<MemeberPage> {
 
   Widget _buildHeaderSection() {
     return Container(
-      padding: EdgeInsets.all(16.0),
+      padding: const EdgeInsets.only(left: 16, right: 16, top: 16),
       decoration: BoxDecoration(
-        color: Color(0xFFDACDFB),
-        //borderRadius: BorderRadius.vertical(bottom: Radius.circular(16)),
+        color: backgroudColors[0],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -84,21 +99,21 @@ class MemberPageState extends State<MemeberPage> {
                 children: [
                   GestureDetector(
                     child: Container(
-                      width: 34, // 宽度 = 半径 * 2 + 边框宽度
-                      height: 34, // 高度 = 半径 * 2 + 边框宽度
+                      width: 40,
+                      height: 40,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: Colors.black, // 边框颜色
-                          width: 2.0, // 边框宽度
+                          color: Colors.white,
+                          width: 2.0,
                         ),
                       ),
                       child: CircleAvatar(
-                        radius: 15, // 头像半径
+                        radius: 22,
                         foregroundImage: AssetImage('assets/user.jpg'),
                       ),
                     ),
-                    onTap: (){
+                    onTap: () {
                       if(username=="点击头像登录"){
                         Navigator.push(
                           context,
@@ -136,50 +151,179 @@ class MemberPageState extends State<MemeberPage> {
                       }
                     },
                   ),
-                  SizedBox(width: 8), // 头像与用户名之间的间距
+                  const SizedBox(width: 12),
                   Text(
                     username,
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white
+                    ),
                   ),
                 ],
               ),
               Row(
                 children: [
-                  IconButton(
-                    icon: Icon(Icons.chat_bubble_outline),
-                    onPressed: () {},
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: IconButton(
+                      icon: const Icon(Icons.chat_bubble_outline, color: Colors.white, size: 20),
+                      onPressed: () {},
+                    ),
                   ),
-                  IconButton(
-                    icon: Icon(Icons.headset_mic),
-                    onPressed: () {},
-                  ),
-                  IconButton(
-                    icon: Icon(Icons.more_horiz),
-                    onPressed: () {},
+                  const SizedBox(width: 8),
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: IconButton(
+                      icon: const Icon(Icons.headset_mic, color: Colors.white, size: 20),
+                      onPressed: () {},
+                    ),
                   ),
                 ],
               ),
             ],
           ),
-          SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _buildCard("我的卡券", "0", "即将过期: 0"),
-              _buildCard("我的琉珠", "0.0", "即将过期: 0.0"),
-              Column(
-                children: [
-                  Icon(Icons.qr_code, size: 48),
-                  Text(
-                    '会员码',
-                    style: TextStyle(fontSize: 10, color: Colors.black),
+          const SizedBox(height: 16),
+          Container(
+            margin: const EdgeInsets.only(bottom: 16),
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Text(
+                              "10",
+                              style: TextStyle(
+                                fontSize: 32,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Icon(Icons.arrow_forward_ios, size: 16),
+                          ],
+                        ),
+                        Text(
+                          "升级还需90成长值",
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    _buildInfoItem("我的卡券", "0", "即将过期：0"),
+                    Container(
+                      width: 1,
+                      height: 40,
+                      color: Colors.grey[200],
+                    ),
+                    _buildInfoItem("我的珑珠", "0.0", "即将过期：0.0"),
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[100],
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Column(
+                        children: [
+                          Icon(
+                            Icons.qr_code_2,
+                            size: 40,
+                            color: Colors.black87,
+                          ),
+                          Text(
+                            "珑珠码",
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ],
+                      )
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                GestureDetector(
+                  child: Center(
+                    child: Text(
+                      "查看全部 15 项权益",
+                      style: TextStyle(color: Colors.black),
+                    ),
                   ),
-                ],
-              ),
-            ],
+                  onTap: (){
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => VipPrivilegePage()),
+                    );
+                  },
+                )
+              ],
+            ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildInfoItem(String title, String value, String subtitle) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey[600],
+              ),
+            ),
+            Icon(Icons.arrow_forward_ios, size: 12, color: Colors.grey[400]),
+          ],
+        ),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          subtitle,
+          style: TextStyle(
+            fontSize: 12,
+            color: Colors.grey[400],
+          ),
+        ),
+      ],
     );
   }
 
@@ -193,29 +337,6 @@ class MemberPageState extends State<MemeberPage> {
         SizedBox(height: 4),
         Text(subtitle, style: TextStyle(fontSize: 12, color: Colors.grey)),
       ],
-    );
-  }
-
-  Widget _buildBenefit(){
-    return Container(
-      padding: EdgeInsets.all(16.0),
-      decoration: BoxDecoration(
-        color: Color(0xFFd0c0f9),
-      ),
-      child: GestureDetector(
-        child: Center(
-          child: Text(
-            "查看全部 15 项权益",
-            style: TextStyle(color: Colors.deepPurple),
-          ),
-        ),
-        onTap: (){
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => VipPrivilegePage()),
-          );
-        },
-      )
     );
   }
 
@@ -250,37 +371,96 @@ class MemberPageState extends State<MemeberPage> {
 
   Widget _buildEarningSection() {
     return Padding(
-      padding: EdgeInsets.all(16.0),
+      padding: EdgeInsets.all(16),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text("赚琉珠", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-          SizedBox(height: 8),
-          _buildEarningItem(Icons.calendar_month,"连签赚琉珠", "日签得 5 成长值", "去签到"),
-          _buildEarningItem(Icons.wallet_giftcard,"每日幸运转转赚", "最高得 666 琉珠", "去参与"),
-          _buildEarningItem(Icons.stacked_line_chart,"琉珠赚不停", "每周助力完成得 8 琉珠", "去参与"),
-        ],
-      ),
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          "赚琉珠",
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 16),
+        _buildEarningItem(
+          "每日赚成长值",
+          "日签得 5 成长值",
+          "去签到",
+          Icons.edit,
+        ),
+        const SizedBox(height: 16),
+        _buildEarningItem(
+          "每日幸运转转赚",
+          "最高得 666 珑珠",
+          "去参与",
+          Icons.card_giftcard,
+        ),
+        const SizedBox(height: 16),
+        _buildEarningItem(
+          "珑珠赚不停 升级更轻松",
+          "每周助力 完成得 8 珑珠",
+          "去参与",
+          Icons.show_chart,
+        ),
+      ],
+    ),
     );
   }
 
-  Widget _buildEarningItem(IconData icon, String title, String subtitle, String action) {
-    return ListTile(
-      title: Row(
-        children: [
-          Icon(
-            icon,
-            color: Colors.black,
+  Widget _buildEarningItem(String title, String subtitle, String action, IconData icon) {
+    return Row(
+      children: [
+        Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: const Color(0xFFFDF6F0),
+            borderRadius: BorderRadius.circular(20),
           ),
-          SizedBox(width: 4,),
-          Text(title)
-        ],
-      ),
-      subtitle: Text(subtitle,style: TextStyle(fontSize: 13,color: Colors.deepPurple),),
-      trailing: ElevatedButton(
-        onPressed: () {},
-        child: Text(action, style: TextStyle(color: Colors.deepPurple)),
-      ),
+          child: Icon(
+            icon,
+            color: const Color(0xFF8B572A),
+            size: 20,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.black,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                subtitle,
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: Color(0xFF8B572A),
+                ),
+              ),
+            ],
+          ),
+        ),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF5DCC3),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Text(
+            action,
+            style: const TextStyle(
+              fontSize: 14,
+              color: Color(0xFF8B572A),
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+      ],
     );
   }
 

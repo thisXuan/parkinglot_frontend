@@ -38,6 +38,7 @@ class _TabsState extends State<Tabs>{
         appBar: AppBar(
           backgroundColor: Colors.white,
           title: Text(titles[_currentIndex]),
+          centerTitle: true,
           automaticallyImplyLeading: false,
           // 添加右上角扫描二维码的功能按钮
           actions: [
