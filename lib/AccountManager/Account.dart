@@ -5,6 +5,7 @@ import 'package:parkinglot_frontend/utils/util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:parkinglot_frontend/AccountManager/VipPrivilegePage.dart';
+import 'package:parkinglot_frontend/AccountManager/SignInPage.dart';
 
 class MemeberPage extends StatefulWidget{
   @override
@@ -230,9 +231,17 @@ class MemberPageState extends State<MemeberPage> {
                         ),
                       ],
                     ),
+                    Text(
+                      'V1',
+                      style: TextStyle(
+                        fontSize: 60,
+                        color: backgroudColors[0],
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ],
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 15),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -268,7 +277,7 @@ class MemberPageState extends State<MemeberPage> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 15),
                 GestureDetector(
                   child: Center(
                     child: Text(
@@ -406,61 +415,71 @@ class MemberPageState extends State<MemeberPage> {
   }
 
   Widget _buildEarningItem(String title, String subtitle, String action, IconData icon) {
-    return Row(
-      children: [
-        Container(
-          width: 40,
-          height: 40,
-          decoration: BoxDecoration(
-            color: const Color(0xFFFDF6F0),
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Icon(
-            icon,
-            color: const Color(0xFF8B572A),
-            size: 20,
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.black,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                subtitle,
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: Color(0xFF8B572A),
-                ),
-              ),
-            ],
-          ),
-        ),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          decoration: BoxDecoration(
-            color: const Color(0xFFF5DCC3),
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Text(
-            action,
-            style: const TextStyle(
-              fontSize: 14,
-              color: Color(0xFF8B572A),
-              fontWeight: FontWeight.w500,
+    return GestureDetector(
+      onTap: () {
+        if (action == "去签到") {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => SignInPage()),
+          );
+        }
+      },
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: const Color(0xFFFDF6F0),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Icon(
+              icon,
+              color: const Color(0xFF8B572A),
+              size: 20,
             ),
           ),
-        ),
-      ],
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.black,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  subtitle,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Color(0xFF8B572A),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF5DCC3),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Text(
+              action,
+              style: const TextStyle(
+                fontSize: 14,
+                color: Color(0xFF8B572A),
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
