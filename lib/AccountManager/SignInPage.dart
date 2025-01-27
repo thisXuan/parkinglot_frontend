@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:parkinglot_frontend/api/user.dart';
 
 class SignInPage extends StatefulWidget {
   @override
@@ -9,13 +10,23 @@ class SignInPage extends StatefulWidget {
 class _SignInPageState extends State<SignInPage> {
   late DateTime _currentMonth;
   late List<DateTime> _days;
-  final List<int> _signedDays = [19, 26]; // 模拟已签到日期
+  List<int> _signedDays = [];
 
   @override
   void initState() {
     super.initState();
     _currentMonth = DateTime.now();
     _generateDays();
+    _getSignInDays();
+  }
+
+  Future<void> _getSignInDays() async{
+    var result = await UserApi().GetSignInDays();
+    if (result is List) {
+      setState(() {
+        _signedDays = result.map((day) => int.parse(day.toString())).toList();
+      });
+    }
   }
 
   void _generateDays() {

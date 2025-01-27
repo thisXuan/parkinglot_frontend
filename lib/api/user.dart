@@ -48,6 +48,20 @@ class UserApi {
       method:DioMethod.get);
     return result;
   }
+
+  // 签到
+  Sign() async{
+    var result = await Request().request("/user/signIn",
+        method:DioMethod.post);
+    return result;
+  }
+
+  // 获取签到次数
+  GetSignInDays() async{
+    var result = await Request().request("/user/getSignInDays",
+        method:DioMethod.get);
+    return result;
+  }
 }
 
 // 导出全局使用这一个实例

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:parkinglot_frontend/AccountManager/Login.dart';
 import 'package:parkinglot_frontend/Tabs.dart';
+import 'package:parkinglot_frontend/api/user.dart';
 import 'package:parkinglot_frontend/utils/util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
@@ -49,6 +50,16 @@ class MemberPageState extends State<MemeberPage> {
       return userInfo['username'] ?? '';
     }
     return "点击头像登录";
+  }
+
+  Future<void> _signIn() async{
+    var result = await UserApi().Sign();
+    if(result!=null){
+      var code = result['code'];
+      if(code!=200){
+        ElToast.info("签到失败");
+      }
+    }
   }
 
   @override
@@ -418,6 +429,7 @@ class MemberPageState extends State<MemeberPage> {
     return GestureDetector(
       onTap: () {
         if (action == "去签到") {
+          _signIn();
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => SignInPage()),
