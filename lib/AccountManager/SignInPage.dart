@@ -16,15 +16,16 @@ class _SignInPageState extends State<SignInPage> {
   void initState() {
     super.initState();
     _currentMonth = DateTime.now();
-    _generateDays();
     _getSignInDays();
+    _generateDays();
   }
 
-  Future<void> _getSignInDays() async{
+  Future<void> _getSignInDays() async {
     var result = await UserApi().GetSignInDays();
-    if (result is List) {
+    if (result['data'] is List) {
       setState(() {
-        _signedDays = result.map((day) => int.parse(day.toString())).toList();
+        _signedDays = result['data'].cast<int>();
+        print(_signedDays);
       });
     }
   }

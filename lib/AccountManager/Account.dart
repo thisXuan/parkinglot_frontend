@@ -427,9 +427,9 @@ class MemberPageState extends State<MemeberPage> {
 
   Widget _buildEarningItem(String title, String subtitle, String action, IconData icon) {
     return GestureDetector(
-      onTap: () {
+      onTap: () async{
         if (action == "去签到") {
-          _signIn();
+          await _signIn();
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => SignInPage()),
