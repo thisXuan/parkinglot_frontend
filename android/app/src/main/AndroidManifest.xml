@@ -28,7 +28,8 @@
     <application
         android:label="parkinglot_frontend"
         android:name=".MyApplication"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:enableOnBackInvokedCallback="true">
         <service
             android:name="com.baidu.location.f"
             android:enabled="true"

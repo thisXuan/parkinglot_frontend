@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:marquee/marquee.dart';
 import 'package:parkinglot_frontend/utils/util.dart';
 
+import '../api/user.dart';
+
   // VIP特权数据结构
 class VipPrivilege {
     final String title;
@@ -23,6 +25,10 @@ class VipPrivilegePage extends StatefulWidget {
 class _VipPrivilegePageState extends State<VipPrivilegePage> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
+
+  int _point = 0;
+  int _currentIndex = 0;
+  int _pointNeeded = 0;
 
   // VIP等级对应的主题色
   final List<Color> vipColors = [
@@ -48,6 +54,46 @@ class _VipPrivilegePageState extends State<VipPrivilegePage> {
     Color(0xFF4A5185),
     Color(0xFF282219),
   ];
+
+  @override
+  void initState() {
+    _getPoint();
+    super.initState();
+  }
+
+  // 定义等级区间
+  final List<Map<String, dynamic>> _levelRanges = [
+    {'min': 0, 'max': 99, 'level': 0},
+    {'min': 100, 'max': 1999, 'level': 1},
+    {'min': 2000, 'max': 3999, 'level': 2},
+    {'min': 4000, 'max': 9999, 'level': 3},
+    {'min': 10000, 'max': double.infinity, 'level': 4},
+  ];
+
+  Future<void> _getPoint() async{
+    var result = await UserApi().GetPoint();
+    int code = result['code'];
+
+    if(result!=null){
+      if(code==200){
+        setState(() {
+          _point = result['data'];
+          for (var range in _levelRanges) {
+            if (_point >= range['min'] && _point <= range['max']) {
+              _currentIndex = range['level'];
+              // 如果不是最高等级，计算升级所需积分
+              if (_currentIndex < 5) {
+                _pointNeeded = _levelRanges[_currentIndex]['max'] - _point;
+              }
+              break;
+            }
+          }
+        });
+      }else{
+        ElToast.info(result['msg']);
+      }
+    }
+  }
 
   // 构建特权网格
   Widget _buildPrivilegeGrid(int level) {
@@ -228,12 +274,35 @@ class _VipPrivilegePageState extends State<VipPrivilegePage> {
                           color: backgroudColors[_currentPage],
                           borderRadius: BorderRadius.circular(20),
                         ),
-                        child: Text(
-                          '当前等级',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
-                          ),
+                        child: Row(
+                          children: [
+                            if (_currentIndex == _currentPage)
+                              Text(
+                                '当前等级',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                ),
+                              )
+                            else
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.lock_outline,  // 使用锁图标
+                                    color: Colors.white,
+                                    size: 16,
+                                  ),
+                                  SizedBox(width: 4),  // 图标和文字之间的间距
+                                  Text(
+                                    '待解锁',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                          ],
                         ),
                       ),
                     ),
@@ -244,7 +313,7 @@ class _VipPrivilegePageState extends State<VipPrivilegePage> {
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           Text(
-                            '10',
+                            _point.toString(),
                             style: TextStyle(
                               fontSize: 48,
                               color: Colors.black,
@@ -271,13 +340,30 @@ class _VipPrivilegePageState extends State<VipPrivilegePage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          if(_currentIndex==_currentPage)
                           Text(
-                            '升级至下一等级还需要：90 成长值',
+                            '升级至下一等级还需要：${_pointNeeded} 成长值',
                             style: TextStyle(
                               color: Colors.black.withOpacity(0.8),
                               fontSize: 14,
                             ),
-                          ),
+                          )
+                          else if(_currentIndex<_currentPage)
+                            Text(
+                              '升级至该等级还需要：${_levelRanges[_currentPage]['min'] - _point} 成长值',
+                              style: TextStyle(
+                                color: Colors.black.withOpacity(0.8),
+                                fontSize: 14,
+                              ),
+                            )
+                          else
+                            Text(
+                              '已解锁',
+                              style: TextStyle(
+                                color: Colors.black.withOpacity(0.8),
+                                fontSize: 14,
+                              ),
+                            ),
                           SizedBox(height: 8),
                           Container(
                             height: 2,

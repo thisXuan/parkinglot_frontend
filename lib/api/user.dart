@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 
 import '../utils/request.dart';
@@ -60,6 +61,13 @@ class UserApi {
   GetSignInDays() async{
     var result = await Request().request("/user/getSignInDays",
         method:DioMethod.get);
+    return result;
+  }
+
+  // 用户查看成长值
+  GetPoint() async{
+    var result = await Request().request("/user/getPoint",
+       method: DioMethod.get);
     return result;
   }
 }

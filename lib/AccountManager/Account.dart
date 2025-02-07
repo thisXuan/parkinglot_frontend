@@ -17,6 +17,9 @@ class MemeberPage extends StatefulWidget{
 
 class MemberPageState extends State<MemeberPage> {
   String username = "点击头像登录";
+  int _point = 0;
+  int _currentIndex = 0;
+  int _pointNeeded = 0;
 
   // VIP等级对应的主题色
   final List<Color> vipColors = [
@@ -42,6 +45,40 @@ class MemberPageState extends State<MemeberPage> {
     });
   }
 
+    // 定义等级区间
+  final List<Map<String, dynamic>> _levelRanges = [
+    {'min': 0, 'max': 99, 'level': 0},
+    {'min': 100, 'max': 1999, 'level': 1},
+    {'min': 2000, 'max': 3999, 'level': 2},
+    {'min': 4000, 'max': 9999, 'level': 3},
+    {'min': 10000, 'max': double.infinity, 'level': 4},
+  ];
+
+  Future<void> _getPoint() async{
+    var result = await UserApi().GetPoint();
+    int code = result['code'];
+
+    if(result!=null){
+      if(code==200){
+        setState(() {
+          _point = result['data'];
+          for (var range in _levelRanges) {
+            if (_point >= range['min'] && _point <= range['max']) {
+              _currentIndex = range['level'];
+              // 如果不是最高等级，计算升级所需积分
+              if (_currentIndex < 5) {
+                _pointNeeded = _levelRanges[_currentIndex]['max'] - _point;
+              }
+              break;
+            }
+          }
+        });
+      }else{
+        ElToast.info(result['msg']);
+      }
+    }
+  }
+
   Future<String> getUserName() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? userJson = prefs.getString('user');
@@ -65,13 +102,14 @@ class MemberPageState extends State<MemeberPage> {
   @override
   void initState() {
     _loadUserName();
+    _getPoint();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: vipColors[0],
+      backgroundColor: vipColors[_currentIndex],
       body: ListView(
         children: [
           _buildHeaderSection(),
@@ -99,7 +137,7 @@ class MemberPageState extends State<MemeberPage> {
     return Container(
       padding: const EdgeInsets.only(left: 16, right: 16, top: 16),
       decoration: BoxDecoration(
-        color: backgroudColors[0],
+        color: backgroudColors[_currentIndex],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -224,7 +262,7 @@ class MemberPageState extends State<MemeberPage> {
                         Row(
                           children: [
                             Text(
-                              "10",
+                              _point.toString(),
                               style: TextStyle(
                                 fontSize: 32,
                                 fontWeight: FontWeight.bold,
@@ -234,7 +272,7 @@ class MemberPageState extends State<MemeberPage> {
                           ],
                         ),
                         Text(
-                          "升级还需90成长值",
+                          "升级还需${_pointNeeded}成长值",
                           style: TextStyle(
                             fontSize: 14,
                             color: Colors.grey[600],
@@ -243,10 +281,10 @@ class MemberPageState extends State<MemeberPage> {
                       ],
                     ),
                     Text(
-                      'V1',
+                      'V${_currentIndex+1}',
                       style: TextStyle(
                         fontSize: 60,
-                        color: backgroudColors[0],
+                        color: backgroudColors[_currentIndex],
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -428,8 +466,11 @@ class MemberPageState extends State<MemeberPage> {
   Widget _buildEarningItem(String title, String subtitle, String action, IconData icon) {
     return GestureDetector(
       onTap: () async{
+        print(_point);
         if (action == "去签到") {
           await _signIn();
+          _getPoint();
+          print(_point);
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => SignInPage()),
