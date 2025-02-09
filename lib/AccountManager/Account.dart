@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:parkinglot_frontend/AccountManager/Login.dart';
+import 'package:parkinglot_frontend/AccountManager/PersonalInfoPage.dart';
 import 'package:parkinglot_frontend/Tabs.dart';
 import 'package:parkinglot_frontend/api/user.dart';
 import 'package:parkinglot_frontend/utils/util.dart';
@@ -170,33 +171,9 @@ class MemberPageState extends State<MemeberPage> {
                           MaterialPageRoute(builder: (context) => LoginPage()),
                         );
                       }else{
-                        showDialog(
-                          context: context,
-                          builder: (context) {
-                            return AlertDialog(
-                              title: Text('确认退出登录?'),
-                              actions: <Widget>[
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.of(context).pop(); // 关闭对话框
-                                  },
-                                  child: Text('取消'),
-                                ),
-                                TextButton(
-                                  onPressed: () async {
-                                    SharedPreferences prefs = await SharedPreferences.getInstance();
-                                    await prefs.remove('user');
-                                    Navigator.of(context).pop(); // 关闭对话框
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(builder: (context) => Tabs()),
-                                    );
-                                  },
-                                  child: Text('确定'),
-                                ),
-                              ],
-                            );
-                          },
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => PersonalInfoPage()),
                         );
                       }
                     },

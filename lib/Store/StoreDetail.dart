@@ -101,11 +101,19 @@ class _StoreDetailPageState extends State<StoreDetailPage> {
               children: [
                 store.image.isNotEmpty
                     ? Image.network(
-                  store.image,
-                  width: 120,
-                  height: 120,
-                  fit: BoxFit.contain,
-                )
+                        store.image,
+                        width: 120,
+                        height: 120,
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Image.asset(
+                            'assets/image_lost.jpg',
+                            width: 120,
+                            height: 120,
+                            fit: BoxFit.contain,
+                          );
+                        },
+                      )
                     : Image.asset(
                   'assets/image_lost.jpg',
                   width: 120,
@@ -196,11 +204,19 @@ class _StoreDetailPageState extends State<StoreDetailPage> {
                 padding: const EdgeInsets.all(16.0),
                 child:  store.image.isNotEmpty
                     ? Image.network(
-                  store.image,
-                  width: 120,
-                  height: 120,
-                  fit: BoxFit.contain,
-                )
+                        store.image,
+                        width: 120,
+                        height: 120,
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Image.asset(
+                            'assets/image_lost.jpg',
+                            width: 120,
+                            height: 120,
+                            fit: BoxFit.contain,
+                          );
+                        },
+                      )
                     : Image.asset(
                   'assets/image_lost.jpg',
                   width: 120,

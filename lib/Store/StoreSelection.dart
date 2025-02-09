@@ -52,10 +52,10 @@ class _BrandSelectionPageState extends State<BrandSelectionPage> {
     });
     if (this._hasMore) {
       var result = await StoreApi().GetStoreInfoWithFilters(
-        selectedCategory,  // 传递选择的类别
-        selectedFloor,     // 传递选择的楼层
+        selectedCategory, // 传递选择的类别
+        selectedFloor, // 传递选择的楼层
         _page,
-        10,                 // 传递 size，假设每页显示 10 个商铺
+        10, // 传递 size，假设每页显示 10 个商铺
       );
       if (result != null && result['code'] == 200 && result['data'] != null) {
         setState(() {
@@ -66,9 +66,8 @@ class _BrandSelectionPageState extends State<BrandSelectionPage> {
         });
       }
       // 判断是否是最后一页
-      List<Store> storeList = (result['data'] as List)
-          .map((json) => Store.fromJson(json))
-          .toList();
+      List<Store> storeList =
+          (result['data'] as List).map((json) => Store.fromJson(json)).toList();
       if (storeList.length < 10) {
         setState(() {
           this._hasMore = false;
@@ -79,8 +78,6 @@ class _BrandSelectionPageState extends State<BrandSelectionPage> {
       _isloading = false;
     });
   }
-
-
 
   Future<void> _refreshData() async {
     await Future.delayed(Duration(milliseconds: 2000), () {
@@ -98,7 +95,7 @@ class _BrandSelectionPageState extends State<BrandSelectionPage> {
             .map((json) => Store.fromJson(json))
             .toList();
       });
-    }else{
+    } else {
       ElToast.info(result['msg']);
       _fetchStoreInfo();
     }
@@ -122,40 +119,38 @@ class _BrandSelectionPageState extends State<BrandSelectionPage> {
       body: Column(
         children: [
           // 搜索栏
-          _buildSectionWrapper(
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: _searchController,
-                        onChanged: (value) {
-                          _storeInfo.clear();
-                          _page = 1;
-                          if(value.isEmpty){
-                            _hasMore = true;
-                            _fetchStoreInfo();
-                          }else{
-                            _performSearch(value);
-                          }
-                        },
-                        decoration: InputDecoration(
-                          hintText: "请输入",
-                          prefixIcon: const Icon(Icons.search),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12.0),
-                            borderSide: BorderSide.none,
-                          ),
-                          filled: true,
-                          fillColor: Colors.grey[100],
-                        ),
+          _buildSectionWrapper(Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _searchController,
+                    onChanged: (value) {
+                      _storeInfo.clear();
+                      _page = 1;
+                      if (value.isEmpty) {
+                        _hasMore = true;
+                        _fetchStoreInfo();
+                      } else {
+                        _performSearch(value);
+                      }
+                    },
+                    decoration: InputDecoration(
+                      hintText: "请输入",
+                      prefixIcon: const Icon(Icons.search),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                        borderSide: BorderSide.none,
                       ),
+                      filled: true,
+                      fillColor: Colors.grey[100],
                     ),
-                  ],
+                  ),
                 ),
-              )
-          ),
+              ],
+            ),
+          )),
           // 楼层和分类标签
           _buildSectionWrapper(Row(
             children: [
@@ -165,7 +160,7 @@ class _BrandSelectionPageState extends State<BrandSelectionPage> {
                 },
                 child: Container(
                   padding:
-                  const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   //color: Colors.white,
                   child: Row(
                     children: [
@@ -195,14 +190,15 @@ class _BrandSelectionPageState extends State<BrandSelectionPage> {
                           });
                         },
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 8),
                           margin: const EdgeInsets.only(right: 8),
                           decoration: BoxDecoration(
                             border: isSelected
                                 ? Border(
-                              bottom: BorderSide(
-                                  color: Colors.orange, width: 2),
-                            )
+                                    bottom: BorderSide(
+                                        color: Colors.orange, width: 2),
+                                  )
                                 : null,
                           ),
                           child: Text(
@@ -232,20 +228,30 @@ class _BrandSelectionPageState extends State<BrandSelectionPage> {
 
                           // 包装 Card 为 InkWell 添加点击事件
                           Widget cardContent = Card(
-                            margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            margin: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 6),
                             color: Colors.white,
                             child: ListTile(
                               leading: brand.image.isNotEmpty
                                   ? Image.network(
-                                brand.image,
-                                width: 70,
-                                height: 70,
-                                fit: BoxFit.cover,
-                              )
+                                      brand.image,
+                                      width: 70,
+                                      height: 70,
+                                      fit: BoxFit.cover,
+                                      errorBuilder:
+                                          (context, error, stackTrace) {
+                                        return Image.asset(
+                                          'assets/image_lost.jpg',
+                                          width: 70,
+                                          height: 70,
+                                          fit: BoxFit.contain,
+                                        );
+                                      },
+                                    )
                                   : Image.asset(
-                                'assets/image_lost.jpg',
-                                width: 70,
-                              ),
+                                      'assets/image_lost.jpg',
+                                      width: 70,
+                                    ),
                               title: Text(brand.storeName),
                               subtitle: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -254,19 +260,24 @@ class _BrandSelectionPageState extends State<BrandSelectionPage> {
                                   SizedBox(height: 2),
                                   Container(
                                     margin: const EdgeInsets.only(right: 4),
-                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 6, vertical: 2),
                                     decoration: BoxDecoration(
                                       color: Colors.orange[100],
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: Text(
-                                      brand.businessHours.isEmpty ? "营业时间未知" : brand.businessHours,
-                                      style: const TextStyle(color: Colors.orange, fontSize: 12),
+                                      brand.businessHours.isEmpty
+                                          ? "营业时间未知"
+                                          : brand.businessHours,
+                                      style: const TextStyle(
+                                          color: Colors.orange, fontSize: 12),
                                     ),
                                   ),
                                 ],
                               ),
-                              trailing: Text(brand.floorNumber.toString() + "F"),
+                              trailing:
+                                  Text(brand.floorNumber.toString() + "F"),
                             ),
                           );
 
@@ -279,7 +290,8 @@ class _BrandSelectionPageState extends State<BrandSelectionPage> {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) => StoreDetailPage(storeId: brand.id),
+                                        builder: (context) =>
+                                            StoreDetailPage(storeId: brand.id),
                                       ),
                                     );
                                   },
@@ -296,7 +308,8 @@ class _BrandSelectionPageState extends State<BrandSelectionPage> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => StoreDetailPage(storeId: brand.id),
+                                    builder: (context) =>
+                                        StoreDetailPage(storeId: brand.id),
                                   ),
                                 );
                               },
@@ -314,7 +327,14 @@ class _BrandSelectionPageState extends State<BrandSelectionPage> {
 
   void _showFloorMenu(BuildContext context) async {
     final List<String> floors = [
-      "全部楼层", "B1", "M", "1F", "2F", "3F", "4F", "5F"
+      "全部楼层",
+      "B1",
+      "M",
+      "1F",
+      "2F",
+      "3F",
+      "4F",
+      "5F"
     ];
     String? result = await showMenu<String>(
       context: context,
@@ -322,39 +342,40 @@ class _BrandSelectionPageState extends State<BrandSelectionPage> {
       items: floors
           .map(
             (floor) => PopupMenuItem<String>(
-          value: floor,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                floor,
-                style: TextStyle(
-                  color: floor == selectedFloor ? Colors.deepPurple : Colors.black,
-                ),
+              value: floor,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    floor,
+                    style: TextStyle(
+                      color: floor == selectedFloor
+                          ? Colors.deepPurple
+                          : Colors.black,
+                    ),
+                  ),
+                  if (floor == selectedFloor)
+                    const Icon(
+                      Icons.check,
+                      color: Colors.deepPurple,
+                      size: 16,
+                    ),
+                ],
               ),
-              if (floor == selectedFloor)
-                const Icon(
-                  Icons.check,
-                  color: Colors.deepPurple,
-                  size: 16,
-                ),
-            ],
-          ),
-        ),
-      )
+            ),
+          )
           .toList(),
     );
     if (result != null && result != selectedFloor) {
       setState(() {
-        selectedFloor = result;  // 更新选择的楼层
-        _storeInfo.clear();  // 清空当前商铺列表
-        _page = 1;  // 重置页码
-        _hasMore = true;  // 重新设置是否还有更多数据
-        _fetchStoreInfo();  // 重新加载数据
+        selectedFloor = result; // 更新选择的楼层
+        _storeInfo.clear(); // 清空当前商铺列表
+        _page = 1; // 重置页码
+        _hasMore = true; // 重新设置是否还有更多数据
+        _fetchStoreInfo(); // 重新加载数据
       });
     }
   }
-
 
   //加载中的圈圈
   Widget _getMoreWidget() {
