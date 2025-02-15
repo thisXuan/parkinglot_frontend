@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:parkinglot_frontend/AccountManager/Login.dart';
 import 'package:parkinglot_frontend/AccountManager/PersonalInfoPage.dart';
+import 'package:parkinglot_frontend/AccountManager/SettingsPage.dart';
 import 'package:parkinglot_frontend/Tabs.dart';
 import 'package:parkinglot_frontend/api/user.dart';
 import 'package:parkinglot_frontend/utils/util.dart';
@@ -8,6 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:parkinglot_frontend/AccountManager/VipPrivilegePage.dart';
 import 'package:parkinglot_frontend/AccountManager/SignInPage.dart';
+import 'package:parkinglot_frontend/AccountManager/PointsExchangePage.dart';
 
 class MemeberPage extends StatefulWidget{
   @override
@@ -395,12 +397,31 @@ class MemberPageState extends State<MemeberPage> {
   }
 
   Widget _buildIconWithLabel(String label, IconData icon) {
-    return Column(
-      children: [
-        Icon(icon, size: 32, color: Colors.black),
-        SizedBox(height: 8),
-        Text(label, style: TextStyle(fontSize: 12)),
-      ],
+    return GestureDetector(
+      onTap: (){
+        if(label=="我的订单"){
+          ElToast.info("敬请期待");
+        }
+        if(label=="我的收藏"){
+          ElToast.info("敬请期待");
+        }
+        if(label=="账号设置"){
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => SettingsPage()),
+          );
+        }
+        if(label=="商场评价"){
+          ElToast.info("敬请期待");
+        }
+      },
+      child: Column(
+        children: [
+          Icon(icon, size: 32, color: Colors.black),
+          SizedBox(height: 8),
+          Text(label, style: TextStyle(fontSize: 12)),
+        ],
+      ),
     );
   }
 
@@ -559,7 +580,18 @@ class MemberPageState extends State<MemeberPage> {
             ],
           ),
           SizedBox(height: 8,),
-          Image.asset('assets/multipleAD.jpg', fit: BoxFit.fitHeight,)
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => PointsExchangePage()),
+              );
+            },
+            child: Image.asset(
+              'assets/multipleAD.jpg',
+              fit: BoxFit.fitHeight,
+            ),
+          ),
         ],
       ),
     );
