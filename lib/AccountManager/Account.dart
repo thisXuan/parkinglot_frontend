@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:parkinglot_frontend/AccountManager/Login.dart';
+import 'package:parkinglot_frontend/AccountManager/MallRatingPage.dart';
+import 'package:parkinglot_frontend/AccountManager/MyCollectionPage.dart';
+import 'package:parkinglot_frontend/AccountManager/OrderPage.dart';
 import 'package:parkinglot_frontend/AccountManager/PersonalInfoPage.dart';
 import 'package:parkinglot_frontend/AccountManager/SettingsPage.dart';
 import 'package:parkinglot_frontend/Tabs.dart';
@@ -400,10 +403,16 @@ class MemberPageState extends State<MemeberPage> {
     return GestureDetector(
       onTap: (){
         if(label=="我的订单"){
-          ElToast.info("敬请期待");
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => OrderPage()),
+          );
         }
         if(label=="我的收藏"){
-          ElToast.info("敬请期待");
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => MyCollectionPage()),
+          );
         }
         if(label=="账号设置"){
           Navigator.push(
@@ -412,7 +421,10 @@ class MemberPageState extends State<MemeberPage> {
           );
         }
         if(label=="商场评价"){
-          ElToast.info("敬请期待");
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => MallRatingPage()),
+          );
         }
       },
       child: Column(
