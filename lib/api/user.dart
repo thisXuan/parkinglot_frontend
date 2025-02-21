@@ -70,6 +70,25 @@ class UserApi {
        method: DioMethod.get);
     return result;
   }
+
+  // 查看优惠券成长值
+  GetCoupon(String type) async{
+    if(type.isNotEmpty){
+      var result = await Request().request("/user/getCoupon?type=$type",
+          method: DioMethod.get);
+      return result;
+    }
+    var result = await Request().request("/user/getCoupon",
+        method: DioMethod.get);
+    return result;
+  }
+
+  // 兑换优惠券
+  ExchangeCoupon(dynamic id) async{
+    var result = await Request().request("/user/exchangeCoupon?id=$id",
+        method: DioMethod.post);
+    return result;
+  }
 }
 
 // 导出全局使用这一个实例

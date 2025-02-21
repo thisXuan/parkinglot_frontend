@@ -1,25 +1,7 @@
 import 'package:flutter/material.dart';
-
-// TODO：花成长值，接口未设计，后端未对接
-class Product {
-  final String id;
-  final String name;
-  final double price;
-  final String image;
-  final int salesCount;
-  final String? tag;
-  final String? promotion;
-
-  Product({
-    required this.id,
-    required this.name,
-    required this.price,
-    required this.image,
-    required this.salesCount,
-    this.tag,
-    this.promotion,
-  });
-}
+import 'package:parkinglot_frontend/api/user.dart';
+import 'package:parkinglot_frontend/entity/Coupon.dart';
+import 'package:parkinglot_frontend/utils/util.dart';
 
 class PointsExchangePage extends StatefulWidget {
   @override
@@ -34,66 +16,33 @@ class _PointsExchangePageState extends State<PointsExchangePage> {
     '推荐', '时尚女装', '家居美学', '运动户外', '穿搭配饰'
   ];
 
-  // 模拟商品数据
-  final List<Product> products = [
-    Product(
-      id: '1',
-      name: '【限时优惠 直充到账】三毛游全球景区博物馆自助讲',
-      price: 138,
-      image: 'assets/image_lost.jpg',
-      salesCount: 2000,
-      tag: '退货包运费',
-    ),
-    Product(
-      id: '2',
-      name: 'FUJIFILM·拍立得相纸适用mini7+/8/9/11/12/25/90/E',
-      price: 65,
-      image: 'assets/image_lost.jpg',
-      salesCount: 3000,
-    ),
-    Product(
-      id: '2',
-      name: 'FUJIFILM·拍立得相纸适用mini7+/8/9/11/12/25/90/E',
-      price: 65,
-      image: 'assets/image_lost.jpg',
-      salesCount: 3000,
-    ),
-    Product(
-      id: '2',
-      name: 'FUJIFILM·拍立得相纸适用mini7+/8/9/11/12/25/90/E',
-      price: 65,
-      image: 'assets/image_lost.jpg',
-      salesCount: 3000,
-    ),
-    Product(
-      id: '2',
-      name: 'FUJIFILM·拍立得相纸适用mini7+/8/9/11/12/25/90/E',
-      price: 65,
-      image: 'assets/image_lost.jpg',
-      salesCount: 3000,
-    ),
-    Product(
-      id: '2',
-      name: 'FUJIFILM·拍立得相纸适用mini7+/8/9/11/12/25/90/E',
-      price: 65,
-      image: 'assets/image_lost.jpg',
-      salesCount: 3000,
-    ),
-    Product(
-      id: '2',
-      name: 'FUJIFILM·拍立得相纸适用mini7+/8/9/11/12/25/90/E',
-      price: 65,
-      image: 'assets/image_lost.jpg',
-      salesCount: 3000,
-    ),
-    Product(
-      id: '2',
-      name: 'FUJIFILM·拍立得相纸适用mini7+/8/9/11/12/25/90/E',
-      price: 65,
-      image: 'assets/image_lost.jpg',
-      salesCount: 3000,
-    ),
-  ];
+  List<Coupon> products = [];
+
+  Future<void> getCoupons() async{
+    String type = "";
+    if(_selectedCategory!='推荐'){
+      type = _selectedCategory;
+    }
+    var result = await UserApi().GetCoupon(type);
+    if(result!=null){
+      var data = result['data'];
+      var code = result['code'];
+      var msg = result['msg'];
+      if(code!=200){
+        ElToast.info(msg);
+      }else{
+       setState(() {
+         products = (data as List).map((json) => Coupon.fromJson(json)).toList();
+       });
+      }
+    }
+  }
+
+  @override
+  void initState() {
+    getCoupons();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -176,10 +125,93 @@ class _PointsExchangePageState extends State<PointsExchangePage> {
                     children: [
                       // 商品图片
                       Expanded(
-                        child: Image.asset(
-                          product.image,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
+                        child: GestureDetector(
+                          child: Image.asset(
+                            "assets/image_lost.jpg",
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                          ),
+                          onTap: (){
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  content: Text(
+                                    '确认兑换?',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  contentPadding: EdgeInsets.only(
+                                    top: 20,
+                                    bottom: 10,
+                                    left: 24,
+                                    right: 24,
+                                  ),
+                                  actions: [
+                                    Container(
+                                      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                                      child: Row(
+                                        children: [
+                                          Expanded(
+                                            child: OutlinedButton(
+                                              onPressed: () {
+                                                Navigator.of(context).pop(); // 关闭弹窗
+                                              },
+                                              style: OutlinedButton.styleFrom(
+                                                side: BorderSide(color: Color(0xFF1E3F7C)),
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius: BorderRadius.circular(22),
+                                                ),
+                                                minimumSize: Size(0, 44),
+                                              ),
+                                              child: Text(
+                                                '取消',
+                                                style: TextStyle(color: Color(0xFF1E3F7C)),
+                                              ),
+                                            ),
+                                          ),
+                                          SizedBox(width: 12),
+                                          Expanded(
+                                            child: ElevatedButton(
+                                              onPressed: () async {
+                                                var result = await UserApi().ExchangeCoupon(product.id);
+                                                if(result!=null){
+                                                  var code = result['code'];
+                                                  var msg = result['msg'];
+                                                  if(code==200){
+                                                    ElToast.info("兑换成功");
+                                                  }else{
+                                                    ElToast.info(msg);
+                                                  }
+                                                }
+                                              },
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor: Color(0xFF1E3F7C),
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius: BorderRadius.circular(22),
+                                                ),
+                                                minimumSize: Size(0, 44),
+                                              ),
+                                              child: Text(
+                                                '确认',
+                                                style: TextStyle(color: Colors.white),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          },
                         ),
                       ),
                       Padding(
@@ -189,7 +221,7 @@ class _PointsExchangePageState extends State<PointsExchangePage> {
                           children: [
                             // 商品名称
                             Text(
-                              product.name,
+                              product.title,
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(fontSize: 14),
@@ -199,7 +231,7 @@ class _PointsExchangePageState extends State<PointsExchangePage> {
                             Row(
                               children: [
                                 Text(
-                                  '${product.price}',
+                                  '${product.payPoint}',
                                   style: TextStyle(
                                     color: Colors.red,
                                     fontSize: 16,
@@ -216,7 +248,7 @@ class _PointsExchangePageState extends State<PointsExchangePage> {
                                 ),
                                 Spacer(),
                                 Text(
-                                  '${product.salesCount}人已兑换',
+                                  '${product.saleCount}人已兑换',
                                   style: TextStyle(
                                     color: Colors.grey,
                                     fontSize: 12,
