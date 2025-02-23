@@ -4,7 +4,7 @@ class Voucher{
   String title;
   String subtitle;
   String rules;
-  int payValue;
+  double payValue;
   int actualValue;
 
   Voucher({

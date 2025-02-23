@@ -54,6 +54,46 @@ class StoreApi {
     return result;
   }
 
+  Likes(dynamic data) async{
+    var result = await Request().request("/store/likes?store_id=$data",
+        method: DioMethod.post
+    );
+    return result;
+  }
+
+  RemoveLikes(dynamic data) async{
+    var result = await Request().request("/store/removeLikes?store_id=$data",
+        method: DioMethod.post
+    );
+    return result;
+  }
+
+  ViewLikesByStore(dynamic data) async{
+    var result = await Request().request("/store/viewLikesByStore?store_id=$data",
+      method: DioMethod.get
+    );
+    return result;
+  }
+
+  BuyVoucher(dynamic data) async{
+    var result = await Request().request("/store/buyVoucher?voucher_id=$data",
+        method: DioMethod.post
+    );
+    return result;
+  }
+
+  GetOrder(dynamic data) async{
+    if(data==0){
+      var result = await Request().request("/store/getOrder",
+          method: DioMethod.post
+      );
+      return result;
+    }
+    var result = await Request().request("/store/getOrder?type=$data",
+        method: DioMethod.post
+    );
+    return result;
+  }
 
 }
 

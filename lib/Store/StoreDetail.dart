@@ -22,16 +22,41 @@ class _StoreDetailPageState extends State<StoreDetailPage> {
     "tags": ["赚琉珠", "消费20元返1琉珠", "花琉珠"],
   };
   bool _isLoading = true;
-  bool _isFavorite = false;
+  bool _isFavorite = true;
 
   @override
   void initState() {
-    super.initState();
+    _fetchLikes();
+    print(_isFavorite);
     _fetchStoreData(widget.storeId);
     setState(() {
       _isLoading = true;
     });
     _fetchVouchers(widget.storeId);
+    super.initState();
+  }
+
+  // 获取是否收藏该店铺
+  void _fetchLikes() async{
+    var result = await StoreApi().ViewLikesByStore(widget.storeId);
+    if(result!=null){
+      var code = result['code'];
+      if(code==200){
+        var data = result['data'];
+        if(data==0){
+          setState(() {
+            _isFavorite = false;
+          });
+        }else{
+          setState(() {
+            _isFavorite = true;
+            print("111");
+          });
+        }
+      }else{
+        ElToast.info(result['msg']);
+      }
+    }
   }
 
   // 获取店铺数据
@@ -60,7 +85,7 @@ class _StoreDetailPageState extends State<StoreDetailPage> {
       var data = result['data'];
       if (code == 200) {
         setState(() {
-          _voucherInfo.addAll((result['data'] as List)
+          _voucherInfo.addAll((data as List)
               .map((json) => Voucher.fromJson(json))
               .toList());
           _isLoading = false;
@@ -108,15 +133,15 @@ class _StoreDetailPageState extends State<StoreDetailPage> {
                         errorBuilder: (context, error, stackTrace) {
                           return Image.asset(
                             'assets/image_lost.jpg',
-                            width: 120,
-                            height: 120,
+                            width: 110,
+                            height: 110,
                             fit: BoxFit.contain,
                           );
                         },
                       )
                     : Image.asset(
                   'assets/image_lost.jpg',
-                  width: 120,
+                  width: 110,
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -154,26 +179,39 @@ class _StoreDetailPageState extends State<StoreDetailPage> {
                   ),
                   padding: const EdgeInsets.symmetric(
                       horizontal: 12.0, vertical: 8.0),
-                  child: Column(
-                    children: [
-                      Text(
-                        "¥" + (voucher.payValue / 100).toString(),
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                  child: GestureDetector(
+                    onTap: () async{
+                      var result = await StoreApi().BuyVoucher(voucher.id);
+                      if(result!=null){
+                        var code = result['code'];
+                        if(code==200){
+                          ElToast.info(result['data']);
+                        }else{
+                          ElToast.info(result['msg']);
+                        }
+                      }
+                    },
+                    child: Column(
+                      children: [
+                        Text(
+                          "¥" + (voucher.payValue / 100).toString(),
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
                         ),
-                      ),
-                      SizedBox(height: 4),
-                      const Text(
-                        "立即购买",
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                        SizedBox(height: 4),
+                        const Text(
+                          "立即购买",
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ],
@@ -356,11 +394,33 @@ class _StoreDetailPageState extends State<StoreDetailPage> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               TextButton.icon(
-                onPressed: () {
+                onPressed: () async{
                   // 收藏逻辑
-                  setState(() {
-                    _isFavorite = !_isFavorite;
-                  });
+                  if(!_isFavorite){
+                    var result = await StoreApi().Likes(widget.storeId);
+                    if(result!=null){
+                      var code = result['code'];
+                      if(code==200){
+                        setState(()  {
+                          _isFavorite = !_isFavorite;
+                        });
+                      }else{
+                        ElToast.info(result['msg']);
+                      }
+                    }
+                  }else{
+                    var result = await StoreApi().RemoveLikes(widget.storeId);
+                    if(result!=null){
+                      var code = result['code'];
+                      if(code==200){
+                        setState(()  {
+                          _isFavorite = !_isFavorite;
+                        });
+                      }else{
+                        ElToast.info(result['msg']);
+                      }
+                    }
+                  }
                 },
                 icon: Icon(
                   _isFavorite ? Icons.star : Icons.star_border, // 根据状态显示图标

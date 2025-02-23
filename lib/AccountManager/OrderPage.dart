@@ -1,22 +1,7 @@
 import 'package:flutter/material.dart';
-
-class Order {
-  final String id;
-  final String productName;
-  final double price;
-  final String image;
-  final String status;  // 订单状态：待付款、待使用、已完成、已退款
-  final DateTime orderTime;
-
-  Order({
-    required this.id,
-    required this.productName,
-    required this.price,
-    required this.image,
-    required this.status,
-    required this.orderTime,
-  });
-}
+import 'package:parkinglot_frontend/api/store.dart';
+import 'package:parkinglot_frontend/entity/Order.dart';
+import 'package:parkinglot_frontend/utils/util.dart';
 
 class OrderPage extends StatefulWidget {
   @override
@@ -27,6 +12,30 @@ class _OrderPageState extends State<OrderPage> {
   String _selectedStatus = '全部';
   final List<String> orderStatus = ['全部', '待付款', '待使用', '已完成', '已退款'];
   List<Order> orders = []; // 假设这里是空的订单列表
+  int _selectedType = 0;
+
+  @override
+  void initState() {
+    getOrderByType();
+    super.initState();
+  }
+
+  void getOrderByType() async{
+    var result = await StoreApi().GetOrder(_selectedType);
+    if(result!=null){
+      var code = result['code'];
+      var data = result['data'];
+      var msg = result['msg'];
+      if(code==200){
+        setState(() {
+          orders = (data as List).map((json) => Order.fromJson(json)).toList();
+        });
+      }else{
+        ElToast.info(msg);
+      }
+    }
+
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -152,20 +161,12 @@ class _OrderPageState extends State<OrderPage> {
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(8),
-                  child: Image.network(
-                    order.image,
+                  child: Image.asset(
+                    'assets/image_lost.jpg',
                     width: 80,
                     height: 80,
                     fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Image.asset(
-                        'assets/image_lost.jpg',
-                        width: 80,
-                        height: 80,
-                        fit: BoxFit.cover,
-                      );
-                    },
-                  ),
+                  )
                 ),
                 SizedBox(width: 12),
                 Expanded(
@@ -173,7 +174,7 @@ class _OrderPageState extends State<OrderPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        order.productName,
+                        order.voucherId.toString(),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
@@ -183,7 +184,7 @@ class _OrderPageState extends State<OrderPage> {
                       ),
                       SizedBox(height: 8),
                       Text(
-                        '¥${order.price}',
+                        '¥${order.payValue}',
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -200,7 +201,7 @@ class _OrderPageState extends State<OrderPage> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
-                    order.status,
+                    order.type.toString(),
                     style: TextStyle(
                       color: Color(0xFFFF6B35),
                       fontSize: 12,
