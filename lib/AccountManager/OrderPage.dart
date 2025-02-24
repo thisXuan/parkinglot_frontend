@@ -11,16 +11,23 @@ class OrderPage extends StatefulWidget {
 class _OrderPageState extends State<OrderPage> {
   String _selectedStatus = '全部';
   final List<String> orderStatus = ['全部', '待付款', '待使用', '已完成', '已退款'];
+  Map<String,int> orderMap= {
+    '全部':0,
+    '待付款':1,
+    '待使用':2,
+    '已完成':3,
+    '已退款':4,
+  };
   List<Order> orders = []; // 假设这里是空的订单列表
   int _selectedType = 0;
 
   @override
   void initState() {
-    getOrderByType();
+    getOrderByType(_selectedType);
     super.initState();
   }
 
-  void getOrderByType() async{
+  void getOrderByType(int _selectedType) async{
     var result = await StoreApi().GetOrder(_selectedType);
     if(result!=null){
       var code = result['code'];
@@ -80,6 +87,8 @@ class _OrderPageState extends State<OrderPage> {
                   onTap: () {
                     setState(() {
                       _selectedStatus = status;
+                      _selectedType = orderMap[_selectedStatus]!;
+                      getOrderByType(_selectedType);
                     });
                   },
                   child: Column(
@@ -174,7 +183,7 @@ class _OrderPageState extends State<OrderPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        order.voucherId.toString(),
+                        "订单号: ${order.id.toString()}",
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
@@ -184,7 +193,7 @@ class _OrderPageState extends State<OrderPage> {
                       ),
                       SizedBox(height: 8),
                       Text(
-                        '¥${order.payValue}',
+                        '¥${order.payValue/100}',
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,

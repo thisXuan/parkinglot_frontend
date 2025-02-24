@@ -85,12 +85,12 @@ class StoreApi {
   GetOrder(dynamic data) async{
     if(data==0){
       var result = await Request().request("/store/getOrder",
-          method: DioMethod.post
+          method: DioMethod.get
       );
       return result;
     }
     var result = await Request().request("/store/getOrder?type=$data",
-        method: DioMethod.post
+        method: DioMethod.get
     );
     return result;
   }
