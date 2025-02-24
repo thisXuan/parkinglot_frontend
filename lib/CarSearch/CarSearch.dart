@@ -8,6 +8,7 @@ import 'package:parkinglot_frontend/Tabs.dart';
 import 'package:parkinglot_frontend/utils/util.dart';
 import 'package:intl/intl.dart';
 import 'package:parkinglot_frontend/api/parking.dart';
+import 'package:license_plate_number/license_plate_number.dart';
 
 import '../api/qrcode.dart';
 
@@ -19,11 +20,12 @@ class CarPage extends StatefulWidget {
 class _CarPageState extends State<CarPage> {
   final List<TextEditingController> _controllers =
       List.generate(8, (index) => TextEditingController());
-  bool _isNewEnergy = false; // 标识是否为新能源车
   String _errorText = '';
 
   final PageController _pageController = PageController(initialPage: 1000);
   late Timer _timer;
+  final KeyboardController _keyboardController = KeyboardController();
+  String plate = "";
 
   @override
   void initState() {
@@ -39,70 +41,8 @@ class _CarPageState extends State<CarPage> {
     });
   }
 
-  // 校验车牌号
-  bool isValidPlate(String plate, bool isNewEnergy) {
-    final normalPlateRegex =
-        RegExp(r'^[京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵青藏川宁琼使][A-Z][A-HJ-NP-Z0-9]{5}$');
-    final newEnergyPlateRegex =
-        RegExp(r'^[京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵青藏川宁琼使][A-Z][A-HJ-NP-Z0-9]{6}$');
-    return isNewEnergy
-        ? newEnergyPlateRegex.hasMatch(plate)
-        : normalPlateRegex.hasMatch(plate);
-  }
-
-  List<Widget> _buildCarPlateInput() {
-    final plateLength = _isNewEnergy ? 8 : 7;
-    List<Widget> inputs = [];
-
-    for (int i = 0; i < plateLength; i++) {
-      inputs.add(_buildSquareInput(i));
-      if (i == 1) {
-        // 在第二个和第三个之间添加点号
-        inputs.add(
-          Text(
-            '·',
-            style: TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold),
-          ),
-        );
-      }
-    }
-    return inputs;
-  }
-
-  Widget _buildSquareInput(int index) {
-    return SizedBox(
-      width: 40.0,
-      height: 50.0,
-      child: TextField(
-        controller: _controllers[index],
-        maxLength: 1,
-        textAlign: TextAlign.center,
-        decoration: InputDecoration(
-          border: OutlineInputBorder(),
-          counterText: '',
-        ),
-        onChanged: (value) {
-          if (value.length == 1 && index < (_isNewEnergy ? 7 : 6)) {
-            FocusScope.of(context).nextFocus();
-          }
-        },
-      ),
-    );
-  }
-
   void handleConfirm() async {
     FocusScope.of(context).unfocus();
-
-    final plateLength = _isNewEnergy ? 8 : 7;
-    final plate =
-        _controllers.take(plateLength).map((c) => c.text.trim()).join();
-
-    if (!isValidPlate(plate, _isNewEnergy)) {
-      setState(() {
-        _errorText = '请输入有效的中国车牌号';
-      });
-      return;
-    }
 
     var result = await ParkingApi().GetParkingTimeAndLocation(plate);
 
@@ -400,28 +340,21 @@ class _CarPageState extends State<CarPage> {
                         )
                       ],
                     ),
-                    SizedBox(height: 8.0),
-                    Row(
-                      children: [
-                        Checkbox(
-                          value: _isNewEnergy,
-                          onChanged: (value) {
-                            setState(() {
-                              _isNewEnergy = value!;
-                              // 重置所有输入框
-                              for (var controller in _controllers) {
-                                controller.clear();
-                              }
-                            });
-                          },
-                        ),
-                        Text('新能源车'),
-                      ],
-                    ),
-                    SizedBox(height: 8.0),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: _buildCarPlateInput(),
+                    SizedBox(height: 16.0),
+                    Container(
+                      alignment: Alignment.topCenter,
+                      padding: EdgeInsets.only(top: 10),
+                      child: PlateInputField(
+                        styles: PlateStyles.light,
+                        inputFieldWidth: 36,
+                        inputFieldHeight: 54,
+                        keyboardController: _keyboardController,
+                        plateSeparatorPadding: 8,
+                        plateSeparatorSize: 6,
+                        onChanged: (List<String> array, String value) {
+                          plate = value;
+                        },
+                      ),
                     ),
                     if (_errorText.isNotEmpty) ...[
                       SizedBox(height: 8.0),

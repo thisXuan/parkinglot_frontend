@@ -48,6 +48,7 @@ dependencies:
   path_provider: ^2.0.14
   intl: ^0.18.0
   marquee: ^2.2.3
+  license_plate_number: ^2.0.1
 
 dev_dependencies:
   flutter_test:

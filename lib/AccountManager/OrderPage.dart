@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:parkinglot_frontend/api/store.dart';
 import 'package:parkinglot_frontend/entity/Order.dart';
 import 'package:parkinglot_frontend/utils/util.dart';
@@ -160,6 +161,7 @@ class _OrderPageState extends State<OrderPage> {
 
   Widget _buildOrderCard(Order order) {
     return Card(
+      color: Colors.white,
       margin: EdgeInsets.only(bottom: 16),
       child: Padding(
         padding: EdgeInsets.all(16),
@@ -191,13 +193,19 @@ class _OrderPageState extends State<OrderPage> {
                           fontWeight: FontWeight.w500,
                         ),
                       ),
-                      SizedBox(height: 8),
                       Text(
-                        '¥${order.payValue/100}',
+                        '实付 ¥ ${order.payValue/100}',
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: 14,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFFFF6B35),
+                          color: Colors.black,
+                        ),
+                      ),
+                      Text(
+                        '下单时间: ${DateFormat("yyyy-MM-dd HH:mm:ss").format(DateTime.parse(order.time))}',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey,
                         ),
                       ),
                     ],
@@ -210,10 +218,10 @@ class _OrderPageState extends State<OrderPage> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
-                    order.type.toString(),
+                    orderStatus[order.type],
                     style: TextStyle(
                       color: Color(0xFFFF6B35),
-                      fontSize: 12,
+                      fontSize: 10,
                     ),
                   ),
                 ),
