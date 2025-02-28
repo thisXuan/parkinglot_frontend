@@ -68,6 +68,13 @@ class StoreApi {
     return result;
   }
 
+  ViewLikes() async{
+    var result = await Request().request("/store/viewLikes",
+        method: DioMethod.get
+    );
+    return result;
+  }
+
   ViewLikesByStore(dynamic data) async{
     var result = await Request().request("/store/viewLikesByStore?store_id=$data",
       method: DioMethod.get

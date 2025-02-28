@@ -1,25 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:parkinglot_frontend/api/store.dart';
+import 'package:parkinglot_frontend/entity/Store.dart';
 import 'package:parkinglot_frontend/utils/util.dart';
 
-class Store {
-  final String id;
-  final String name;
-  final String category;
-  final String location;
-  final String image;
-  final List<String> tags; // 例如：花珠珠、赚珠珠等标签
-  final String storeNumber; // 店铺编号，如 A馆-L1-50
-
-  Store({
-    required this.id,
-    required this.name,
-    required this.category,
-    required this.location,
-    required this.image,
-    required this.tags,
-    required this.storeNumber,
-  });
-}
 
 class MyCollectionPage extends StatefulWidget {
   @override
@@ -28,17 +11,32 @@ class MyCollectionPage extends StatefulWidget {
 
 class _MyCollectionPageState extends State<MyCollectionPage> {
   String _selectedTab = '品牌';
-  List<Store> stores = [
-    Store(
-        id: "1",
-        name: "三元梅园",
-        category: "甜品饮品",
-        location: "A馆-L1-50",
-        image: "assets/image_lost.jpg",
-        tags: ["花琉珠","赚琉珠"],
-        storeNumber: "A馆-L1-50",
-     )
-  ];
+  List<Store> stores = [];
+
+
+  void _loadFavorite() async{
+    var result = await StoreApi().ViewLikes();
+    if(result!=null){
+      var code = result['code'];
+      var data = result['data'];
+      var msg = result['msg'];
+      if(code==200){
+       setState(() {
+         stores.addAll((data as List)
+             .map((json) => Store.fromJson(json))
+             .toList());
+       });
+      }else{
+        ElToast.info(msg);
+      }
+    }
+  }
+
+  @override
+  void initState() {
+    _loadFavorite();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -88,7 +86,7 @@ class _MyCollectionPageState extends State<MyCollectionPage> {
                       itemBuilder: (context, index) {
                         final store = stores[index];
                         return Dismissible(
-                          key: Key(store.id),
+                          key: Key(store.id.toString()),
                           direction: DismissDirection.endToStart, // 只允许从右向左滑动
                           background: Container(
                             alignment: Alignment.centerRight,
@@ -291,7 +289,7 @@ class _MyCollectionPageState extends State<MyCollectionPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    store.name,
+                    store.storeName,
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -299,37 +297,38 @@ class _MyCollectionPageState extends State<MyCollectionPage> {
                   ),
                   SizedBox(height: 4),
                   Text(
-                    '${store.category} | ${store.storeNumber}',
+                    '${store.serviceCategory} | ${store.serviceType}',
                     style: TextStyle(
                       color: Colors.grey[600],
                       fontSize: 12,
                     ),
                   ),
                   SizedBox(height: 8),
-                  Row(
-                    children: store.tags.map((tag) {
-                      return Container(
-                        margin: EdgeInsets.only(right: 8),
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: Color(0xFFFF9966),
-                          ),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          tag,
-                          style: TextStyle(
-                            color: Color(0xFFFF9966),
-                            fontSize: 12,
-                          ),
-                        ),
-                      );
-                    }).toList(),
-                  ),
+                  // TODO: tags
+                  // Row(
+                  //   children: store.tags.map((tag) {
+                  //     return Container(
+                  //       margin: EdgeInsets.only(right: 8),
+                  //       padding: EdgeInsets.symmetric(
+                  //         horizontal: 8,
+                  //         vertical: 2,
+                  //       ),
+                  //       decoration: BoxDecoration(
+                  //         border: Border.all(
+                  //           color: Color(0xFFFF9966),
+                  //         ),
+                  //         borderRadius: BorderRadius.circular(12),
+                  //       ),
+                  //       child: Text(
+                  //         tag,
+                  //         style: TextStyle(
+                  //           color: Color(0xFFFF9966),
+                  //           fontSize: 12,
+                  //         ),
+                  //       ),
+                  //     );
+                  //   }).toList(),
+                  // ),
                 ],
               ),
             ),
