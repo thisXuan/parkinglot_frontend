@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:parkinglot_frontend/AccountManager/ForgetPassword.dart';
 import 'package:parkinglot_frontend/AccountManager/Register.dart';
+import 'package:parkinglot_frontend/Manager/ManageLocationPage.dart';
 import 'package:parkinglot_frontend/api/user.dart';
 import 'package:parkinglot_frontend/Tabs.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -43,7 +44,8 @@ class _LoginPageState extends State<LoginPage> {
 
     if(result!=null){
       var code = result['code'];
-      var message = result['data'];
+      var token = result['data']['jwt'];
+      var type = result['data']['type'];
       var msg = result['msg'];
       if (code == 200) {
         var userinfo = await UserApi().GetUserInfo(phone);
@@ -51,16 +53,24 @@ class _LoginPageState extends State<LoginPage> {
         SharedPreferences prefs = await SharedPreferences.getInstance();
         Map<String, String> userInfo = {
           'phone': phone,
-          'token': message,
-          'username':username
+          'token': token,
+          'username':username,
+          'type': type.toString()
         };
         // 将Map转换为JSON字符串
         String userJson = jsonEncode(userInfo);
         prefs.setString('user', userJson);
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => Tabs()),
-        );
+        if(type==0){
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => Tabs()),
+          );
+        }else{
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => ManageLocationPage()),
+          );
+        }
       } else {
         ElToast.info(msg.toString());
       }

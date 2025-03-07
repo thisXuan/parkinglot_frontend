@@ -5,6 +5,7 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'dart:ui' as ui;
 import 'dart:async';
 import 'package:parkinglot_frontend/api/navigation.dart';
+import 'package:parkinglot_frontend/entity/Store.dart';
 import 'package:parkinglot_frontend/entity/StoreDTO.dart';
 import 'package:parkinglot_frontend/utils/util.dart';
 import 'package:parkinglot_frontend/api/store.dart';
@@ -135,7 +136,7 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage>
     );
   }
 
-  void _filterSuggestions(String input, int fieldIndex) {
+  void _filterSuggestions(String input, int fieldIndex) async{
     _getStoreNames();
     if (input.isEmpty) {
       if (fieldIndex == 1) {
@@ -146,20 +147,30 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage>
         _hideOverlay(2);
       }
     } else {
-      final filtered = _allSuggestions
-          .where((suggestion) => suggestion.contains(input))
-          .toList();
-      setState(() {
-        if (fieldIndex == 1) {
-          _filteredSuggestions1 = filtered;
+      // TODO: 接入es
+      List<String> filtered = [];
+      var result = await StoreApi().QueryStoreInfo(input);
+      if(result!=null){
+        List<Store> _stores = (result['data'] as List)
+            .map((json) => Store.fromJson(json))
+            .toList();
+        _stores.forEach((store) {
+          filtered.add(store.storeName);
+        });
+        setState(() {
+          if (fieldIndex == 1) {
+            _filteredSuggestions1 = filtered;
+          } else {
+            _filteredSuggestions2 = filtered;
+          }
+        });
+        if (filtered.isNotEmpty) {
+          _showOverlay(fieldIndex);
         } else {
-          _filteredSuggestions2 = filtered;
+          _hideOverlay(fieldIndex);
         }
-      });
-      if (filtered.isNotEmpty) {
-        _showOverlay(fieldIndex);
-      } else {
-        _hideOverlay(fieldIndex);
+      }else{
+        ElToast.info(result['msg']);
       }
     }
   }
@@ -173,7 +184,6 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage>
     }
     return true;
   }
-
 
   @override
   void dispose() {
