@@ -50,6 +50,19 @@ class UserApi {
     return result;
   }
 
+  // 获取用户身份
+  GetUserRole() async{
+    var result = await Request().request("/user/getUserRole",
+        method:DioMethod.get);
+    return result;
+  }
+
+  GetUser() async{
+    var result = await Request().request("/user/getUsers",
+        method:DioMethod.get);
+    return result;
+  }
+
   // 签到
   Sign() async{
     var result = await Request().request("/user/signIn",

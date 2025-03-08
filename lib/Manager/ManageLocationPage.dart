@@ -11,7 +11,7 @@ class ManageLocationPage extends StatefulWidget{
 class ManageLocationPageState extends State<ManageLocationPage>{
   @override
   Widget build(BuildContext context) {
-    return Text("管理员");
+    return Center(child: Text("管理员"));
   }
 
 }

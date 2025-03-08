@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:parkinglot_frontend/AccountManager/ForgetPassword.dart';
 import 'package:parkinglot_frontend/AccountManager/Register.dart';
 import 'package:parkinglot_frontend/Manager/ManageLocationPage.dart';
+import 'package:parkinglot_frontend/Manager/ManagerTab.dart';
 import 'package:parkinglot_frontend/api/user.dart';
 import 'package:parkinglot_frontend/Tabs.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -44,10 +45,10 @@ class _LoginPageState extends State<LoginPage> {
 
     if(result!=null){
       var code = result['code'];
-      var token = result['data']['jwt'];
-      var type = result['data']['type'];
       var msg = result['msg'];
       if (code == 200) {
+        var token = result['data']['jwt'];
+        var type = result['data']['type'];
         var userinfo = await UserApi().GetUserInfo(phone);
         var username = userinfo['data']['name'];
         SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -68,11 +69,11 @@ class _LoginPageState extends State<LoginPage> {
         }else{
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => ManageLocationPage()),
+            MaterialPageRoute(builder: (context) => ManagerTab()),
           );
         }
       } else {
-        ElToast.info(msg.toString());
+        ElToast.info(msg);
       }
     }
 
