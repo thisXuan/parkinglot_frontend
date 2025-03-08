@@ -36,6 +36,19 @@ class ParkingApi {
     return result;
   }
 
+  // 车辆位置显示
+  Location() async{
+    var result = await Request().request("/parking/location",
+        method: DioMethod.get);
+    return result;
+  }
+
+  // 空位置显示
+  Nulllocation() async{
+    var result = await Request().request("/parking/nulllocation",
+        method: DioMethod.get);
+    return result;
+  }
 }
 
 // 导出全局使用这一个实例
