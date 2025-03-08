@@ -173,12 +173,22 @@ class _ShopManagementScreenState extends State<ManagerLocationPage> {
     );
   }
 
-  Future<void> _changeShopLocation(String beforeName, String afterName) async {
+  Future<Map<String, dynamic>?> _changeShopLocation(String beforeName, String afterName) async {
     // 实际API调用
     try {
-      // TODO：修改店铺名称
+      // TODO: 修改店铺名称
+      // 这里应该是实际的API调用
+      // return await ShopApi().changeShopLocation(beforeName, afterName);
+
+      // 模拟API调用
+      await Future.delayed(Duration(seconds: 1));
+      return {
+        'code': 200,
+        'data': 'success'
+      };
     } catch (e) {
       print('Error changing shop location: $e');
+      return null;
     }
   }
 
