@@ -28,7 +28,7 @@ class _TabsState extends State<ManagerTab>{
   void initState() {
     super.initState();
     _pageList=[
-      ManageLocationPage(),
+      ManagerLocationPage(),
       ManagerPersonPage(),
       ManagerSettingPage()
     ];
