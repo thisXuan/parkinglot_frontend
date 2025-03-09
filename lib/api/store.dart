@@ -33,8 +33,14 @@ class StoreApi {
     return result;
   }
 
-  GetStoreName() async{
-    var result = await Request().request("/store/getStoreName",
+  GetStoreName(dynamic data) async{
+    var result = await Request().request("/store/getStoreName?query=$data",
+        method: DioMethod.get);
+    return result;
+  }
+
+  GetAllName() async{
+    var result = await Request().request("/store/getAllName",
         method: DioMethod.get);
     return result;
   }

@@ -110,7 +110,10 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage>
     if (result != null && result['code'] == 200) {
       setState(() {
         if(result['data']!=null){
-          coordinate = Coordinate.fromJson(result['data']);
+          coordinate = Coordinate(
+              xCoordinate: result['data']['xCoordinate'] ?? -1,
+              yCoordinate: result['data']['yCoordinate'] ?? -1
+          );
         }
       });
     }
@@ -120,6 +123,7 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage>
     var result = await ParkingApi().Nulllocation();
     if (result != null && result['code'] == 200) {
       setState(() {
+        print(result);
         coordinates = (result['data'] as List)
             .map((json) => Coordinate.fromJson(json))
             .toList();
@@ -206,14 +210,9 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage>
       }
     } else {
       List<String> filtered = [];
-      var result = await StoreApi().QueryStoreInfo(input);
+      var result = await StoreApi().GetStoreName(input);
       if (result != null && result['code']==200) {
-        List<Store> _stores = (result['data'] as List)
-            .map((json) => Store.fromJson(json))
-            .toList();
-        _stores.forEach((store) {
-          filtered.add(store.storeName);
-        });
+        filtered = List<String>.from(result['data']);
         setState(() {
           if (fieldIndex == 1) {
             _filteredSuggestions1 = filtered;
@@ -252,10 +251,12 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage>
   }
 
   Future<void> _getStoreNames() async {
-    var result = await StoreApi().GetStoreName();
-    setState(() {
-      _allSuggestions = List<String>.from(result['data']);
-    });
+    var result = await StoreApi().GetAllName();
+    if(result!=null&&result['code']==200){
+      setState(() {
+        _allSuggestions = List<String>.from(result['data']);
+      });
+    }
   }
 
   Future<void> _loadAllBackgroundImages() async {
@@ -342,6 +343,10 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage>
   void _onFloorSelected(String? floor) {
     if (floor != null) {
       setState(() {
+        if(floor=="B2"){
+          getEmptySpace();
+          getCoordinate();
+        }
         _selectedFloor = floor;
         _getStoreLocations(_selectedFloor);
         _progressAnimation =
@@ -573,6 +578,58 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage>
                 ),
               ),
             ),
+          // 楼层切换按钮 - 替换为可滑动的垂直楼层选择器
+          Positioned(
+            left: 16,
+            top: 200,
+            child: Container(
+              height: 200, // 限制高度，使其可滑动
+              width: 50,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black26,
+                    blurRadius: 4,
+                    offset: Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: ['F5', 'F4', 'F3', 'F2', 'F1', 'M', 'B1', 'B2'].map((floor) {
+                    bool isSelected = _selectedFloor == floor;
+                    return GestureDetector(
+                      onTap: () => _onFloorSelected(floor),
+                      child: Container(
+                        width: 50,
+                        height: 50,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: isSelected ? Colors.deepPurple : Colors.white,
+                          border: Border(
+                            bottom: BorderSide(
+                              color: Colors.grey.withOpacity(0.3),
+                              width: 1,
+                            ),
+                          ),
+                        ),
+                        child: Text(
+                          floor,
+                          style: TextStyle(
+                            color: isSelected ? Colors.white : Colors.black,
+                            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                          ),
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -620,6 +677,63 @@ class IndoorMapPainter extends CustomPainter {
           image: defaultBackground,
           fit: BoxFit.fitHeight,
         );
+      }
+      // 添加绘制店铺名称的逻辑
+      // 只在放大到一定程度时显示店铺名称
+      final textPainter = TextPainter(
+        textDirection: TextDirection.ltr,
+      );
+
+      for (var store in storeLocations!) {
+        if (store.floorNumber == _selectedFloor && store.scale <= scale) {
+          double x = size.width * store.x / 100; // 根据比例计算 x 坐标
+          double y = size.height * store.y / 100; // 根据比例计算 y 坐标
+
+          // 根据缩放比例调整文字大小
+          double fontSize = 10 / scale; // 字体大小随缩放比例变化
+
+          textPainter.text = TextSpan(
+            text: store.name,
+            style: TextStyle(
+              color: Colors.black,
+              fontSize: fontSize,
+              fontWeight: FontWeight.bold,
+              backgroundColor: Colors.white.withOpacity(0.7),
+            ),
+          );
+
+          textPainter.layout();
+
+          // 绘制文字，稍微偏移以避免遮挡点位
+          textPainter.paint(
+            canvas,
+            Offset(x + 1, y - 2), // 计算绘制位置
+          );
+        }
+      }
+
+      // 如果在B2
+      if (_selectedFloor == 'B2') {
+        // 绘制当前停车位
+        final Paint currentCoordinatePaint = Paint()
+          ..color = Colors.yellow
+          ..style = PaintingStyle.fill;
+
+        double currentX = size.width * coordinate.xCoordinate / 100;
+        double currentY = size.height * coordinate.yCoordinate / 100;
+        canvas.drawCircle(
+            Offset(currentX, currentY), 6.0 / scale, currentCoordinatePaint);
+
+        // 绘制空车位
+        final Paint coordinatesPaint = Paint()
+          ..color = Colors.green
+          ..style = PaintingStyle.fill;
+
+        for (var coord in coordinates) {
+          double x = size.width * coord.xCoordinate / 100;
+          double y = size.height * coord.yCoordinate / 100;
+          canvas.drawCircle(Offset(x, y), 4.0 / scale, coordinatesPaint);
+        }
       }
       canvas.restore();
       return;
@@ -745,11 +859,12 @@ class IndoorMapPainter extends CustomPainter {
         );
       }
     }
+
     // 如果在B2
     if (_selectedFloor == 'B2') {
       // 绘制当前停车位
       final Paint currentCoordinatePaint = Paint()
-        ..color = Colors.green
+        ..color = Colors.yellow
         ..style = PaintingStyle.fill;
 
       double currentX = size.width * coordinate.xCoordinate / 100;
@@ -759,7 +874,7 @@ class IndoorMapPainter extends CustomPainter {
 
       // 绘制空车位
       final Paint coordinatesPaint = Paint()
-        ..color = Colors.red
+        ..color = Colors.green
         ..style = PaintingStyle.fill;
 
       for (var coord in coordinates) {

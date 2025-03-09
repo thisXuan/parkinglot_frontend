@@ -9,8 +9,8 @@ class Coordinate{
   
   factory Coordinate.fromJson(Map<String, dynamic> json){
     return Coordinate(
-        xCoordinate: json['xCoordinate'],
-        yCoordinate: json['yCoordinate']
+        xCoordinate: json['xcoordinate']??0,
+        yCoordinate: json['ycoordinate']??0
     );
   }
 }
