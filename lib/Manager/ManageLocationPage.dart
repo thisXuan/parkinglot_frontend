@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:parkinglot_frontend/api/store.dart';
+import 'package:parkinglot_frontend/utils/util.dart';
 
 import '../entity/Store.dart';
 //import 'package:parkinglot_frontend/api/shop.dart';
@@ -17,65 +18,111 @@ class _ShopManagementScreenState extends State<ManagerLocationPage> {
   String selectedFloor = "全部楼层";
   String selectedCategory = "全部";
   List<Store> _storeInfo = [];
+  bool _isLoadingMore = false;
 
   @override
   void initState() {
     super.initState();
     _fetchStoreInfo();
+    _scrollController.addListener(_scrollListener);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_scrollListener);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _scrollListener() {
+    if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
+      if (!_isLoadingMore && _hasMore) {
+        _loadMoreData();
+      }
+    }
+  }
+
+  Future<void> _loadMoreData() async {
+    if (!_hasMore) return;
+    
+    setState(() {
+      _isLoadingMore = true;
+    });
+    
+    await _fetchStoreInfo();
+    
+    setState(() {
+      _isLoadingMore = false;
+    });
   }
 
   Future<void> _fetchStoreInfo() async {
-    setState(() {
-      _isLoading = true;
-    });
-    if (this._hasMore) {
-      var result = await StoreApi().GetStoreInfoWithFilters(
-        selectedCategory, // 传递选择的类别
-        selectedFloor, // 传递选择的楼层
-        _page,
-        10, // 传递 size，假设每页显示 10 个商铺
-      );
-      if (result != null && result['code'] == 200 && result['data'] != null) {
-        setState(() {
-          _storeInfo.addAll((result['data'] as List)
-              .map((json) => Store.fromJson(json))
-              .toList());
-          _page++;
-        });
-      }
-      // 判断是否是最后一页
-      List<Store> storeList =
-      (result['data'] as List).map((json) => Store.fromJson(json)).toList();
-      if (storeList.length < 10) {
-        setState(() {
-          this._hasMore = false;
-        });
-      }
+    if (!_hasMore) return;
+    
+    if (_page == 1) {
+      setState(() {
+        _isLoading = true;
+      });
     }
+    
+    try {
+      var result = await StoreApi().GetStoreInfoWithFilters(
+        selectedCategory,
+        selectedFloor,
+        _page,
+        10,
+      );
+      
+      if (result != null && result['code'] == 200 && result['data'] != null) {
+        List<Store> newStores = (result['data'] as List)
+            .map((json) => Store.fromJson(json))
+            .toList();
+            
+        setState(() {
+          if (_page == 1) {
+            _storeInfo = newStores;
+          } else {
+            _storeInfo.addAll(newStores);
+          }
+          
+          // 判断是否还有更多数据
+          _hasMore = newStores.length == 10;
+          if (_hasMore) {
+            _page++;
+          }
+        });
+      } else {
+        setState(() {
+          _hasMore = false;
+        });
+      }
+    } catch (e) {
+      print('Error fetching store info: $e');
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _refreshData() async {
     setState(() {
-      _isLoading = false;
+      _page = 1;
+      _hasMore = true;
+      _storeInfo = [];
     });
+    await _fetchStoreInfo();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('商铺管理'),
-      ),
-      body: _isLoading
+      body: _isLoading && _page == 1
           ? Center(child: CircularProgressIndicator())
           : RefreshIndicator(
-        onRefresh: _fetchStoreInfo,
-        child: _buildShopList(),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          //_showChangeShopLocationDialog();
-        },
-        child: Icon(Icons.swap_horiz),
-        tooltip: '更改商铺位置',
-      ),
+              onRefresh: _refreshData,
+              child: _buildShopList(),
+            ),
     );
   }
 
@@ -85,9 +132,14 @@ class _ShopManagementScreenState extends State<ManagerLocationPage> {
     }
 
     return ListView.separated(
-      itemCount: _storeInfo.length,
+      controller: _scrollController,
+      itemCount: _storeInfo.length + 1,
       separatorBuilder: (context, index) => Divider(height: 1),
       itemBuilder: (context, index) {
+        if (index == _storeInfo.length) {
+          return _buildFooter();
+        }
+        
         var shop = _storeInfo[index];
         return ListTile(
           leading: CircleAvatar(
@@ -111,26 +163,73 @@ class _ShopManagementScreenState extends State<ManagerLocationPage> {
     );
   }
 
+  Widget _buildFooter() {
+    if (_isLoadingMore) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16.0),
+        child: Center(child: CircularProgressIndicator()),
+      );
+    } else if (!_hasMore) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16.0),
+        child: Center(child: Text('我已经到底了', style: TextStyle(color: Colors.grey))),
+      );
+    } else {
+      return SizedBox.shrink();
+    }
+  }
+
   void _showChangeShopLocationDialog(Store shop) {
-    final beforeNameController = TextEditingController(text: shop.storeName ?? '');
-    final afterNameController = TextEditingController();
+    final storeNameController = TextEditingController(text: shop.storeName);
+    final serviceCategoryController = TextEditingController(text: shop.serviceCategory);
+    final serviceTypeController = TextEditingController(text: shop.serviceType);
+    final businessHoursController = TextEditingController(text: shop.businessHours);
+    final addressController = TextEditingController(text: shop.address);
+    final floorNumberController = TextEditingController(text: shop.floorNumber.toString());
+    final descriptionController = TextEditingController(text: shop.description);
+    final recommendedServicesController = TextEditingController(text: shop.recommendedServices);
+    final imageController = TextEditingController(text: shop.image);
 
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('更改商铺位置'),
+        title: Text('编辑商铺信息'),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
-                controller: beforeNameController,
-                decoration: InputDecoration(labelText: '当前商铺名称'),
-                readOnly: shop != null,
+                controller: storeNameController,
+                decoration: InputDecoration(labelText: '商铺名称'),
               ),
               TextField(
-                controller: afterNameController,
-                decoration: InputDecoration(labelText: '新商铺名称'),
+                controller: serviceCategoryController,
+                decoration: InputDecoration(labelText: '服务类别'),
+              ),
+              TextField(
+                controller: serviceTypeController,
+                decoration: InputDecoration(labelText: '服务类型'),
+              ),
+              TextField(
+                controller: businessHoursController,
+                decoration: InputDecoration(labelText: '营业时间'),
+              ),
+              TextField(
+                controller: addressController,
+                decoration: InputDecoration(labelText: '地址'),
+              ),
+              TextField(
+                controller: floorNumberController,
+                decoration: InputDecoration(labelText: '楼层'),
+                keyboardType: TextInputType.number,
+              ),
+              TextField(
+                controller: descriptionController,
+                decoration: InputDecoration(labelText: '描述'),
+              ),
+              TextField(
+                controller: recommendedServicesController,
+                decoration: InputDecoration(labelText: '推荐服务'),
               ),
             ],
           ),
@@ -142,54 +241,53 @@ class _ShopManagementScreenState extends State<ManagerLocationPage> {
           ),
           ElevatedButton(
             onPressed: () async {
-              // 调用更改商铺位置的API
+              // 创建更新后的商铺对象
+              Store updatedStore = Store(
+                id: shop.id,
+                storeName: storeNameController.text,
+                serviceCategory: serviceCategoryController.text,
+                serviceType: serviceTypeController.text,
+                businessHours: businessHoursController.text,
+                address: addressController.text,
+                floorNumber: int.tryParse(floorNumberController.text) ?? shop.floorNumber,
+                description: descriptionController.text,
+                recommendedServices: recommendedServicesController.text,
+                image: imageController.text,
+              );
+              
               try {
-                var result = await _changeShopLocation(
-                  beforeNameController.text,
-                  afterNameController.text,
-                );
+                // 将Store对象转换为Map
+                Map<String, dynamic> storeMap = {
+                  'id': updatedStore.id,
+                  'storeName': updatedStore.storeName,
+                  'serviceCategory': updatedStore.serviceCategory,
+                  'serviceType': updatedStore.serviceType,
+                  'businessHours': updatedStore.businessHours,
+                  'address': updatedStore.address,
+                  'floorNumber': updatedStore.floorNumber,
+                  'description': updatedStore.description,
+                  'recommendedServices': updatedStore.recommendedServices,
+                  'image': updatedStore.image,
+                };
+                
+                var result = await StoreApi().UpdateStore(storeMap);
 
                 if (result != null && result['code'] == 200) {
                   Navigator.pop(context);
-                  _fetchStoreInfo(); // 刷新商铺列表
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('商铺位置更改成功')),
-                  );
+                  _refreshData(); // 刷新商铺列表
+                  ElToast.info('商铺信息更新成功');
                 } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('商铺位置更改失败: ${result?['message'] ?? '未知错误'}')),
-                  );
+                  ElToast.info(result['msg']);
                 }
               } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('发生错误: $e')),
-                );
+                print('发生错误: $e');
               }
             },
-            child: Text('确认更改'),
+            child: Text('保存'),
           ),
         ],
       ),
     );
-  }
-
-  Future<Map<String, dynamic>?> _changeShopLocation(String beforeName, String afterName) async {
-    // 实际API调用
-    try {
-      // TODO: 修改店铺名称
-      // 这里应该是实际的API调用
-      // return await ShopApi().changeShopLocation(beforeName, afterName);
-
-      // 模拟API调用
-      await Future.delayed(Duration(seconds: 1));
-      return {
-        'code': 200,
-        'data': 'success'
-      };
-    } catch (e) {
-      print('Error changing shop location: $e');
-      return null;
-    }
   }
 
   void _showShopDetails(Store store) {

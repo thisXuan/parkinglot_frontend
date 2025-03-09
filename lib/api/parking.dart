@@ -49,6 +49,13 @@ class ParkingApi {
         method: DioMethod.get);
     return result;
   }
+
+  // 被占用位置显示
+  Fulllocation() async{
+    var result = await Request().request("/parking/fulllocation",
+        method: DioMethod.get);
+    return result;
+  }
 }
 
 // 导出全局使用这一个实例

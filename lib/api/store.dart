@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:parkinglot_frontend/entity/Store.dart';
 
 import '../utils/request.dart';
 
@@ -104,6 +105,14 @@ class StoreApi {
     }
     var result = await Request().request("/store/getOrder?type=$data",
         method: DioMethod.get
+    );
+    return result;
+  }
+
+  UpdateStore(dynamic data) async{
+    var result = await Request().request("/store/updateStore",
+        method: DioMethod.post,
+        data: data
     );
     return result;
   }

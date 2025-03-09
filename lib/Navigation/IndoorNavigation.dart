@@ -70,6 +70,9 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage>
   // 空位置显示
   List<Coordinate> coordinates = [];
 
+  // 已被占用的位置显示
+  List<Coordinate> full_coordinates = [];
+
   @override
   void initState() {
     super.initState();
@@ -81,6 +84,7 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage>
     _getStoreLocations(_selectedFloor);
     getCoordinate();
     getEmptySpace();
+    getFullSpace();
     _transformationController.addListener(() {
       setState(() {
         _scale = _transformationController.value.getMaxScaleOnAxis();
@@ -125,6 +129,18 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage>
       setState(() {
         print(result);
         coordinates = (result['data'] as List)
+            .map((json) => Coordinate.fromJson(json))
+            .toList();
+      });
+    }
+  }
+
+  void getFullSpace() async {
+    var result = await ParkingApi().Fulllocation();
+    if (result != null && result['code'] == 200) {
+      setState(() {
+        print(result);
+        full_coordinates = (result['data'] as List)
             .map((json) => Coordinate.fromJson(json))
             .toList();
       });
@@ -346,6 +362,7 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage>
         if(floor=="B2"){
           getEmptySpace();
           getCoordinate();
+          getFullSpace();
         }
         _selectedFloor = floor;
         _getStoreLocations(_selectedFloor);
@@ -449,6 +466,7 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage>
                       scale: _scale,
                       coordinate: coordinate,
                       coordinates: coordinates,
+                      fullCoordinates: full_coordinates,
                       animationProgress: _progressAnimation.value,
                       transformationController: _transformationController,
                       availableHeight: MediaQuery.of(context).size.height,
@@ -641,6 +659,7 @@ class IndoorMapPainter extends CustomPainter {
   final List<Point>? points;
   final Coordinate coordinate;
   final List<Coordinate> coordinates;
+  final List<Coordinate> fullCoordinates;
 
   final double scale;
   final double animationProgress;
@@ -658,7 +677,8 @@ class IndoorMapPainter extends CustomPainter {
       required this.availableHeight,
       required this.storeLocations,
       required this.coordinate,
-      required this.coordinates});
+      required this.coordinates,
+      required this.fullCoordinates});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -733,6 +753,17 @@ class IndoorMapPainter extends CustomPainter {
           double x = size.width * coord.xCoordinate / 100;
           double y = size.height * coord.yCoordinate / 100;
           canvas.drawCircle(Offset(x, y), 4.0 / scale, coordinatesPaint);
+        }
+
+        // 绘制被占用位置
+        final Paint coordinatesFullPaint = Paint()
+          ..color = Colors.green
+          ..style = PaintingStyle.fill;
+
+        for (var coord in fullCoordinates) {
+          double x = size.width * coord.xCoordinate / 100;
+          double y = size.height * coord.yCoordinate / 100;
+          canvas.drawCircle(Offset(x, y), 4.0 / scale, coordinatesFullPaint);
         }
       }
       canvas.restore();
@@ -881,6 +912,17 @@ class IndoorMapPainter extends CustomPainter {
         double x = size.width * coord.xCoordinate / 100;
         double y = size.height * coord.yCoordinate / 100;
         canvas.drawCircle(Offset(x, y), 4.0 / scale, coordinatesPaint);
+      }
+
+      // 绘制被占用位置
+      final Paint coordinatesFullPaint = Paint()
+        ..color = Colors.green
+        ..style = PaintingStyle.fill;
+
+      for (var coord in fullCoordinates) {
+        double x = size.width * coord.xCoordinate / 100;
+        double y = size.height * coord.yCoordinate / 100;
+        canvas.drawCircle(Offset(x, y), 4.0 / scale, coordinatesFullPaint);
       }
     }
 

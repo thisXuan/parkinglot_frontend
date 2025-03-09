@@ -22,7 +22,7 @@ class _TabsState extends State<ManagerTab>{
   int _currentIndex=0;
   //下面的三个方法都是三个界面的方法
   List _pageList=[];
-  List<String> titles = ["管理商铺","管理用户","账号管理"];
+  List<String> titles = ["商铺管理","用户管理","账号管理"];
 
   @override
   void initState() {

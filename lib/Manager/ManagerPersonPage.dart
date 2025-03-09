@@ -65,23 +65,28 @@ class _UserManagementScreenState extends State<ManagerPersonPage> with SingleTic
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('用户管理'),
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: [
-            Tab(text: '管理员'),
-            Tab(text: '普通用户'),
-          ],
-        ),
-      ),
-      body: isLoading
-          ? Center(child: CircularProgressIndicator())
-          : TabBarView(
-        controller: _tabController,
+      body: Column(
         children: [
-          _buildUserList(adminUsers, true),
-          _buildUserList(normalUsers, false),
+          Material(
+            child: TabBar(
+              controller: _tabController,
+              tabs: [
+                Tab(text: '管理员'),
+                Tab(text: '普通用户'),
+              ],
+            ),
+          ),
+          Expanded(
+            child: isLoading
+                ? Center(child: CircularProgressIndicator())
+                : TabBarView(
+                    controller: _tabController,
+                    children: [
+                      _buildUserList(adminUsers, true),
+                      _buildUserList(normalUsers, false),
+                    ],
+                  ),
+          ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
