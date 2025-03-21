@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:parkinglot_frontend/AccountManager/Account.dart';
 import 'package:parkinglot_frontend/AccountManager/PersonalInfoPage.dart';
 import 'package:parkinglot_frontend/Manager/ManageLocationPage.dart';
+import 'package:parkinglot_frontend/Manager/ManagerDataPage.dart';
 import 'package:parkinglot_frontend/Manager/ManagerPersonPage.dart';
 import 'package:parkinglot_frontend/Manager/ManagerSettingPage.dart';
 import 'package:parkinglot_frontend/Navigation/IndoorNavigation.dart';
@@ -22,7 +23,7 @@ class _TabsState extends State<ManagerTab>{
   int _currentIndex=0;
   //下面的三个方法都是三个界面的方法
   List _pageList=[];
-  List<String> titles = ["商铺管理","用户管理","账号管理"];
+  List<String> titles = ["商铺管理","用户管理","数据分析","账号管理"];
 
   @override
   void initState() {
@@ -30,6 +31,7 @@ class _TabsState extends State<ManagerTab>{
     _pageList=[
       ManagerLocationPage(),
       ManagerPersonPage(),
+      ManagerDataPage(),
       ManagerSettingPage()
     ];
   }
@@ -65,6 +67,10 @@ class _TabsState extends State<ManagerTab>{
             BottomNavigationBarItem(
                 icon: Icon(Icons.man),
                 label: "管理用户"
+            ),
+            BottomNavigationBarItem(
+                icon: Icon(Icons.data_exploration),
+                label: "数据分析"
             ),
             BottomNavigationBarItem(
                 icon: Icon(Icons.settings),
