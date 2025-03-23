@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:parkinglot_frontend/api/data.dart';
+import 'package:parkinglot_frontend/entity/DataDTO.dart';
+import 'package:parkinglot_frontend/entity/SalesDataDTO.dart';
+import 'package:parkinglot_frontend/utils/request.dart';
 
 class ManagerDataPage extends StatefulWidget {
   @override
@@ -7,13 +11,19 @@ class ManagerDataPage extends StatefulWidget {
 }
 
 class ManagerDataPageState extends State<ManagerDataPage> {
-  // 模拟数据
-  final int visitorCount = 1234;
-  final int availableParkingSpots = 45;
-  final int activeShops = 28;
+  // 数据概览
+  int visitorCount = 0;
+  int availableParkingSpots = 0;
+  int activeShops = 0;
   
   // 销售数据
-  late List<SalesData> salesDataList;
+  List<SalesData> salesDataList = List.filled(7, new SalesData(date: DateTime.now(), sales: 0, orders: 0));
+
+  // 订单分析
+  int todayOrder = 0;
+  int dayOrderDay = 0;
+  int weekOrder=0;
+  int weekOrderWeek=0;
 
   // 停车场数据
   final List<ParkingData> parkingData = [
@@ -24,40 +34,94 @@ class ManagerDataPageState extends State<ManagerDataPage> {
   ];
 
   // 用户统计数据
-  final int totalUsers = 5000;
-  final int newUsers = 120;
-  final List<FlSpot> activeUsersData = [
-    FlSpot(0, 800),
-    FlSpot(1, 1000),
-    FlSpot(2, 950),
-    FlSpot(3, 1200),
-    FlSpot(4, 1100),
-    FlSpot(5, 1300),
-    FlSpot(6, 1250),
-  ];
+  int totalUsers = 0;
+  int newUsers = 0;
+  List<FlSpot> activeUsersData = [];
 
   @override
   void initState() {
     super.initState();
-    // 初始化销售数据
+    initTotalView();
     initSalesData();
+    initOrderData();
+    initUserData();
   }
 
-  void initSalesData() {
+  void initTotalView() async{
+    var result = await DataApi().TotalView();
+    if(result!=null){
+      var code = result['code'];
+      if(code==200){
+        DataDTO dataDTO = DataDTO.fromJson(result['data']);
+        setState(() {
+          visitorCount = dataDTO.visitor;
+          availableParkingSpots = dataDTO.parking;
+          activeShops = dataDTO.store;
+        });
+      }
+    }
+  }
+
+  void initSalesData() async{
     final now = DateTime.now();
+    var result = await DataApi().SalesAnalysis();
+    List<int> sales = List.filled(7, 0);
+    if(result!=null){
+      var code = result['code'];
+      if(code==200){
+        sales = List<int>.from(result['data']);
+      }else{
+        return;
+      }
+    }
     salesDataList = List.generate(7, (index) {
       final date = now.subtract(Duration(days: 6 - index));
       return SalesData(
         date: date,
-        sales: [2500, 3200, 2800, 3600, 3100, 3800, 4200][index],
+        sales: sales[index],
         orders: [120, 150, 130, 180, 160, 200, 220][index],
       );
     });
   }
 
+  void initOrderData() async{
+    var result = await DataApi().OrderAnalysis();
+    if(result!=null){
+      var code = result['code'];
+      if(code==200){
+        setState(() {
+          todayOrder = result['data']['todayOrder'];
+          dayOrderDay = result['data']['dayOrderDay'];
+          weekOrder=result['data']['weekOrder'];
+          weekOrderWeek=result['data']['weekOrderWeek'];
+        });
+      }
+    }
+  }
+
+  void initUserData() async{
+    var result = await DataApi().UserAnalysis();
+    if(result!=null){
+      var code = result['code'];
+      if(code==200){
+        setState(() {
+          totalUsers = result['data']['totalRegister'];
+          newUsers = result['data']['todayRegister'];
+          List<int> weekRegister = List<int>.from(result['data']['weekRegister']);
+          for(int i=0;i<weekRegister.length;i++){
+            setState(() {
+              activeUsersData.add(FlSpot(i.toDouble(), weekRegister[i].toDouble()));
+            });
+          }
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xFFF5F5F5),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16),
         child: Column(
@@ -78,6 +142,7 @@ class ManagerDataPageState extends State<ManagerDataPage> {
 
   Widget _buildOverview() {
     return Card(
+      color: Colors.white,
       child: Padding(
         padding: EdgeInsets.all(16),
         child: Column(
@@ -110,6 +175,7 @@ class ManagerDataPageState extends State<ManagerDataPage> {
 
   Widget _buildSalesAnalysis() {
     return Card(
+      color: Colors.white,
       child: Padding(
         padding: EdgeInsets.all(16),
         child: Column(
@@ -170,7 +236,7 @@ class ManagerDataPageState extends State<ManagerDataPage> {
                   spots: salesDataList.asMap().entries.map((e) {
                     return FlSpot(e.key.toDouble(), e.value.sales.toDouble());
                   }).toList(),
-                  isCurved: true,
+                  isCurved: false,
                   color: Colors.blue,
                 ),
               ],
@@ -182,14 +248,6 @@ class ManagerDataPageState extends State<ManagerDataPage> {
   }
 
   Widget _buildOrdersAnalysis() {
-    // 计算最新的日环比和周同比
-    final todayOrders = salesDataList.last.orders;
-    final yesterdayOrders = salesDataList[salesDataList.length - 2].orders;
-    final lastWeekOrders = todayOrders * 0.8; // 模拟数据，实际应该从数据源获取
-
-    final dayChange = ((todayOrders - yesterdayOrders) / yesterdayOrders * 100).toStringAsFixed(1);
-    final weekChange = ((todayOrders - lastWeekOrders) / lastWeekOrders * 100).toStringAsFixed(1);
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -200,18 +258,18 @@ class ManagerDataPageState extends State<ManagerDataPage> {
             Expanded(
               child: _buildOrderMetric(
                 '今日订单',
-                todayOrders.toString(),
-                '日环比 ${dayChange}%',
-                dayChange.startsWith('-') ? Colors.red : Colors.green,
+                todayOrder.toString(),
+                '日环比 ${dayOrderDay}%',
+                dayOrderDay.toString().startsWith('-') ? Colors.green : Colors.red,
               ),
             ),
             SizedBox(width: 16),
             Expanded(
               child: _buildOrderMetric(
                 '周订单趋势',
-                todayOrders.toString(),
-                '周同比 ${weekChange}%',
-                weekChange.startsWith('-') ? Colors.red : Colors.green,
+                weekOrder.toString(),
+                '周同比 ${weekOrderWeek}%',
+                weekOrderWeek.toString().startsWith('-') ? Colors.green : Colors.red,
               ),
             ),
           ],
@@ -245,6 +303,7 @@ class ManagerDataPageState extends State<ManagerDataPage> {
 
   Widget _buildParkingAnalysis() {
     return Card(
+      color: Colors.white,
       child: Padding(
         padding: EdgeInsets.all(16),
         child: Column(
@@ -290,6 +349,7 @@ class ManagerDataPageState extends State<ManagerDataPage> {
 
   Widget _buildUserAnalysis() {
     return Card(
+      color: Colors.white,
       child: Padding(
         padding: EdgeInsets.all(16),
         child: Column(
@@ -329,7 +389,7 @@ class ManagerDataPageState extends State<ManagerDataPage> {
                   lineBarsData: [
                     LineChartBarData(
                       spots: activeUsersData,
-                      isCurved: true,
+                      isCurved: false,
                       color: Colors.green,
                     ),
                   ],
