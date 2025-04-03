@@ -59,6 +59,7 @@ class _TabsState extends State<Tabs>{
          */
         body:this._pageList[this._currentIndex],
         bottomNavigationBar: BottomNavigationBar(
+          backgroundColor: Colors.white,
           type: BottomNavigationBarType.fixed,
           currentIndex: this._currentIndex,
           //实现底部导航栏点击选中功能

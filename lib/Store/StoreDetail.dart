@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:parkinglot_frontend/CarSearch/Payment.dart';
+import 'package:parkinglot_frontend/Store/StorePayment.dart';
 import 'package:parkinglot_frontend/api/store.dart';
 import 'package:parkinglot_frontend/api/voucher.dart';
 import 'package:parkinglot_frontend/utils/util.dart';
@@ -117,6 +119,7 @@ class _StoreDetailPageState extends State<StoreDetailPage> {
       children: [
         const SizedBox(height: 8),
         Card(
+          color: Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8.0),
           ),
@@ -181,15 +184,20 @@ class _StoreDetailPageState extends State<StoreDetailPage> {
                       horizontal: 12.0, vertical: 8.0),
                   child: GestureDetector(
                     onTap: () async{
-                      var result = await StoreApi().BuyVoucher(voucher.id);
-                      if(result!=null){
-                        var code = result['code'];
-                        if(code==200){
-                          ElToast.info(result['data']);
-                        }else{
-                          ElToast.info(result['msg']);
-                        }
-                      }
+                      // var result = await StoreApi().BuyVoucher(voucher.id);
+                      // if(result!=null){
+                      //   var code = result['code'];
+                      //   if(code==200){
+                      //     ElToast.info(result['data']);
+                      //   }else{
+                      //     ElToast.info(result['msg']);
+                      //   }
+                      // }
+                      // 跳转到支付界面
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => StorePaymentPage(amount: voucher.payValue,)),
+                      );
                     },
                     child: Column(
                       children: [
@@ -225,6 +233,7 @@ class _StoreDetailPageState extends State<StoreDetailPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        backgroundColor: Colors.grey[100],
         appBar: AppBar(
           title: Text("品牌详情"),
         ),
@@ -262,6 +271,7 @@ class _StoreDetailPageState extends State<StoreDetailPage> {
               ),
               // 店铺信息卡片
               Card(
+                color: Colors.white,
                 margin: const EdgeInsets.all(0),
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),

@@ -38,6 +38,7 @@ class _MallRatingPageState extends State<MallRatingPage> {
     List<String> currentTags = isGoodRating ? _goodTags : _badTags;
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
