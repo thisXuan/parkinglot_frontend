@@ -15,10 +15,14 @@ class _ShopManagementScreenState extends State<ManagerLocationPage> {
   int _page = 1;
   bool _hasMore = true; //判断有没有数据
   ScrollController _scrollController = new ScrollController();
-  String selectedFloor = "全部楼层";
+  String selectedFloor = 'B1';
   String selectedCategory = "全部";
   List<Store> _storeInfo = [];
   bool _isLoadingMore = false;
+  final List<String> floors = ['B1', 'M', 'F1', 'F2', 'F3', 'F4', 'F5'];
+  String selectedShopNumber = '1';
+  String selectedBuilding = 'A';
+  final List<String> buildings = ['A', 'B']; // 场馆选项
 
   @override
   void initState() {
@@ -117,6 +121,7 @@ class _ShopManagementScreenState extends State<ManagerLocationPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[200],
       body: _isLoading && _page == 1
           ? Center(child: CircularProgressIndicator())
           : RefreshIndicator(
@@ -131,33 +136,64 @@ class _ShopManagementScreenState extends State<ManagerLocationPage> {
       return Center(child: Text('暂无商铺信息'));
     }
 
-    return ListView.separated(
+    return ListView.builder(
       controller: _scrollController,
       itemCount: _storeInfo.length + 1,
-      separatorBuilder: (context, index) => Divider(height: 1),
+      padding: EdgeInsets.all(8.0),
       itemBuilder: (context, index) {
         if (index == _storeInfo.length) {
           return _buildFooter();
         }
         
         var shop = _storeInfo[index];
-        return ListTile(
-          leading: CircleAvatar(
-            backgroundColor: Colors.amber[100],
-            child: Text(
-              shop.storeName.substring(0, 1),
-              style: TextStyle(color: Colors.amber[800]),
+        return Card(
+          color: Colors.white,
+          margin: EdgeInsets.symmetric(vertical: 8.0),
+          elevation: 2.0,
+          child: InkWell(
+            onTap: () => _showShopDetails(shop),
+            child: Padding(
+              padding: EdgeInsets.all(12.0),
+              child: Row(
+                children: [
+                  CircleAvatar(
+                    backgroundColor: Colors.amber[100],
+                    child: Text(
+                      shop.storeName.substring(0, 1),
+                      style: TextStyle(color: Colors.amber[800]),
+                    ),
+                  ),
+                  SizedBox(width: 16.0),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          shop.storeName,
+                          style: TextStyle(
+                            fontSize: 16.0,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        SizedBox(height: 4.0),
+                        Text(
+                          '位置: ${shop.address}',
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 14.0,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.edit_location_alt, color: Colors.blue),
+                    onPressed: () => _showChangeShopLocationDialog(shop),
+                  ),
+                ],
+              ),
             ),
           ),
-          title: Text(shop.storeName),
-          subtitle: Text('位置: ${shop.address}'),
-          trailing: IconButton(
-            icon: Icon(Icons.edit_location_alt, color: Colors.blue),
-            onPressed: () => _showChangeShopLocationDialog(shop),
-          ),
-          onTap: () {
-            _showShopDetails(shop);
-          },
         );
       },
     );
@@ -214,14 +250,78 @@ class _ShopManagementScreenState extends State<ManagerLocationPage> {
                 controller: businessHoursController,
                 decoration: InputDecoration(labelText: '营业时间'),
               ),
-              TextField(
-                controller: addressController,
-                decoration: InputDecoration(labelText: '地址'),
-              ),
-              TextField(
-                controller: floorNumberController,
-                decoration: InputDecoration(labelText: '楼层'),
-                keyboardType: TextInputType.number,
+              Row(
+                children: [
+                  Expanded(
+                    child: DropdownButtonFormField<String>(
+                      decoration: InputDecoration(
+                        labelText: '场馆',
+                        contentPadding: EdgeInsets.symmetric(horizontal: 12),
+                      ),
+                      value: selectedBuilding,
+                      items: buildings.map((String building) {
+                        return DropdownMenuItem<String>(
+                          value: building,
+                          child: Text('${building}馆'),
+                        );
+                      }).toList(),
+                      onChanged: (String? newValue) {
+                        if (newValue != null) {
+                          setState(() {
+                            selectedBuilding = newValue;
+                          });
+                        }
+                      },
+                    ),
+                  ),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: DropdownButtonFormField<String>(
+                      decoration: InputDecoration(
+                        labelText: '楼层',
+                        contentPadding: EdgeInsets.symmetric(horizontal: 12),
+                      ),
+                      value: selectedFloor,
+                      items: floors.map((String floor) {
+                        return DropdownMenuItem<String>(
+                          value: floor,
+                          child: Text(floor),
+                        );
+                      }).toList(),
+                      onChanged: (String? newValue) {
+                        if (newValue != null) {
+                          setState(() {
+                            selectedFloor = newValue;
+                          });
+                        }
+                      },
+                    ),
+                  ),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: DropdownButtonFormField<String>(
+                      decoration: InputDecoration(
+                        labelText: '店铺号',
+                        contentPadding: EdgeInsets.symmetric(horizontal: 12),
+                      ),
+                      value: selectedShopNumber,
+                      items: List<String>.generate(40, (index) => (index + 1).toString())
+                          .map((String number) {
+                        return DropdownMenuItem<String>(
+                          value: number,
+                          child: Text(number),
+                        );
+                      }).toList(),
+                      onChanged: (String? newValue) {
+                        if (newValue != null) {
+                          setState(() {
+                            selectedShopNumber = newValue;
+                          });
+                        }
+                      },
+                    ),
+                  ),
+                ],
               ),
               TextField(
                 controller: descriptionController,
@@ -248,7 +348,7 @@ class _ShopManagementScreenState extends State<ManagerLocationPage> {
                 serviceCategory: serviceCategoryController.text,
                 serviceType: serviceTypeController.text,
                 businessHours: businessHoursController.text,
-                address: addressController.text,
+                address: getFullAddress(),
                 floorNumber: int.tryParse(floorNumberController.text) ?? shop.floorNumber,
                 description: descriptionController.text,
                 recommendedServices: recommendedServicesController.text,
@@ -317,5 +417,9 @@ class _ShopManagementScreenState extends State<ManagerLocationPage> {
         ],
       ),
     );
+  }
+
+  String getFullAddress() {
+    return '${selectedBuilding}馆-$selectedFloor-$selectedShopNumber';
   }
 }

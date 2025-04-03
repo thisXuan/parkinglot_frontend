@@ -65,9 +65,11 @@ class _UserManagementScreenState extends State<ManagerPersonPage> with SingleTic
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[200],
       body: Column(
         children: [
           Material(
+            color: Colors.white,
             child: TabBar(
               controller: _tabController,
               tabs: [
@@ -91,7 +93,6 @@ class _UserManagementScreenState extends State<ManagerPersonPage> with SingleTic
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // 添加新用户的逻辑
           _showAddUserDialog();
         },
         child: Icon(Icons.add),
@@ -106,38 +107,67 @@ class _UserManagementScreenState extends State<ManagerPersonPage> with SingleTic
 
     return RefreshIndicator(
       onRefresh: _fetchUsers,
-      child: ListView.separated(
+      child: ListView.builder(
+        padding: EdgeInsets.all(8),
         itemCount: users.length,
-        separatorBuilder: (context, index) => Divider(height: 1),
         itemBuilder: (context, index) {
           UserMessage user = users[index];
-          return ListTile(
-            leading: CircleAvatar(
-              backgroundColor: Colors.deepPurple[100],
-              child: Text(
-                user.name?.substring(0, 1).toUpperCase() ?? '?',
-                style: TextStyle(color: Colors.deepPurple),
+          return Padding(
+            padding: EdgeInsets.symmetric(vertical: 4),
+            child: Card(
+              color: Colors.white,
+              elevation: 2,
+              child: Padding(
+                padding: EdgeInsets.all(12),
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      backgroundColor: Colors.deepPurple[100],
+                      child: Text(
+                        user.name?.substring(0, 1).toUpperCase() ?? '?',
+                        style: TextStyle(color: Colors.deepPurple),
+                      ),
+                    ),
+                    SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            user.name ?? '未知用户',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          SizedBox(height: 4),
+                          Text(
+                            user.phone.isEmpty ? '无电话号' : user.phone,
+                            style: TextStyle(
+                              color: Colors.grey[600],
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: Icon(Icons.edit, color: Colors.blue),
+                          onPressed: () => _showEditUserDialog(user),
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.delete, color: Colors.red),
+                          onPressed: () => _showDeleteConfirmDialog(user),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
-            title: Text(user.name ?? '未知用户'),
-            subtitle: Text(user.phone.isEmpty?'无电话号':user.phone),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  icon: Icon(Icons.edit, color: Colors.blue),
-                  onPressed: () => _showEditUserDialog(user),
-                ),
-                IconButton(
-                  icon: Icon(Icons.delete, color: Colors.red),
-                  onPressed: () => _showDeleteConfirmDialog(user),
-                ),
-              ],
-            ),
-            onTap: () {
-              // 查看用户详情
-              _showUserDetails(user);
-            },
           );
         },
       ),

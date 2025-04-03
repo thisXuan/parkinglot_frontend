@@ -31,7 +31,7 @@ class Request {
   Request._internal() {
     // 初始化基本选项
     BaseOptions options = BaseOptions(
-        baseUrl: 'http://192.168.18.131:8081',
+        baseUrl: 'http://10.6.33.59:8081',
         connectTimeout: const Duration(seconds: 5),
         receiveTimeout: const Duration(seconds: 5));
     _instance = this;
