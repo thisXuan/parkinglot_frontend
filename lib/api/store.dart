@@ -117,6 +117,20 @@ class StoreApi {
     return result;
   }
 
+  CreateOrder(dynamic data) async{
+    var result = await Request().request("/store/createOrder?voucher_id=$data",
+        method: DioMethod.post
+    );
+    return result;
+  }
+
+  PayOrder(dynamic data) async{
+    var result = await Request().request("/store/payOrder?order_id=$data",
+        method: DioMethod.post
+    );
+    return result;
+  }
+
 }
 
 // 导出全局使用这一个实例

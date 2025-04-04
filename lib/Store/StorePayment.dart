@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:parkinglot_frontend/AccountManager/OrderPage.dart';
 import 'dart:async';
+
+import 'package:parkinglot_frontend/api/store.dart';
+import 'package:parkinglot_frontend/utils/util.dart';
 
 class StorePaymentPage extends StatefulWidget {
   final double amount; // 接收支付金额参数
+  final int voucher_id;
 
-  const StorePaymentPage({Key? key, required this.amount}) : super(key: key);
+  const StorePaymentPage({Key? key, required this.amount, required this.voucher_id}) : super(key: key);
 
   @override
   _PaymentPageState createState() => _PaymentPageState();
@@ -15,17 +20,29 @@ class _PaymentPageState extends State<StorePaymentPage> {
   double discount = 15.39; // 自定义的折扣金额
   Timer? _timer;
   int _timeLeft = 15 * 60; // 15分钟，以秒为单位
+  String orderId = "";
 
   @override
   void initState() {
     super.initState();
     startTimer();
+    createOrder();
   }
 
   @override
   void dispose() {
     _timer?.cancel();
     super.dispose();
+  }
+
+  void createOrder() async{
+    var result = await StoreApi().CreateOrder(widget.voucher_id);
+    if(result!=null&&result['code']==200){
+      var data = result['data'];
+      setState(() {
+        orderId = data.toString();
+      });
+    }
   }
 
   void startTimer() {
@@ -147,7 +164,12 @@ class _PaymentPageState extends State<StorePaymentPage> {
                 SizedBox(width: 12),
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: () => Navigator.of(context).pop(true),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => OrderPage()),
+                      );
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.deepOrange,
                       shape: RoundedRectangleBorder(
@@ -326,24 +348,75 @@ class _PaymentPageState extends State<StorePaymentPage> {
   }
 
   void _handlePayment() {
-    // 实现支付逻辑
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('支付确认'),
-        content: Text('确认支付 ¥${(widget.amount - discount).toStringAsFixed(2)}？'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('取消'),
+        content: Text(
+          '确认支付 ¥${(widget.amount/100 - discount).toStringAsFixed(2)}？',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
           ),
-          TextButton(
-            onPressed: () {
-              // 这里添加实际的支付处理逻辑
-              Navigator.pop(context);
-              // 支付成功后的处理
-            },
-            child: Text('确认'),
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        contentPadding: EdgeInsets.only(
+          top: 20,
+          bottom: 10,
+          left: 24,
+          right: 24,
+        ),
+        actions: [
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+            child: Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: OutlinedButton.styleFrom(
+                      side: BorderSide(color: Colors.deepOrange),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(22),
+                      ),
+                      minimumSize: Size(0, 44),
+                    ),
+                    child: Text(
+                      '取消',
+                      style: TextStyle(color: Colors.deepOrange),
+                    ),
+                  ),
+                ),
+                SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () async{
+                      var result = await StoreApi().PayOrder(orderId);
+                      if(result!=null&&result['code']==200){
+                        ElToast.info(result['data']);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => OrderPage()),
+                        );
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.deepOrange,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(22),
+                      ),
+                      minimumSize: Size(0, 44),
+                    ),
+                    child: Text(
+                      '确认',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),

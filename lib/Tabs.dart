@@ -8,14 +8,15 @@ import 'package:parkinglot_frontend/QRcode/QRScanPage.dart';
 
 class Tabs extends StatefulWidget{
   String? location;
+  final int initialIndex;
 
-  Tabs({this.location, Key? key}) : super(key: key);
+  Tabs({this.location, this.initialIndex = 0, Key? key}) : super(key: key);
 
   _TabsState createState()=>_TabsState();
 }
 
 class _TabsState extends State<Tabs>{
-  int _currentIndex=0;
+  late int _currentIndex;
   //下面的三个方法都是三个界面的方法
   List _pageList=[];
   List<String> titles = ["地图导览","品牌筛选","停车缴费","我的账户"];
@@ -23,6 +24,7 @@ class _TabsState extends State<Tabs>{
   @override
   void initState() {
     super.initState();
+    _currentIndex = widget.initialIndex;
     _pageList=[
       IndoorNavigationPage(location: widget.location,),
       BrandSelectionPage(),

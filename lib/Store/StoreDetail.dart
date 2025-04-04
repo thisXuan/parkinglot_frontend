@@ -184,19 +184,10 @@ class _StoreDetailPageState extends State<StoreDetailPage> {
                       horizontal: 12.0, vertical: 8.0),
                   child: GestureDetector(
                     onTap: () async{
-                      // var result = await StoreApi().BuyVoucher(voucher.id);
-                      // if(result!=null){
-                      //   var code = result['code'];
-                      //   if(code==200){
-                      //     ElToast.info(result['data']);
-                      //   }else{
-                      //     ElToast.info(result['msg']);
-                      //   }
-                      // }
                       // 跳转到支付界面
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => StorePaymentPage(amount: voucher.payValue,)),
+                        MaterialPageRoute(builder: (context) => StorePaymentPage(amount: voucher.payValue,voucher_id: voucher.id,)),
                       );
                     },
                     child: Column(
