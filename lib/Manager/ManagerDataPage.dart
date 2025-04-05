@@ -129,6 +129,8 @@ class ManagerDataPageState extends State<ManagerDataPage> {
           children: [
             _buildOverview(),
             SizedBox(height: 20),
+            _buildReviews(),
+            SizedBox(height: 20),
             _buildSalesAnalysis(),
             SizedBox(height: 20),
             _buildParkingAnalysis(),
@@ -156,6 +158,45 @@ class ManagerDataPageState extends State<ManagerDataPage> {
                 _buildOverviewItem('访问人数', visitorCount),
                 _buildOverviewItem('空闲车位', availableParkingSpots),
                 _buildOverviewItem('营业店铺', activeShops),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildReviews() {
+    return Card(
+      color: Colors.white,
+      child: Padding(
+        padding: EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            GestureDetector(
+              onTap: (){
+                print("1111");
+              },
+              child: Row(
+                children: [
+                  Text('商场评价', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  Spacer(),  // 使“点击查看详情”和图标靠右对齐
+                  Row(
+                    children: [
+                      Text("点击查看详情", style: TextStyle(fontSize: 14, color: Colors.grey)),
+                      Icon(Icons.arrow_forward_ios, color: Colors.grey)
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _buildOverviewItem('整体评分', 0),
+                _buildOverviewItem('反馈人数', 0),
               ],
             ),
           ],

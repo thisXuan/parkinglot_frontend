@@ -401,7 +401,7 @@ class MemberPageState extends State<MemeberPage> {
 
   Widget _buildIconWithLabel(String label, IconData icon) {
     return GestureDetector(
-      onTap: (){
+      onTap: () async{
         if(label=="我的订单"){
           Navigator.push(
             context,
@@ -421,6 +421,12 @@ class MemberPageState extends State<MemeberPage> {
           );
         }
         if(label=="商场评价"){
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          String? userJson = prefs.getString('user');
+          if (userJson == null) {
+            ElToast.info("请先登录");
+            return;
+          }
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => MallRatingPage()),
