@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:parkinglot_frontend/Manager/ManagerReviewPage.dart';
 import 'package:parkinglot_frontend/api/data.dart';
 import 'package:parkinglot_frontend/entity/DataDTO.dart';
 import 'package:parkinglot_frontend/entity/SalesDataDTO.dart';
@@ -176,12 +177,15 @@ class ManagerDataPageState extends State<ManagerDataPage> {
           children: [
             GestureDetector(
               onTap: (){
-                print("1111");
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ManagerReviewPage()),
+                );
               },
               child: Row(
                 children: [
                   Text('商场评价', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                  Spacer(),  // 使“点击查看详情”和图标靠右对齐
+                  Spacer(),  // 使"点击查看详情"和图标靠右对齐
                   Row(
                     children: [
                       Text("点击查看详情", style: TextStyle(fontSize: 14, color: Colors.grey)),
@@ -408,34 +412,40 @@ class ManagerDataPageState extends State<ManagerDataPage> {
             SizedBox(height: 20),
             Container(
               height: 200,
-              child: LineChart(
-                LineChartData(
-                  gridData: FlGridData(show: true),
-                  titlesData: FlTitlesData(
-                    bottomTitles: AxisTitles(
-                      sideTitles: SideTitles(
-                        showTitles: true,
-                        getTitlesWidget: (value, meta) {
-                          if (value.toInt() >= 0 && value.toInt() < salesDataList.length) {
-                            return Text(
-                              '${salesDataList[value.toInt()].date.day}日',
-                              style: TextStyle(fontSize: 10),
-                            );
-                          }
-                          return Text('');
-                        },
+              child: activeUsersData.isEmpty
+                  ? Center(
+                      child: Text('暂无数据', 
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                    )
+                  : LineChart(
+                      LineChartData(
+                        gridData: FlGridData(show: true),
+                        titlesData: FlTitlesData(
+                          bottomTitles: AxisTitles(
+                            sideTitles: SideTitles(
+                              showTitles: true,
+                              getTitlesWidget: (value, meta) {
+                                if (value.toInt() >= 0 && value.toInt() < salesDataList.length) {
+                                  return Text(
+                                    '${salesDataList[value.toInt()].date.day}日',
+                                    style: TextStyle(fontSize: 10),
+                                  );
+                                }
+                                return Text('');
+                              },
+                            ),
+                          ),
+                        ),
+                        lineBarsData: [
+                          LineChartBarData(
+                            spots: activeUsersData,
+                            isCurved: false,
+                            color: Colors.green,
+                          ),
+                        ],
                       ),
                     ),
-                  ),
-                  lineBarsData: [
-                    LineChartBarData(
-                      spots: activeUsersData,
-                      isCurved: false,
-                      color: Colors.green,
-                    ),
-                  ],
-                ),
-              ),
             ),
           ],
         ),

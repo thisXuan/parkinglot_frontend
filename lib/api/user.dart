@@ -102,6 +102,21 @@ class UserApi {
         method: DioMethod.post);
     return result;
   }
+
+  // 提交评论
+  PostReview(dynamic data) async{
+    var result = await Request().request("/user/postReview",
+        method: DioMethod.post,
+        data: data);
+    return result;
+  }
+
+  // 查看评论
+  GetReview() async{
+    var result = await Request().request("/user/getReview",
+        method: DioMethod.get);
+    return result;
+  }
 }
 
 // 导出全局使用这一个实例

@@ -1,4 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:parkinglot_frontend/api/user.dart';
+import 'package:parkinglot_frontend/utils/util.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MallRatingPage extends StatefulWidget {
   @override
@@ -179,13 +184,31 @@ class _MallRatingPageState extends State<MallRatingPage> {
         ),
       ),
       bottomNavigationBar: Container(
-        color: Colors.white,  // 设置底部区域背景为白色
+        color: Colors.white,
         child: SafeArea(
           child: Padding(
             padding: EdgeInsets.all(16),
             child: ElevatedButton(
-              onPressed: () {
-                // TODO: 提交评价
+              onPressed: () async{
+                SharedPreferences prefs = await SharedPreferences.getInstance();
+                String? userJson = prefs.getString('user');
+                if(userJson==null){
+                  return;
+                }
+
+                Map<String, dynamic> responseBody = {
+                  "rating": _rating,
+                  "tags": _selectedTags.toList(),
+                  "comment": _commentController.text.trim(),
+                };
+
+                var result = await UserApi().PostReview(responseBody);
+                if(result!=null&&result['code']==200){
+                  ElToast.info("评价成功");
+                  Navigator.pop(context);
+                }else{
+                  ElToast.info("评价失败");
+                }
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Color(0xFFFF9966),
