@@ -68,111 +68,204 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text('注册'),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.more_horiz, color: Colors.black),
+            onPressed: () {},
+          ),
+        ],
       ),
       body: SingleChildScrollView(
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          constraints: BoxConstraints(
-            minHeight: MediaQuery.of(context).size.height,
-          ),
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '注册界面',
+                '注册',
                 style: TextStyle(
-                  fontSize: 24,
-                  color: Colors.deepPurple,
+                  fontSize: 28,
                   fontWeight: FontWeight.bold,
                 ),
               ),
+              SizedBox(height: 40),
+              // 用户名输入区域
+              Container(
+                decoration: BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(color: Colors.grey.shade300),
+                  ),
+                ),
+                child: TextField(
+                  controller: _usernameController,
+                  decoration: InputDecoration(
+                    hintText: '请输入用户名',
+                    border: InputBorder.none,
+                    hintStyle: TextStyle(
+                      color: Colors.grey,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+              ),
               SizedBox(height: 20),
-              TextField(
-                controller: _usernameController,
-                decoration: InputDecoration(
-                  labelText: "用户名",
-                  border: OutlineInputBorder(),
+              // 手机号输入区域
+              Container(
+                decoration: BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(color: Colors.grey.shade300),
+                  ),
+                ),
+                child: TextField(
+                  controller: _phoneController,
+                  decoration: InputDecoration(
+                    hintText: '请输入手机号',
+                    border: InputBorder.none,
+                    hintStyle: TextStyle(
+                      color: Colors.grey,
+                      fontSize: 16,
+                    ),
+                  ),
+                  keyboardType: TextInputType.phone,
                 ),
               ),
-              SizedBox(height: 16),
-              TextField(
-                controller: _phoneController,
-                decoration: InputDecoration(
-                  labelText: "手机号",
-                  border: OutlineInputBorder(),
-                ),
-                keyboardType: TextInputType.phone,
-              ),
-              SizedBox(height: 16),
+              SizedBox(height: 20),
+              // 验证码输入区域
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Expanded(
-                    child: TextField(
-                      controller: _captchaController,
-                      decoration: InputDecoration(
-                        labelText: "验证码",
-                        border: OutlineInputBorder(),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        border: Border(
+                          bottom: BorderSide(color: Colors.grey.shade300),
+                        ),
+                      ),
+                      child: TextField(
+                        controller: _captchaController,
+                        decoration: InputDecoration(
+                          hintText: '请输入验证码',
+                          border: InputBorder.none,
+                          hintStyle: TextStyle(
+                            color: Colors.grey,
+                            fontSize: 16,
+                          ),
+                        ),
                       ),
                     ),
                   ),
+                  SizedBox(width: 16),
                   TextButton(
-                    child: Text('发送验证码', style: TextStyle(color: Colors.blue)),
                     onPressed: _sendCaptcha,
-                    style: TextButton.styleFrom(
-                      backgroundColor: Colors.transparent, // 设置按钮背景颜色
-                      padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20), // 设置按钮内边距
+                    child: Text(
+                      '发送验证码',
+                      style: TextStyle(
+                        color: Color(0xFF1E3F7C),
+                        fontSize: 14,
+                      ),
                     ),
                   ),
                 ],
               ),
-              SizedBox(height: 16),
-              TextField(
-                controller: _passwordController,
-                obscureText: true,
-                decoration: InputDecoration(
-                  labelText: "密码",
-                  border: OutlineInputBorder(),
+              SizedBox(height: 20),
+              // 密码输入区域
+              Container(
+                decoration: BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(color: Colors.grey.shade300),
+                  ),
+                ),
+                child: TextField(
+                  controller: _passwordController,
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    hintText: '请输入密码',
+                    border: InputBorder.none,
+                    hintStyle: TextStyle(
+                      color: Colors.grey,
+                      fontSize: 16,
+                    ),
+                  ),
                 ),
               ),
-              SizedBox(height: 16),
-              TextField(
-                controller: _confirmPasswordController,
-                obscureText: true,
-                decoration: InputDecoration(
-                  labelText: "确认密码",
-                  border: OutlineInputBorder(),
-                  suffixIcon: _isPasswordMatch
-                      ? Icon(Icons.check, color: Colors.green)
-                      : Icon(Icons.close, color: Colors.red),
+              SizedBox(height: 20),
+              // 确认密码输入区域
+              Container(
+                decoration: BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(color: Colors.grey.shade300),
+                  ),
+                ),
+                child: TextField(
+                  controller: _confirmPasswordController,
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    hintText: '请确认密码',
+                    border: InputBorder.none,
+                    hintStyle: TextStyle(
+                      color: Colors.grey,
+                      fontSize: 16,
+                    ),
+                    suffixIcon: _isPasswordMatch
+                        ? Icon(Icons.check, color: Colors.green)
+                        : Icon(Icons.close, color: Colors.red),
+                  ),
                 ),
               ),
-              SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: _isPasswordMatch ? () => _register() : null,
-                child: Text("注册"),
+              SizedBox(height: 40),
+              // 注册按钮
+              Container(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  onPressed: _isPasswordMatch ? () => _register() : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color(0xFF1E3F7C),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(25),
+                    ),
+                  ),
+                  child: Text(
+                    '注册',
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
               ),
-              SizedBox(height: 30),
+              SizedBox(height: 20),
+              // 已有账号登录
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text("已有账号？"),
+                  Text(
+                    "已有账号？",
+                    style: TextStyle(
+                      color: Colors.grey[600],
+                      fontSize: 14,
+                    ),
+                  ),
                   GestureDetector(
-                    onTap: () {
-                      Navigator.pop(context);
-                    },
+                    onTap: () => Navigator.pop(context),
                     child: Text(
                       "立即登录",
                       style: TextStyle(
-                          color: Colors.deepPurple,
-                          fontWeight: FontWeight.bold
+                        color: Color(0xFF1E3F7C),
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
-                  )
+                  ),
                 ],
-              )
+              ),
             ],
           ),
         ),

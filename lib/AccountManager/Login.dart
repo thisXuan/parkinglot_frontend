@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
 import 'package:parkinglot_frontend/AccountManager/ForgetPassword.dart';
 import 'package:parkinglot_frontend/AccountManager/Register.dart';
 import 'package:parkinglot_frontend/Manager/ManageLocationPage.dart';
@@ -19,8 +20,15 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _isLoading = false;
+  bool _isAgreedToTerms = false;  // 添加协议同意状态变量
 
   void _login() async {
+    // 添加协议检查
+    if (!_isAgreedToTerms) {
+      ElToast.info("请同意用户协议");
+      return;
+    }
+
     String phone = _usernameController.text;
     String password = _passwordController.text;
     if(phone.isEmpty||password.isEmpty){
@@ -83,92 +91,209 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text('登录'),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.more_horiz, color: Colors.black),
+            onPressed: () {},
+          ),
+        ],
       ),
       body: Stack(
         children: [
           SingleChildScrollView(
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              constraints: BoxConstraints(
-                  minHeight: MediaQuery.of(context).size.height),
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'ParkLocation',
+                    '登录',
                     style: TextStyle(
-                      fontSize: 30,
-                      color: Colors.deepPurple,
+                      fontSize: 28,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
+                  SizedBox(height: 40),
+                  // 手机号输入区域
+                  Container(
+                    decoration: BoxDecoration(
+                      border: Border(
+                        bottom: BorderSide(color: Colors.grey.shade300),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: _usernameController,
+                            decoration: InputDecoration(
+                              hintText: '请输入账号',
+                              border: InputBorder.none,
+                              hintStyle: TextStyle(
+                                color: Colors.grey,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                   SizedBox(height: 20),
-                  TextField(
-                    controller: _usernameController,
-                    decoration: InputDecoration(
-                      labelText: "手机号",
-                      border: OutlineInputBorder(),
+                  // 密码输入区域
+                  Container(
+                    decoration: BoxDecoration(
+                      border: Border(
+                        bottom: BorderSide(color: Colors.grey.shade300),
+                      ),
                     ),
-                  ),
-                  SizedBox(height: 16),
-                  TextField(
-                    controller: _passwordController,
-                    obscureText: true,
-                    decoration: InputDecoration(
-                      labelText: "密码",
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  SizedBox(height: 8),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => ForgetpasswordPage()),
-                        );
-                      },
-                      child: Text(
-                        '忘记密码？',
-                        style: TextStyle(
-                          color: Colors.deepPurple,
-                          fontWeight: FontWeight.bold,
+                    child: TextField(
+                      controller: _passwordController,
+                      obscureText: true,
+                      decoration: InputDecoration(
+                        hintText: '请输入密码',
+                        border: InputBorder.none,
+                        hintStyle: TextStyle(
+                          color: Colors.grey,
+                          fontSize: 16,
                         ),
                       ),
                     ),
                   ),
-                  SizedBox(height: 15),
-                  ElevatedButton(
-                    onPressed: () {
-                      _login();
-                    },
-                    child: Text("登录"),
-                  ),
-                  SizedBox(height: 30),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text("没有账号？"),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => RegisterPage()),
-                          );
-                        },
-                        child: Text(
-                          "立即注册",
-                          style: TextStyle(
-                              color: Colors.deepPurple,
-                              fontWeight: FontWeight.bold),
+                  SizedBox(height: 40),
+                  // 登录按钮
+                  Container(
+                    width: double.infinity,
+                    height: 50,
+                    child: ElevatedButton(
+                      onPressed: _login,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color(0xFF1E3F7C),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(25),
                         ),
-                      )
-                    ],
+                      ),
+                      child: Text(
+                        '登录',
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  Center(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => RegisterPage()),
+                            );
+                          },
+                          child: Text(
+                            '注册',
+                            style: TextStyle(
+                              color: Color(0xFF1E3F7C),
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 8,),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => ForgetpasswordPage()),
+                            );
+                          },
+                          child: Text(
+                            '忘记密码',
+                            style: TextStyle(
+                              color: Color(0xFF1E3F7C),
+                              fontSize: 14,
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  // 修改用户协议部分
+                  GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _isAgreedToTerms = !_isAgreedToTerms;
+                      });
+                    },
+                    child: Row(
+                      children: [
+                        Icon(
+                          _isAgreedToTerms ? Icons.check_circle : Icons.circle_outlined,
+                          color: _isAgreedToTerms ? Color(0xFF1E3F7C) : Color(0xFF8E9AAF),
+                          size: 20
+                        ),
+                        SizedBox(width: 8),
+                        Expanded(
+                          child: RichText(
+                            text: TextSpan(
+                              style: TextStyle(
+                                color: Colors.grey[600],
+                                fontSize: 12,
+                              ),
+                              children: [
+                                TextSpan(
+                                  text: '我已阅读并同意',
+                                ),
+                                TextSpan(
+                                  text: '《隐私政策》',
+                                  style: TextStyle(
+                                    color: Color(0xFF1E3F7C),
+                                  ),
+                                  recognizer: TapGestureRecognizer()
+                                    ..onTap = () {
+                                      // 处理隐私政策点击
+                                    },
+                                ),
+                                TextSpan(text: '、'),
+                                TextSpan(
+                                  text: '《服务协议》',
+                                  style: TextStyle(
+                                    color: Color(0xFF1E3F7C),
+                                  ),
+                                  recognizer: TapGestureRecognizer()
+                                    ..onTap = () {
+                                      // 处理服务协议点击
+                                    },
+                                ),
+                                TextSpan(text: '和'),
+                                TextSpan(
+                                  text: '《小程序隐私保护指引》',
+                                  style: TextStyle(
+                                    color: Color(0xFF1E3F7C),
+                                  ),
+                                  recognizer: TapGestureRecognizer()
+                                    ..onTap = () {
+                                      // 处理隐私保护指引点击
+                                    },
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -178,7 +303,9 @@ class _LoginPageState extends State<LoginPage> {
             Container(
               color: Colors.black54,
               child: Center(
-                child: CircularProgressIndicator(),
+                child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF8E9AAF)),
+                ),
               ),
             ),
         ],

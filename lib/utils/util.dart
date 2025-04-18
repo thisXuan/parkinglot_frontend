@@ -30,7 +30,7 @@ class ElToast {
       'bgColor': const Color.fromRGBO(240, 249, 235, 1),
       'textColor': const Color.fromRGBO(149, 212, 117, 1.0)
     },
-    'info': {'bgColor': Colors.black12, 'textColor': Colors.white70},
+    'info': {'bgColor': const Color.fromRGBO(240, 243, 248, 1.0), 'textColor': Colors.black},
     'warning': {
       'bgColor': const Color.fromRGBO(253, 246, 236, 1),
       'textColor': const Color.fromRGBO(238, 190, 119, 1.0)

@@ -67,103 +67,166 @@ class _ForgetpasswordPageState extends State<ForgetpasswordPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text('忘记密码'),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
       ),
       body: SingleChildScrollView(
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          constraints: BoxConstraints(
-            minHeight: MediaQuery.of(context).size.height,
-          ),
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 '忘记密码',
                 style: TextStyle(
-                  fontSize: 24,
-                  color: Colors.deepPurple,
+                  fontSize: 28,
                   fontWeight: FontWeight.bold,
                 ),
               ),
+              SizedBox(height: 40),
+              // 手机号输入区域
+              Container(
+                decoration: BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(color: Colors.grey.shade300),
+                  ),
+                ),
+                child: TextField(
+                  controller: _phoneController,
+                  decoration: InputDecoration(
+                    hintText: '请输入手机号',
+                    border: InputBorder.none,
+                    hintStyle: TextStyle(
+                      color: Colors.grey,
+                      fontSize: 16,
+                    ),
+                  ),
+                  keyboardType: TextInputType.phone,
+                ),
+              ),
               SizedBox(height: 20),
-              TextField(
-                controller: _phoneController,
-                decoration: InputDecoration(
-                  labelText: "手机号",
-                  border: OutlineInputBorder(),
+              // 验证码输入区域
+              Container(
+                decoration: BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(color: Colors.grey.shade300),
+                  ),
                 ),
-                keyboardType: TextInputType.phone,
-              ),
-              SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _codeController,
-                      decoration: InputDecoration(
-                        labelText: "验证码",
-                        border: OutlineInputBorder(),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _codeController,
+                        decoration: InputDecoration(
+                          hintText: '请输入验证码',
+                          border: InputBorder.none,
+                          hintStyle: TextStyle(
+                            color: Colors.grey,
+                            fontSize: 16,
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                  TextButton(
-                    child: Text("发送验证码"),
-                    onPressed: () => _sendCaptcha(),
-                    style: TextButton.styleFrom(
-                      backgroundColor: Colors.transparent,
-                      padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 16),
-              TextField(
-                controller: _newPasswordController,
-                obscureText: true,
-                decoration: InputDecoration(
-                  labelText: "新密码",
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              SizedBox(height: 16),
-              TextField(
-                controller: _confirmPasswordController,
-                obscureText: true,
-                decoration: InputDecoration(
-                  labelText: "确认密码",
-                  border: OutlineInputBorder(),
-                  suffixIcon: _isPasswordMatch
-                      ? Icon(Icons.check, color: Colors.green)
-                      : Icon(Icons.close, color: Colors.red),
-                ),
-              ),
-              SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: _isPasswordMatch ? () => _resetPassword() : null,
-                child: Text("重置密码"),
-              ),
-              SizedBox(height: 30),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text("返回登录？"),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.pop(context);
-                    },
-                    child: Text(
-                      "立即登录",
-                      style: TextStyle(
-                        color: Colors.deepPurple,
-                        fontWeight: FontWeight.bold,
+                    TextButton(
+                      onPressed: _sendCaptcha,
+                      child: Text(
+                        '发送验证码',
+                        style: TextStyle(
+                          color: Color(0xFF1E3F7C),
+                          fontSize: 14,
+                        ),
                       ),
                     ),
-                  )
-                ],
-              )
+                  ],
+                ),
+              ),
+              SizedBox(height: 20),
+              // 新密码输入区域
+              Container(
+                decoration: BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(color: Colors.grey.shade300),
+                  ),
+                ),
+                child: TextField(
+                  controller: _newPasswordController,
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    hintText: '请输入新密码',
+                    border: InputBorder.none,
+                    hintStyle: TextStyle(
+                      color: Colors.grey,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(height: 20),
+              // 确认密码输入区域
+              Container(
+                decoration: BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(color: Colors.grey.shade300),
+                  ),
+                ),
+                child: TextField(
+                  controller: _confirmPasswordController,
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    hintText: '请确认新密码',
+                    border: InputBorder.none,
+                    hintStyle: TextStyle(
+                      color: Colors.grey,
+                      fontSize: 16,
+                    ),
+                    suffixIcon: _isPasswordMatch
+                        ? Icon(Icons.check_circle, color: Colors.green)
+                        : Icon(Icons.cancel, color: Colors.red),
+                  ),
+                ),
+              ),
+              SizedBox(height: 40),
+              // 重置密码按钮
+              Container(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  onPressed: _isPasswordMatch ? _resetPassword : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color(0xFF1E3F7C),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(25),
+                    ),
+                  ),
+                  child: Text(
+                    '重置密码',
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(height: 20),
+              // 返回登录
+              Center(
+                child: TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text(
+                    '返回登录',
+                    style: TextStyle(
+                      color: Color(0xFF1E3F7C),
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+              ),
             ],
           ),
         ),
