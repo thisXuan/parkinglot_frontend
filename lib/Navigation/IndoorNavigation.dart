@@ -710,7 +710,7 @@ class IndoorMapPainter extends CustomPainter {
           double y = size.height * store.y / 100; // 根据比例计算 y 坐标
 
           // 根据缩放比例调整文字大小
-          double fontSize = 10 / scale; // 字体大小随缩放比例变化
+          double fontSize = 9 / scale; // 字体大小随缩放比例变化
 
           textPainter.text = TextSpan(
             text: store.name,
@@ -727,7 +727,7 @@ class IndoorMapPainter extends CustomPainter {
           // 绘制文字，稍微偏移以避免遮挡点位
           textPainter.paint(
             canvas,
-            Offset(x + 1, y - 2), // 计算绘制位置
+            Offset(x-15, y), // 计算绘制位置
           );
         }
       }
@@ -869,7 +869,7 @@ class IndoorMapPainter extends CustomPainter {
         double y = size.height * store.y / 100; // 根据比例计算 y 坐标
 
         // 根据缩放比例调整文字大小
-        double fontSize = 10 / scale; // 字体大小随缩放比例变化
+        double fontSize = 9 / scale; // 字体大小随缩放比例变化
 
         textPainter.text = TextSpan(
           text: store.name,
@@ -886,7 +886,7 @@ class IndoorMapPainter extends CustomPainter {
         // 绘制文字，稍微偏移以避免遮挡点位
         textPainter.paint(
           canvas,
-          Offset(x + 1, y - 2), // 计算绘制位置
+          Offset(x - 15, y), // 计算绘制位置
         );
       }
     }
