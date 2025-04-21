@@ -323,6 +323,7 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage>
         }
         setState(() {
           _selectedFloor = map.keys.first;
+          _getStoreLocations(_selectedFloor);
         });
 
         // 获取storeNames并展示弹窗
@@ -386,6 +387,7 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: Stack(
         children: [
           Column(
@@ -443,7 +445,6 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage>
                       if (_validateInput(idController1.text, 1) &&
                           _validateInput(idController2.text, 2)) {
                         getCoordinates(idController1.text, idController2.text);
-                        _getStoreLocations(_selectedFloor);
                         return;
                       } else {
                         ElToast.info("输入错误");
@@ -707,7 +708,7 @@ class IndoorMapPainter extends CustomPainter {
       for (var store in storeLocations!) {
         if (store.floorNumber == _selectedFloor && store.scale <= scale) {
           double x = size.width * store.x / 100; // 根据比例计算 x 坐标
-          double y = size.height * store.y / 100; // 根据比例计算 y 坐标
+          double y = nowHeight * store.y / 100; // 根据比例计算 y 坐标
 
           // 根据缩放比例调整文字大小
           double fontSize = 9 / scale; // 字体大小随缩放比例变化
@@ -740,7 +741,7 @@ class IndoorMapPainter extends CustomPainter {
           ..style = PaintingStyle.fill;
 
         double currentX = size.width * coordinate.xCoordinate / 100;
-        double currentY = size.height * coordinate.yCoordinate / 100;
+        double currentY = nowHeight * coordinate.yCoordinate / 100;
         canvas.drawCircle(
             Offset(currentX, currentY), 6.0 / scale, currentCoordinatePaint);
 
@@ -751,18 +752,18 @@ class IndoorMapPainter extends CustomPainter {
 
         for (var coord in coordinates) {
           double x = size.width * coord.xCoordinate / 100;
-          double y = size.height * coord.yCoordinate / 100;
+          double y = nowHeight * coord.yCoordinate / 100;
           canvas.drawCircle(Offset(x, y), 4.0 / scale, coordinatesPaint);
         }
 
         // 绘制被占用位置
         final Paint coordinatesFullPaint = Paint()
-          ..color = Colors.green
+          ..color = Colors.red
           ..style = PaintingStyle.fill;
 
         for (var coord in fullCoordinates) {
           double x = size.width * coord.xCoordinate / 100;
-          double y = size.height * coord.yCoordinate / 100;
+          double y = nowHeight * coord.yCoordinate / 100;
           canvas.drawCircle(Offset(x, y), 4.0 / scale, coordinatesFullPaint);
         }
       }
@@ -799,9 +800,9 @@ class IndoorMapPainter extends CustomPainter {
 
     for (int i = 0; i < points!.length - 1; i++) {
       double x1 = size.width * points![i].x / 100;
-      double y1 = size.height * points![i].y / 100;
+      double y1 = nowHeight * points![i].y / 100;
       double x2 = size.width * points![i + 1].x / 100;
-      double y2 = size.height * points![i + 1].y / 100;
+      double y2 = nowHeight * points![i + 1].y / 100;
       double length = sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2));
       segmentLengths.add(length);
       totalLength += length;
@@ -825,17 +826,17 @@ class IndoorMapPainter extends CustomPainter {
 
     for (int i = 0; i < segmentIndex; i++) {
       double x1 = size.width * points![i].x / 100;
-      double y1 = size.height * points![i].y / 100;
+      double y1 = nowHeight * points![i].y / 100;
       double x2 = size.width * points![i + 1].x / 100;
-      double y2 = size.height * points![i + 1].y / 100;
+      double y2 = nowHeight * points![i + 1].y / 100;
       canvas.drawLine(Offset(x1, y1), Offset(x2, y2), animationPathPaint);
     }
 
     if (segmentIndex < points!.length - 1) {
       double startX = size.width * points![segmentIndex].x / 100;
-      double startY = size.height * points![segmentIndex].y / 100;
+      double startY = nowHeight * points![segmentIndex].y / 100;
       double endX = size.width * points![segmentIndex + 1].x / 100;
-      double endY = size.height * points![segmentIndex + 1].y / 100;
+      double endY = nowHeight * points![segmentIndex + 1].y / 100;
 
       // 动态线段终点
       double currentX = startX + (endX - startX) * localProgress;
@@ -866,7 +867,7 @@ class IndoorMapPainter extends CustomPainter {
     for (var store in storeLocations!) {
       if (store.floorNumber == _selectedFloor && store.scale <= scale) {
         double x = size.width * store.x / 100; // 根据比例计算 x 坐标
-        double y = size.height * store.y / 100; // 根据比例计算 y 坐标
+        double y = nowHeight * store.y / 100; // 根据比例计算 y 坐标
 
         // 根据缩放比例调整文字大小
         double fontSize = 9 / scale; // 字体大小随缩放比例变化
@@ -899,7 +900,7 @@ class IndoorMapPainter extends CustomPainter {
         ..style = PaintingStyle.fill;
 
       double currentX = size.width * coordinate.xCoordinate / 100;
-      double currentY = size.height * coordinate.yCoordinate / 100;
+      double currentY = nowHeight * coordinate.yCoordinate / 100;
       canvas.drawCircle(
           Offset(currentX, currentY), 6.0 / scale, currentCoordinatePaint);
 
@@ -910,18 +911,18 @@ class IndoorMapPainter extends CustomPainter {
 
       for (var coord in coordinates) {
         double x = size.width * coord.xCoordinate / 100;
-        double y = size.height * coord.yCoordinate / 100;
+        double y = nowHeight * coord.yCoordinate / 100;
         canvas.drawCircle(Offset(x, y), 4.0 / scale, coordinatesPaint);
       }
 
       // 绘制被占用位置
       final Paint coordinatesFullPaint = Paint()
-        ..color = Colors.green
+        ..color = Colors.red
         ..style = PaintingStyle.fill;
 
       for (var coord in fullCoordinates) {
         double x = size.width * coord.xCoordinate / 100;
-        double y = size.height * coord.yCoordinate / 100;
+        double y = nowHeight * coord.yCoordinate / 100;
         canvas.drawCircle(Offset(x, y), 4.0 / scale, coordinatesFullPaint);
       }
     }
