@@ -115,7 +115,7 @@ class _BrandSelectionPageState extends State<BrandSelectionPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[60],
+      backgroundColor: Colors.grey[200],
       body: Column(
         children: [
           // 搜索栏

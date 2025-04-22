@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:parkinglot_frontend/AccountManager/Login.dart';
+import 'package:parkinglot_frontend/AccountManager/LotteryPage.dart';
 import 'package:parkinglot_frontend/AccountManager/MallRatingPage.dart';
 import 'package:parkinglot_frontend/AccountManager/MyCollectionPage.dart';
 import 'package:parkinglot_frontend/AccountManager/OrderPage.dart';
@@ -490,6 +491,12 @@ class MemberPageState extends State<MemeberPage> {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => SignInPage()),
+          );
+        }
+        if(title=="每日幸运转转赚"&&action=="去参与"){
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => LotteryPage()),
           );
         }
       },

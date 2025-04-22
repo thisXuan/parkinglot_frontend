@@ -5,7 +5,7 @@ class Coupon {
   String rules;
   int payPoint;
   int status;
-  // String image;
+  String image;
   int saleCount;
 
   Coupon({
@@ -15,7 +15,7 @@ class Coupon {
     required this.rules,
     required this.payPoint,
     required this.status,
-    // required this.image,
+    required this.image,
     required this.saleCount
   });
 
@@ -27,7 +27,7 @@ class Coupon {
       rules: json['rules'],
       payPoint: json['payPoint'],
       status: json['status'],
-      // image: json['image'],
+      image: json['image']??'',
       saleCount: json['saleCount']
     );
   }

@@ -120,6 +120,7 @@ class _PointsExchangePageState extends State<PointsExchangePage> {
               itemBuilder: (context, index) {
                 final product = products[index];
                 return Card(
+                  color: Colors.white,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [

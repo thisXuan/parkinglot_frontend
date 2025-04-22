@@ -127,9 +127,9 @@ class _StoreDetailPageState extends State<StoreDetailPage> {
             padding: const EdgeInsets.all(10.0),
             child: Row(
               children: [
-                store.image.isNotEmpty
+                voucher.image.isNotEmpty
                     ? Image.network(
-                        store.image,
+                        voucher.image,
                         width: 120,
                         height: 120,
                         fit: BoxFit.contain,

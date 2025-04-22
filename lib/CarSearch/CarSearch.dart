@@ -110,6 +110,7 @@ class _CarPageState extends State<CarPage> {
 
   void showParkingRules(BuildContext context) {
     showModalBottomSheet(
+      backgroundColor: Colors.grey[100],
       context: context,
       builder: (BuildContext context) {
         return Stack(
