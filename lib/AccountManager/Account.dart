@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:parkinglot_frontend/AccountManager/Chat.dart';
 import 'package:parkinglot_frontend/AccountManager/Login.dart';
 import 'package:parkinglot_frontend/AccountManager/LotteryPage.dart';
 import 'package:parkinglot_frontend/AccountManager/MallRatingPage.dart';
@@ -14,6 +15,7 @@ import 'dart:convert';
 import 'package:parkinglot_frontend/AccountManager/VipPrivilegePage.dart';
 import 'package:parkinglot_frontend/AccountManager/SignInPage.dart';
 import 'package:parkinglot_frontend/AccountManager/PointsExchangePage.dart';
+import 'package:tencent_cloud_chat_uikit/tencent_cloud_chat_uikit.dart';
 
 class MemeberPage extends StatefulWidget{
   @override
@@ -217,9 +219,19 @@ class MemberPageState extends State<MemeberPage> {
                       color: Colors.white.withOpacity(0.2),
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    child: IconButton(
-                      icon: const Icon(Icons.headset_mic, color: Colors.white, size: 20),
-                      onPressed: () {},
+                    child: GestureDetector(
+                      onTap: (){
+                        final CoreServicesImpl _coreInstance = TIMUIKitCore.getInstance();
+                        _coreInstance.login(userID: "admin", userSig: "eJyrVgrxCdYrSy1SslIy0jNQ0gHzM1NS80oy0zLBwiWpxSVQ8eKU7MSCgswUJStDMwMDAwtjM1MTiExqRUFmUSpQ3NTU1AgoBREtycwFiZmbmJoYWpgbW0JNyUwHGutp7mEao5*bWxCcaphcWBmjH*SSU5kR5aPtZ*ZnlphqaOps6Vpp7Fjh5l5iaWCrVAsASicw1g__");
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => Chat()),
+                        );
+                      },
+                      child: IconButton(
+                        icon: const Icon(Icons.headset_mic, color: Colors.white, size: 20),
+                        onPressed: () {},
+                      ),
                     ),
                   ),
                 ],

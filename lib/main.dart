@@ -3,6 +3,10 @@ import 'package:parkinglot_frontend/Manager/ManagerTab.dart';
 import 'package:parkinglot_frontend/Tabs.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:parkinglot_frontend/api/user.dart';
+import 'package:tencent_cloud_chat_uikit/tencent_cloud_chat_uikit.dart';
+import 'package:tencent_cloud_chat_sdk/enum/log_level_enum.dart';
+import 'package:tencent_cloud_chat_uikit/base_widgets/tim_callback.dart';
+import 'package:tencent_cloud_chat_sdk/enum/V2TimSDKListener.dart';
 
 void main() {
   // if (Platform.isIOS) {
@@ -18,7 +22,12 @@ void main() {
   runApp(MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
   Future<int> getUserRole() async {
     var result = await UserApi().GetUserRole();
     if (result != null) {
@@ -31,6 +40,18 @@ class MyApp extends StatelessWidget {
     } else {
       return 0;
     }
+  }
+
+  final CoreServicesImpl _coreInstance = TIMUIKitCore.getInstance();
+  @override
+  void initState() {
+    _coreInstance.init(
+        sdkAppID: 1600083654, // Replace 0 with the SDKAppID of your IM application when integrating
+        //language: LanguageEnum.zhHant, // 界面语言配置，若不配置，则跟随系统语言
+        loglevel: LogLevelEnum.V2TIM_LOG_DEBUG,
+        onTUIKitCallbackListener:  (TIMCallback callbackValue){}, // [建议配置，详见此部分](https://cloud.tencent.com/document/product/269/70746#callback)
+        listener: V2TimSDKListener());
+    super.initState();
   }
 
   // This widget is the root of your application.
