@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:parkinglot_frontend/AccountManager/ChatPage.dart';
 import 'package:parkinglot_frontend/AccountManager/Login.dart';
 import 'package:parkinglot_frontend/AccountManager/LotteryPage.dart';
 import 'package:parkinglot_frontend/AccountManager/MallRatingPage.dart';
@@ -219,7 +220,12 @@ class MemberPageState extends State<MemeberPage> {
                     ),
                     child: IconButton(
                       icon: const Icon(Icons.headset_mic, color: Colors.white, size: 20),
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => ChatPage()),
+                        );
+                      },
                     ),
                   ),
                 ],
