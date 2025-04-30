@@ -127,10 +127,17 @@ class _PointsExchangePageState extends State<PointsExchangePage> {
                       // 商品图片
                       Expanded(
                         child: GestureDetector(
-                          child: Image.asset(
-                            "assets/image_lost.jpg",
+                          child: Image.network(
+                            product.image,
                             width: double.infinity,
                             fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Image.asset(
+                                'assets/image_lost.jpg',
+                                width: double.infinity,
+                                fit: BoxFit.cover,
+                              );
+                            },
                           ),
                           onTap: (){
                             showDialog(

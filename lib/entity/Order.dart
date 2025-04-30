@@ -5,6 +5,7 @@ class Order{
   String time;
   double payValue;
   int type;
+  String image;
 
   Order({
     required this.id,
@@ -12,7 +13,8 @@ class Order{
     required this.voucherId,
     required this.time,
     required this.payValue,
-    required this.type
+    required this.type,
+    required this.image
 });
 
   factory Order.fromJson(Map<String, dynamic> json) {
@@ -22,7 +24,8 @@ class Order{
         voucherId: json['voucherId'],
         time: json['time'],
         payValue: json['payValue'],
-        type: json['type']
+        type: json['type'],
+        image: json['image']??''
     );
   }
 }

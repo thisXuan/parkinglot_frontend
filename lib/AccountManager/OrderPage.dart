@@ -179,12 +179,20 @@ class _OrderPageState extends State<OrderPage> {
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(8),
-                  child: Image.asset(
-                    'assets/image_lost.jpg',
+                  child: Image.network(
+                    order.image, // 使用订单中的网络图片URL
                     width: 80,
                     height: 80,
                     fit: BoxFit.cover,
-                  )
+                    errorBuilder: (context, error, stackTrace) {
+                      return Image.asset(
+                        'assets/image_lost.jpg', // 加载失败时显示本地图片
+                        width: 80,
+                        height: 80,
+                        fit: BoxFit.cover,
+                      );
+                    },
+                  ),
                 ),
                 SizedBox(width: 12),
                 Expanded(
