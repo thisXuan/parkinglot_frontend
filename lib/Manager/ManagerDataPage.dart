@@ -6,6 +6,8 @@ import 'package:parkinglot_frontend/entity/DataDTO.dart';
 import 'package:parkinglot_frontend/entity/SalesDataDTO.dart';
 import 'package:parkinglot_frontend/utils/request.dart';
 
+import '../api/user.dart';
+
 class ManagerDataPage extends StatefulWidget {
   @override
   State<StatefulWidget> createState() => ManagerDataPageState();
@@ -39,6 +41,10 @@ class ManagerDataPageState extends State<ManagerDataPage> {
   int newUsers = 0;
   List<FlSpot> activeUsersData = [];
 
+  // 商场评价
+  double averageRating = 0;
+  int reviews = 0;
+
   @override
   void initState() {
     super.initState();
@@ -46,6 +52,7 @@ class ManagerDataPageState extends State<ManagerDataPage> {
     initSalesData();
     initOrderData();
     initUserData();
+    initReviewData();
   }
 
   void initTotalView() async{
@@ -62,6 +69,23 @@ class ManagerDataPageState extends State<ManagerDataPage> {
       }
     }
   }
+
+  void initReviewData() async {
+    var result = await UserApi().GetReview();
+    if (result != null) {
+      var code = result['code'];
+      if (code == 200) {
+        setState(() {
+          averageRating = result['data']['overallRating']['average'];
+
+          reviews = (result['data']['reviews'] as List)
+              .map((review) => ReviewData.fromJson(review))
+              .toList().length;
+        });
+      }
+    }
+  }
+
 
   void initSalesData() async{
     final now = DateTime.now();
@@ -156,9 +180,9 @@ class ManagerDataPageState extends State<ManagerDataPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _buildOverviewItem('访问人数', visitorCount),
-                _buildOverviewItem('空闲车位', availableParkingSpots),
-                _buildOverviewItem('营业店铺', activeShops),
+                _buildOverviewItem('访问人数', visitorCount.toString()),
+                _buildOverviewItem('空闲车位', availableParkingSpots.toString()),
+                _buildOverviewItem('营业店铺', activeShops.toString()),
               ],
             ),
           ],
@@ -199,8 +223,8 @@ class ManagerDataPageState extends State<ManagerDataPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _buildOverviewItem('整体评分', 0),
-                _buildOverviewItem('反馈人数', 0),
+                _buildOverviewItem('整体评分', averageRating.toString()),
+                _buildOverviewItem('反馈人数', reviews.toString()),
               ],
             ),
           ],
@@ -209,7 +233,7 @@ class ManagerDataPageState extends State<ManagerDataPage> {
     );
   }
 
-  Widget _buildOverviewItem(String title, int value) {
+  Widget _buildOverviewItem(String title, String value) {
     return Column(
       children: [
         Text(value.toString(), style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
