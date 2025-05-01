@@ -15,11 +15,11 @@ class _ShopManagementScreenState extends State<ManagerLocationPage> {
   int _page = 1;
   bool _hasMore = true; //判断有没有数据
   ScrollController _scrollController = new ScrollController();
-  String selectedFloor = 'B1';
+  String selectedFloor = "全部楼层";
   String selectedCategory = "全部";
   List<Store> _storeInfo = [];
   bool _isLoadingMore = false;
-  final List<String> floors = ['B1', 'M', 'F1', 'F2', 'F3', 'F4', 'F5'];
+  final List<String> floors = ['B1', 'M', 'F1', 'F2', 'F3', 'F4', 'F5', '全部楼层'];
   String selectedShopNumber = '1';
   String selectedBuilding = 'A';
   final List<String> buildings = ['A', 'B']; // 场馆选项
@@ -114,6 +114,7 @@ class _ShopManagementScreenState extends State<ManagerLocationPage> {
       _page = 1;
       _hasMore = true;
       _storeInfo = [];
+      selectedFloor = "全部楼层"; // 重置selectedFloor为"全部楼层"
     });
     await _fetchStoreInfo();
   }
@@ -225,6 +226,7 @@ class _ShopManagementScreenState extends State<ManagerLocationPage> {
     final descriptionController = TextEditingController(text: shop.description);
     final recommendedServicesController = TextEditingController(text: shop.recommendedServices);
     final imageController = TextEditingController(text: shop.image);
+    String floor1 = shop.floorNumber.toString();
 
     showDialog(
       context: context,
@@ -254,6 +256,7 @@ class _ShopManagementScreenState extends State<ManagerLocationPage> {
                 children: [
                   Expanded(
                     child: DropdownButtonFormField<String>(
+                      isExpanded: true, // 设置isExpanded为true
                       decoration: InputDecoration(
                         labelText: '场馆',
                         contentPadding: EdgeInsets.symmetric(horizontal: 12),
@@ -277,6 +280,7 @@ class _ShopManagementScreenState extends State<ManagerLocationPage> {
                   SizedBox(width: 8),
                   Expanded(
                     child: DropdownButtonFormField<String>(
+                      isExpanded: true, // 设置isExpanded为true
                       decoration: InputDecoration(
                         labelText: '楼层',
                         contentPadding: EdgeInsets.symmetric(horizontal: 12),
@@ -300,6 +304,7 @@ class _ShopManagementScreenState extends State<ManagerLocationPage> {
                   SizedBox(width: 8),
                   Expanded(
                     child: DropdownButtonFormField<String>(
+                      isExpanded: true, // 设置isExpanded为true
                       decoration: InputDecoration(
                         labelText: '店铺号',
                         contentPadding: EdgeInsets.symmetric(horizontal: 12),
