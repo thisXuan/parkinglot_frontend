@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:parkinglot_frontend/utils/util.dart';
 
 class Message {
   final String content;
@@ -106,9 +107,13 @@ class _ChatPageState extends State<ChatPage> {
       }
     } catch (e) {
       print('Error: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('发送消息失败')),
-      );
+      setState(() {
+        _messages.add(Message(
+          content: "消息发送失败，请稍后再试。",
+          isUser: false,
+          timestamp: DateTime.now(),
+        ));
+      });
     }
   }
 
