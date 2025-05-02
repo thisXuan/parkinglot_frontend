@@ -290,7 +290,7 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage>
     }
   }
 
-  Future<void> getCoordinates(String storeName1, String storeName2) async {
+  Future<void> getCoordinates(String storeName1, String storeName2, int mode) async {
     map.clear();
 
     dynamic data = {'startName': storeName1, 'endName': storeName2};
@@ -300,7 +300,7 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage>
     });
     var result;
     try {
-      result = await NavigationApi().GetPath(data);
+      result = await NavigationApi().GetPath(data,mode);
       var code = result['code'];
       var msg = result['msg'];
       if (code != 200) {
@@ -427,31 +427,62 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage>
                       },
                     ),
                   ),
-                  ElevatedButton(
-                    onPressed: () {
-                      // 收起键盘
-                      FocusScope.of(context).unfocus();
+                 Row(
+                   mainAxisAlignment: MainAxisAlignment.center,
+                   children: [
+                     ElevatedButton(
+                       onPressed: () {
+                         // 收起键盘
+                         FocusScope.of(context).unfocus();
 
-                      if (idController1.text.length == 0 ||
-                          idController2.text.length == 0) {
-                        ElToast.info("请输入起始点和终点");
-                        return;
-                      }
+                         if (idController1.text.length == 0 ||
+                             idController2.text.length == 0) {
+                           ElToast.info("请输入起始点和终点");
+                           return;
+                         }
 
-                      if (idController1.text == idController2.text) {
-                        ElToast.info("起始点和终点不能相同");
-                        return;
-                      }
-                      if (_validateInput(idController1.text, 1) &&
-                          _validateInput(idController2.text, 2)) {
-                        getCoordinates(idController1.text, idController2.text);
-                        return;
-                      } else {
-                        ElToast.info("输入错误");
-                      }
-                    },
-                    child: Text('开始导航'),
-                  ),
+                         if (idController1.text == idController2.text) {
+                           ElToast.info("起始点和终点不能相同");
+                           return;
+                         }
+                         if (_validateInput(idController1.text, 1) &&
+                             _validateInput(idController2.text, 2)) {
+                           getCoordinates(idController1.text, idController2.text,1);
+                           return;
+                         } else {
+                           ElToast.info("输入错误");
+                         }
+                       },
+                       child: Text('直梯方案'),
+                     ),
+                     SizedBox(width: 8,),
+                     ElevatedButton(
+                     onPressed: () {
+                       // 收起键盘
+                       FocusScope.of(context).unfocus();
+
+                       if (idController1.text.length == 0 ||
+                           idController2.text.length == 0) {
+                         ElToast.info("请输入起始点和终点");
+                         return;
+                       }
+
+                       if (idController1.text == idController2.text) {
+                         ElToast.info("起始点和终点不能相同");
+                         return;
+                       }
+                       if (_validateInput(idController1.text, 1) &&
+                           _validateInput(idController2.text, 2)) {
+                         getCoordinates(idController1.text, idController2.text,2);
+                         return;
+                       } else {
+                         ElToast.info("输入错误");
+                       }
+                     },
+                     child: Text('扶梯方案'),
+                   ),
+                   ],
+                 )
                 ],
               )),
               Expanded(
@@ -728,7 +759,7 @@ class IndoorMapPainter extends CustomPainter {
           // 绘制文字，稍微偏移以避免遮挡点位
           textPainter.paint(
             canvas,
-            Offset(x-15, y), // 计算绘制位置
+            Offset(x-15, y-10), // 计算绘制位置
           );
         }
       }
@@ -887,7 +918,7 @@ class IndoorMapPainter extends CustomPainter {
         // 绘制文字，稍微偏移以避免遮挡点位
         textPainter.paint(
           canvas,
-          Offset(x - 15, y), // 计算绘制位置
+          Offset(x - 15, y-10), // 计算绘制位置
         );
       }
     }

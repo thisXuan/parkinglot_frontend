@@ -13,8 +13,8 @@ class NavigationApi {
     // 初始化基本选项
   }
 
-  GetPath(dynamic data) async {
-    var result = await Request().request("/navigation/getPath",
+  GetPath(dynamic data, dynamic mode) async {
+    var result = await Request().request("/navigation/getPath?mode=$mode",
         method: DioMethod.get,
         data:data);
     return result;
