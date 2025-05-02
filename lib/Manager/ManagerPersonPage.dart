@@ -183,6 +183,7 @@ class _UserManagementScreenState extends State<ManagerPersonPage> with SingleTic
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
+        backgroundColor: Colors.white,
         title: Text('添加新用户'),
         content: SingleChildScrollView(
           child: Column(
@@ -268,6 +269,7 @@ class _UserManagementScreenState extends State<ManagerPersonPage> with SingleTic
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
+        backgroundColor: Colors.white,
         title: Text('编辑用户'),
         content: SingleChildScrollView(
           child: Column(

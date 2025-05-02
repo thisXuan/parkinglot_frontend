@@ -188,6 +188,7 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage>
             elevation: 4.0,
             borderRadius: BorderRadius.circular(8.0),
             child: Container(
+              color: Colors.white,
               height: containerHeight,
               child: ListView.builder(
                 padding: EdgeInsets.zero,
@@ -387,6 +388,7 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       resizeToAvoidBottomInset: false,
       body: Stack(
         children: [
@@ -427,6 +429,9 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage>
                       },
                     ),
                   ),
+                  SizedBox(
+                    height: 8,
+                  ),
                  Row(
                    mainAxisAlignment: MainAxisAlignment.center,
                    children: [
@@ -453,7 +458,17 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage>
                            ElToast.info("输入错误");
                          }
                        },
-                       child: Text('直梯方案'),
+                       child: Text('直梯方案',
+                           style: TextStyle(color: Color(0xFF1E3F7C))),
+                       style: OutlinedButton.styleFrom(
+                         backgroundColor: Colors.white,
+                         side: BorderSide(color: Color(0xFF1E3F7C)),
+                         shape: RoundedRectangleBorder(
+                           borderRadius: BorderRadius.circular(22),
+                         ),
+                         minimumSize: Size(0, 44),
+
+                       ),
                      ),
                      SizedBox(width: 8,),
                      ElevatedButton(
@@ -479,7 +494,16 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage>
                          ElToast.info("输入错误");
                        }
                      },
-                     child: Text('扶梯方案'),
+                       style: OutlinedButton.styleFrom(
+                         backgroundColor: Colors.white,
+                         side: BorderSide(color: Color(0xFF1E3F7C)),
+                         shape: RoundedRectangleBorder(
+                           borderRadius: BorderRadius.circular(22),
+                         ),
+                         minimumSize: Size(0, 44),
+                       ),
+                     child: Text('扶梯方案',
+                       style: TextStyle(color: Color(0xFF1E3F7C)),),
                    ),
                    ],
                  )
@@ -533,7 +557,7 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage>
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: _selectedFloor == floorKey
-                              ? Colors.deepPurple
+                              ? Color(0xFF1E3F7C)
                               : Colors.grey,
                         ),
                         child: Text(
@@ -658,7 +682,7 @@ class IndoorNavigationPageState extends State<IndoorNavigationPage>
                         height: 50,
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
-                          color: isSelected ? Colors.deepPurple : Colors.white,
+                          color: isSelected ? Color(0xFF1E3F7C) : Colors.white,
                           border: Border(
                             bottom: BorderSide(
                               color: Colors.grey.withOpacity(0.3),
@@ -822,7 +846,7 @@ class IndoorMapPainter extends CustomPainter {
       ..style = PaintingStyle.stroke;
 
     final Paint animationPathPaint = Paint()
-      ..color = Colors.purple
+      ..color = Color(0xFF1E3F7C)
       ..strokeWidth = 4.0
       ..style = PaintingStyle.stroke;
 
@@ -882,7 +906,7 @@ class IndoorMapPainter extends CustomPainter {
 
       // 动态行走点
       final Paint animationPaint = Paint()
-        ..color = Colors.deepPurple
+        ..color = Color(0xFF1E3F7C)
         ..style = PaintingStyle.fill;
 
       canvas.drawCircle(

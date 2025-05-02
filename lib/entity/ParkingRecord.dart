@@ -20,7 +20,7 @@ class ParkingRecord {
         carName: json['carname'] ?? '',
         entryTime: json['entrytime'] ?? '',
         exitTime: json['exittime'] ?? '尚未离开',
-        parkingSpace: json['parkingspace'] ?? '',
+        parkingSpace: json['parkingSpace'] ?? '',
         payment: json['payment']??'待支付'
     );
   }

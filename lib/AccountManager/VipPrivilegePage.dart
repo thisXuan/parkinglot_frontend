@@ -180,6 +180,7 @@ class _VipPrivilegePageState extends State<VipPrivilegePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: Text('会员特权'),
         centerTitle: true,

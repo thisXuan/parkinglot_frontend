@@ -71,7 +71,7 @@ class _ChatPageState extends State<ChatPage> {
 
     await _subscription?.cancel();
 
-    final uri = Uri.parse('http://192.168.1.12:5001/api/workstation/agent');
+    final uri = Uri.parse('http://124.220.13.89:5001/api/workstation/agent');
     final headers = {
       'Content-Type': 'application/json',
       'Accept': 'text/event-stream',

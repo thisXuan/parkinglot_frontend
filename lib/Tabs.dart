@@ -64,6 +64,7 @@ class _TabsState extends State<Tabs>{
           backgroundColor: Colors.white,
           type: BottomNavigationBarType.fixed,
           currentIndex: this._currentIndex,
+          selectedItemColor: Color(0xFF1E3F7C),
           //实现底部导航栏点击选中功能
           onTap: (int index){
 //              this._currentIndex=index;//不会重新渲染

@@ -226,6 +226,7 @@ class _StoreDetailPageState extends State<StoreDetailPage> {
     return Scaffold(
         backgroundColor: Colors.grey[100],
         appBar: AppBar(
+          backgroundColor: Colors.white,
           title: Text("品牌详情"),
         ),
         body: _isLoading

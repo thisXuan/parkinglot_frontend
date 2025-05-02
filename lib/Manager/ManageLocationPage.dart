@@ -231,6 +231,7 @@ class _ShopManagementScreenState extends State<ManagerLocationPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
+        backgroundColor: Colors.white,
         title: Text('编辑商铺信息'),
         content: SingleChildScrollView(
           child: Column(
