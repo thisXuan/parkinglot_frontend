@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:parkinglot_frontend/api/user.dart';
 import 'package:parkinglot_frontend/entity/UserMessage.dart';
+import 'package:parkinglot_frontend/utils/util.dart';
 
 class ManagerPersonPage extends StatefulWidget {
   @override
@@ -281,7 +282,7 @@ class _UserManagementScreenState extends State<ManagerPersonPage> with SingleTic
               ),
               TextField(
                 controller: emailController,
-                decoration: InputDecoration(labelText: '邮箱'),
+                decoration: InputDecoration(labelText: '联系方式'),
                 keyboardType: TextInputType.emailAddress,
               ),
               SizedBox(height: 16),
@@ -305,8 +306,29 @@ class _UserManagementScreenState extends State<ManagerPersonPage> with SingleTic
             child: Text('取消'),
           ),
           ElevatedButton(
-            onPressed: (){
-
+            onPressed: () async{
+              UserMessage new_user = UserMessage(
+                  id: user.id,
+                  name: usernameController.text,
+                  phone: emailController.text,
+                  point: user.point,
+                  type: selectedRole
+              );
+              Map<String, dynamic> userMap = {
+                'id': new_user.id,
+                'name': new_user.name,
+                'phone': new_user.phone,
+                'point':new_user.point,
+                'type':new_user.type
+              };
+              var result = await UserApi().UpdateUsers(userMap);
+              if (result != null && result['code'] == 200) {
+                Navigator.pop(context);
+                _fetchUsers();
+                ElToast.info('用户信息更新成功');
+              } else {
+                ElToast.info(result['msg']);
+              }
             },
             // onPressed: () async {
             //   // 更新用户的API调用

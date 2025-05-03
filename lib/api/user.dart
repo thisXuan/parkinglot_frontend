@@ -57,6 +57,14 @@ class UserApi {
     return result;
   }
 
+  // 修改用户信息
+  UpdateUsers(dynamic data)async{
+    var result = await Request().request("/user/updateUser",
+        method:DioMethod.post,
+        data: data);
+    return result;
+  }
+
   GetUser() async{
     var result = await Request().request("/user/getUsers",
         method:DioMethod.get);
