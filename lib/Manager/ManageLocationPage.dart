@@ -7,10 +7,10 @@ import '../entity/Store.dart';
 
 class ManagerLocationPage extends StatefulWidget {
   @override
-  _ShopManagementScreenState createState() => _ShopManagementScreenState();
+  _ManagerLocationPageState createState() => _ManagerLocationPageState();
 }
 
-class _ShopManagementScreenState extends State<ManagerLocationPage> {
+class _ManagerLocationPageState extends State<ManagerLocationPage> {
   bool _isLoading = true;
   int _page = 1;
   bool _hasMore = true; //判断有没有数据
@@ -23,6 +23,8 @@ class _ShopManagementScreenState extends State<ManagerLocationPage> {
   String selectedShopNumber = '1';
   String selectedBuilding = 'A';
   final List<String> buildings = ['A', 'B']; // 场馆选项
+  String _searchText = '';
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
@@ -119,101 +121,227 @@ class _ShopManagementScreenState extends State<ManagerLocationPage> {
     await _fetchStoreInfo();
   }
 
+  Future<void> _performSearch(String data) async {
+    _hasMore = false;
+    var result = await StoreApi().QueryStoreInfo(data);
+    if (result != null && result['code'] == 200 && result['data'] != null) {
+      setState(() {
+        _storeInfo = (result['data'] as List)
+            .map((json) => Store.fromJson(json))
+            .toList();
+      });
+    } else {
+      ElToast.info(result['msg']);
+      _fetchStoreInfo();
+    }
+  }
+
+  List<Store> get _filteredStores {
+    if (_searchText.isEmpty) return _storeInfo;
+    return _storeInfo.where((store) => store.storeName.contains(_searchText)).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[200],
-      body: _isLoading && _page == 1
-          ? Center(child: CircularProgressIndicator())
-          : RefreshIndicator(
-              onRefresh: _refreshData,
-              child: _buildShopList(),
-            ),
-    );
-  }
-
-  Widget _buildShopList() {
-    if (_storeInfo.isEmpty) {
-      return Center(child: Text('暂无商铺信息'));
-    }
-
-    return ListView.builder(
-      controller: _scrollController,
-      itemCount: _storeInfo.length + 1,
-      padding: EdgeInsets.all(8.0),
-      itemBuilder: (context, index) {
-        if (index == _storeInfo.length) {
-          return _buildFooter();
-        }
-        
-        var shop = _storeInfo[index];
-        return Card(
-          color: Colors.white,
-          margin: EdgeInsets.symmetric(vertical: 8.0),
-          elevation: 2.0,
-          child: InkWell(
-            onTap: () => _showShopDetails(shop),
-            child: Padding(
-              padding: EdgeInsets.all(12.0),
-              child: Row(
+      backgroundColor: Color(0xFFF5F5F5),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  CircleAvatar(
-                    backgroundColor: Colors.amber[100],
-                    child: Text(
-                      shop.storeName.substring(0, 1),
-                      style: TextStyle(color: Colors.amber[800]),
-                    ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '商铺管理',
+                        style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        '管理您的所有商铺信息',
+                        style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                      ),
+                    ],
                   ),
-                  SizedBox(width: 16.0),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          shop.storeName,
-                          style: TextStyle(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        SizedBox(height: 4.0),
-                        Text(
-                          '位置: ${shop.address}',
-                          style: TextStyle(
-                            color: Colors.grey[600],
-                            fontSize: 14.0,
-                          ),
-                        ),
-                      ],
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      // 添加商铺逻辑
+                    },
+                    icon: Icon(Icons.add),
+                    label: Text('添加商铺'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color(0xFF2563EB),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                     ),
-                  ),
-                  IconButton(
-                    icon: Icon(Icons.edit_location_alt, color: Colors.blue),
-                    onPressed: () => _showChangeShopLocationDialog(shop),
                   ),
                 ],
               ),
-            ),
+              SizedBox(height: 24),
+              TextField(
+                controller: _searchController,
+                onChanged: (value) {
+                  _searchText = value;
+                  if (value.isEmpty) {
+                    _hasMore = true;
+                    _page = 1;
+                    _fetchStoreInfo();
+                  } else {
+                    _performSearch(value);
+                  }
+                },
+                decoration: InputDecoration(
+                  hintText: '搜索商铺...',
+                  prefixIcon: Icon(Icons.search),
+                  filled: true,
+                  fillColor: Colors.white,
+                  contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 16),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+              ),
+              SizedBox(height: 24),
+              Expanded(
+                child: NotificationListener<ScrollNotification>(
+                  onNotification: (ScrollNotification scrollInfo) {
+                    if (!_isLoadingMore && _hasMore && scrollInfo.metrics.pixels >= scrollInfo.metrics.maxScrollExtent - 200) {
+                      _loadMoreData();
+                    }
+                    return false;
+                  },
+                  child: _isLoading
+                      ? Center(child: CircularProgressIndicator())
+                      : _filteredStores.isEmpty
+                          ? Center(child: Text('暂无商铺信息'))
+                          : ListView.builder(
+                              controller: _scrollController,
+                              itemCount: _filteredStores.length + 1,
+                              itemBuilder: (context, index) {
+                                if (index == _filteredStores.length) {
+                                  if (!_hasMore) {
+                                    return Center(
+                                      child: Padding(
+                                        padding: EdgeInsets.symmetric(vertical: 16),
+                                        child: Text('我是有底线的', style: TextStyle(color: Colors.grey)),
+                                      ),
+                                    );
+                                  } else if (_isLoadingMore) {
+                                    return Center(
+                                      child: Padding(
+                                        padding: EdgeInsets.symmetric(vertical: 16),
+                                        child: CircularProgressIndicator(),
+                                      ),
+                                    );
+                                  } else {
+                                    return SizedBox.shrink();
+                                  }
+                                }
+                                final store = _filteredStores[index];
+                                return Padding(
+                                  padding: const EdgeInsets.only(bottom: 24.0),
+                                  child: _buildStoreCard(store),
+                                );
+                              },
+                            ),
+                ),
+              ),
+            ],
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 
-  Widget _buildFooter() {
-    if (_isLoadingMore) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 16.0),
-        child: Center(child: CircularProgressIndicator()),
-      );
-    } else if (!_hasMore) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 16.0),
-        child: Center(child: Text('我已经到底了', style: TextStyle(color: Colors.grey))),
-      );
-    } else {
-      return SizedBox.shrink();
-    }
+  Widget _buildStoreCard(Store store) {
+    return Card(
+      color: Colors.white,
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+            child: store.image.isNotEmpty
+                ? Image.network(
+                    store.image,
+                    height: 120,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                  )
+                : Container(
+                    height: 120,
+                    width: double.infinity,
+                    color: Colors.grey[200],
+                    child: Icon(Icons.store, size: 48, color: Colors.grey[400]),
+                  ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        store.storeName,
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.edit, size: 18),
+                      onPressed: () {
+                        // 编辑商铺逻辑
+                        _showChangeShopLocationDialog(store);
+                      },
+                    ),
+                  ],
+                ),
+                SizedBox(height: 4),
+                Text(store.address, style: TextStyle(fontSize: 13, color: Colors.grey[700])),
+                SizedBox(height: 4),
+                Text('联系方式: ${store.serviceType}', style: TextStyle(fontSize: 13, color: Colors.grey[700])),
+                SizedBox(height: 4),
+                Text('服务类型: ${store.serviceCategory}', style: TextStyle(fontSize: 13, color: Colors.grey[700])),
+                SizedBox(height: 4),
+                Text('营业时间: ${store.businessHours}', style: TextStyle(fontSize: 13, color: Colors.grey[700])),
+                SizedBox(height: 8),
+                Row(
+                  children: [
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: store.businessHours.contains('休息') ? Colors.grey[200] : Color(0xFFE6F4EA),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        store.businessHours.contains('休息') ? '休息中' : '营业中',
+                        style: TextStyle(
+                          color: store.businessHours.contains('休息') ? Colors.grey : Color(0xFF34A853),
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   void _showChangeShopLocationDialog(Store shop) {
@@ -345,7 +473,7 @@ class _ShopManagementScreenState extends State<ManagerLocationPage> {
             onPressed: () => Navigator.pop(context),
             child: Text('取消'),
           ),
-          ElevatedButton(
+          ElevatedButton.icon(
             onPressed: () async {
               // 创建更新后的商铺对象
               Store updatedStore = Store(
@@ -389,7 +517,15 @@ class _ShopManagementScreenState extends State<ManagerLocationPage> {
                 print('发生错误: $e');
               }
             },
-            child: Text('保存'),
+            icon: Icon(Icons.save),
+            label: Text('保存'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Color(0xFF2563EB),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
           ),
         ],
       ),

@@ -4,6 +4,7 @@ class UserMessage {
   String phone;
   String point;
   int type;
+  int status;
 
   UserMessage({
     required this.id,
@@ -11,6 +12,7 @@ class UserMessage {
     required this.phone,
     required this.point,
     required this.type,
+    required this.status
   });
 
   factory UserMessage.fromJson(Map<String, dynamic> json) {
@@ -19,7 +21,8 @@ class UserMessage {
         name: json['name']??'',
         phone: json['phone']??'',
         point: json['point']??'',
-        type: json['type']??0
+        type: json['type']??0,
+        status: json['status']??1,
     );
   }
 

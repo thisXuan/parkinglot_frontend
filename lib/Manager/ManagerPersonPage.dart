@@ -13,6 +13,8 @@ class _UserManagementScreenState extends State<ManagerPersonPage> with SingleTic
   List<UserMessage> adminUsers = [];
   List<UserMessage> normalUsers = [];
   bool isLoading = true;
+  String _searchText = '';
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
@@ -26,14 +28,12 @@ class _UserManagementScreenState extends State<ManagerPersonPage> with SingleTic
       isLoading = true;
     });
     List<UserMessage> users = [];
-
     try {
       var result = await UserApi().GetUser();
       if (result != null && result['code'] == 200) {
         users.addAll((result['data'] as List)
             .map((json) => UserMessage.fromJson(json))
             .toList());
-
         setState(() {
           adminUsers = users.where((user) => user.type == 1).toList();
           normalUsers = users.where((user) => user.type == 0).toList();
@@ -57,6 +57,15 @@ class _UserManagementScreenState extends State<ManagerPersonPage> with SingleTic
     }
   }
 
+  List<UserMessage> get _filteredNormalUsers {
+    if (_searchText.isEmpty) return normalUsers;
+    return normalUsers.where((user) => user.name.contains(_searchText) || user.phone.contains(_searchText)).toList();
+  }
+  List<UserMessage> get _filteredAdminUsers {
+    if (_searchText.isEmpty) return adminUsers;
+    return adminUsers.where((user) => user.name.contains(_searchText) || user.phone.contains(_searchText)).toList();
+  }
+
   @override
   void dispose() {
     _tabController.dispose();
@@ -66,113 +75,265 @@ class _UserManagementScreenState extends State<ManagerPersonPage> with SingleTic
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[200],
-      body: Column(
-        children: [
-          Material(
-            color: Colors.white,
-            child: TabBar(
-              controller: _tabController,
-              tabs: [
-                Tab(text: '管理员'),
-                Tab(text: '普通用户'),
-              ],
-            ),
-          ),
-          Expanded(
-            child: isLoading
-                ? Center(child: CircularProgressIndicator())
-                : TabBarView(
-                    controller: _tabController,
-                    children: [
-                      _buildUserList(adminUsers, true),
-                      _buildUserList(normalUsers, false),
-                    ],
+      backgroundColor: Color(0xFFF5F5F5),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('用户管理', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+              SizedBox(height: 4),
+              Text('管理普通用户和下线管理员', style: TextStyle(fontSize: 14, color: Colors.grey[600])),
+              SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _searchController,
+                      onChanged: (value) {
+                        setState(() {
+                          _searchText = value;
+                        });
+                      },
+                      decoration: InputDecoration(
+                        hintText: '搜索昵称或手机号...',
+                        prefixIcon: Icon(Icons.search),
+                        filled: true,
+                        fillColor: Colors.white,
+                        contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 16),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                    ),
                   ),
+                  SizedBox(width: 16),
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      _showAddUserDialog();
+                    },
+                    icon: Icon(Icons.add),
+                    label: Text('添加用户'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color(0xFF2563EB),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 16),
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: TabBar(
+                  controller: _tabController,
+                  labelColor: Colors.black,
+                  unselectedLabelColor: Colors.grey,
+                  indicatorColor: Color(0xFF2563EB),
+                  indicatorWeight: 3,
+                  tabs: [
+                    Tab(text: '普通用户'),
+                    Tab(text: '下线管理员'),
+                  ],
+                ),
+              ),
+              SizedBox(height: 8),
+              Expanded(
+                child: isLoading
+                    ? Center(child: CircularProgressIndicator())
+                    : TabBarView(
+                        controller: _tabController,
+                        children: [
+                          _buildUserTable(_filteredNormalUsers, false),
+                          _buildUserTable(_filteredAdminUsers, true),
+                        ],
+                      ),
+              ),
+            ],
           ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          _showAddUserDialog();
-        },
-        child: Icon(Icons.add),
+        ),
       ),
     );
   }
 
-  Widget _buildUserList(List<dynamic> users, bool isAdmin) {
-    if (users.isEmpty) {
-      return Center(child: Text('暂无${isAdmin ? '管理员' : '普通用户'}'));
-    }
-
-    return RefreshIndicator(
-      onRefresh: _fetchUsers,
-      child: ListView.builder(
-        padding: EdgeInsets.all(8),
-        itemCount: users.length,
-        itemBuilder: (context, index) {
-          UserMessage user = users[index];
-          return Padding(
-            padding: EdgeInsets.symmetric(vertical: 4),
-            child: Card(
-              color: Colors.white,
-              elevation: 2,
-              child: Padding(
-                padding: EdgeInsets.all(12),
-                child: Row(
-                  children: [
-                    CircleAvatar(
-                      backgroundColor: Colors.deepPurple[100],
-                      child: Text(
-                        user.name?.substring(0, 1).toUpperCase() ?? '?',
-                        style: TextStyle(color: Colors.deepPurple),
-                      ),
-                    ),
-                    SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            user.name ?? '未知用户',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          SizedBox(height: 4),
-                          Text(
-                            user.phone.isEmpty ? '无电话号' : user.phone,
-                            style: TextStyle(
-                              color: Colors.grey[600],
-                              fontSize: 14,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        IconButton(
-                          icon: Icon(Icons.edit, color: Colors.blue),
-                          onPressed: () => _showEditUserDialog(user),
-                        ),
-                        IconButton(
-                          icon: Icon(Icons.delete, color: Colors.red),
-                          onPressed: () => _showDeleteConfirmDialog(user),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+  Widget _buildUserTable(List<UserMessage> users, bool isAdmin) {
+    return Container(
+      margin: EdgeInsets.only(top: 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        children: [
+          Container(
+            padding: EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+            decoration: BoxDecoration(
+              border: Border(bottom: BorderSide(color: Colors.grey[200]!)),
+            ),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              physics: BouncingScrollPhysics(),
+              child: Row(
+                children: [
+                  _buildTableHeaderCell('昵称', width: 120),
+                  _buildTableHeaderCell('电话号码', width: 150),
+                  _buildTableHeaderCell('状态', width: 100),
+                  _buildTableHeaderCell('操作', width: 200, alignRight: true),
+                ],
               ),
             ),
-          );
-        },
+          ),
+          Expanded(
+            child: users.isEmpty
+                ? Center(child: Text('暂无数据'))
+                : ListView.builder(
+                    itemCount: users.length,
+                    itemBuilder: (context, index) {
+                      final user = users[index];
+                      return Container(
+                        padding: EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+                        decoration: BoxDecoration(
+                          border: Border(bottom: BorderSide(color: Colors.grey[100]!)),
+                        ),
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          physics: BouncingScrollPhysics(),
+                          child: Row(
+                            children: [
+                              _buildTableCell(user.name ?? '', width: 120),
+                              _buildTableCell(user.phone, width: 150),
+                              Container(
+                                width: 100,
+                                child: _buildStatusTag(user.status),
+                              ),
+                              Container(
+                                width: 200,
+                                child: Wrap(
+                                  alignment: WrapAlignment.end,
+                                  spacing: 8,
+                                  children: [
+                                    OutlinedButton.icon(
+                                      icon: Icon(Icons.edit, size: 16),
+                                      label: Text('编辑'),
+                                      style: OutlinedButton.styleFrom(
+                                        foregroundColor: Color(0xFF2563EB),
+                                        side: BorderSide(color: Color(0xFF2563EB)),
+                                        minimumSize: Size(60, 32),
+                                        padding: EdgeInsets.symmetric(horizontal: 8),
+                                      ),
+                                      onPressed: () => _showEditUserDialog(user),
+                                    ),
+                                    if (user.status == 1)
+                                      ElevatedButton.icon(
+                                        icon: Icon(Icons.block, size: 16),
+                                        label: Text('拉黑'),
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.red,
+                                          foregroundColor: Colors.white,
+                                          minimumSize: Size(60, 32),
+                                          padding: EdgeInsets.symmetric(horizontal: 8),
+                                        ),
+                                        onPressed: () {
+                                          // 拉黑逻辑
+                                        },
+                                      )
+                                    else
+                                      OutlinedButton.icon(
+                                        icon: Icon(Icons.refresh, size: 16),
+                                        label: Text('恢复'),
+                                        style: OutlinedButton.styleFrom(
+                                          foregroundColor: Colors.green,
+                                          side: BorderSide(color: Colors.green),
+                                          minimumSize: Size(60, 32),
+                                          padding: EdgeInsets.symmetric(horizontal: 8),
+                                        ),
+                                        onPressed: () {
+                                          // 恢复逻辑
+                                        },
+                                      ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+          ),
+        ],
       ),
     );
+  }
+
+  Widget _buildTableHeaderCell(String text, {double width = 100, bool alignRight = false}) {
+    return Container(
+      width: width,
+      padding: EdgeInsets.symmetric(horizontal: 8),
+      child: Align(
+        alignment: alignRight ? Alignment.centerRight : Alignment.centerLeft,
+        child: Text(
+          text,
+          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey[800]),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTableCell(String text, {double width = 100}) {
+    return Container(
+      width: width,
+      padding: EdgeInsets.symmetric(horizontal: 8),
+      child: Text(
+        text,
+        style: TextStyle(fontSize: 15, color: Colors.black87),
+        overflow: TextOverflow.ellipsis,
+      ),
+    );
+  }
+
+  Widget _buildStatusTag(int? status) {
+    // 1: 正常，0: 已禁用
+    if (status == 1) {
+      return Container(
+        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+        decoration: BoxDecoration(
+          color: Color(0xFFE6F4EA),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.check_circle, color: Color(0xFF34A853), size: 16),
+            SizedBox(width: 4),
+            Text('正常', style: TextStyle(color: Color(0xFF34A853), fontSize: 13)),
+          ],
+        ),
+      );
+    } else {
+      return Container(
+        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+        decoration: BoxDecoration(
+          color: Color(0xFFFDEAEA),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.error, color: Color(0xFFEA4335), size: 16),
+            SizedBox(width: 4),
+            Text('已禁用', style: TextStyle(color: Color(0xFFEA4335), fontSize: 13)),
+          ],
+        ),
+      );
+    }
   }
 
   void _showAddUserDialog() {
@@ -305,14 +466,15 @@ class _UserManagementScreenState extends State<ManagerPersonPage> with SingleTic
             onPressed: () => Navigator.pop(context),
             child: Text('取消'),
           ),
-          ElevatedButton(
+          ElevatedButton.icon(
             onPressed: () async{
               UserMessage new_user = UserMessage(
                   id: user.id,
                   name: usernameController.text,
                   phone: emailController.text,
                   point: user.point,
-                  type: selectedRole
+                  type: selectedRole,
+                  status: 1
               );
               Map<String, dynamic> userMap = {
                 'id': new_user.id,
@@ -356,7 +518,15 @@ class _UserManagementScreenState extends State<ManagerPersonPage> with SingleTic
             //     );
             //   }
             // },
-            child: Text('保存'),
+            icon: Icon(Icons.save),
+            label: Text('保存'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Color(0xFF2563EB),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
           ),
         ],
       ),

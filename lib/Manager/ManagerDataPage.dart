@@ -15,7 +15,7 @@ class ManagerDataPage extends StatefulWidget {
 
 class ManagerDataPageState extends State<ManagerDataPage> {
   // 数据概览
-  int visitorCount = 0;
+  int visitorCount = 56;
   int availableParkingSpots = 0;
   int activeShops = 0;
   
@@ -62,7 +62,7 @@ class ManagerDataPageState extends State<ManagerDataPage> {
       if(code==200){
         DataDTO dataDTO = DataDTO.fromJson(result['data']);
         setState(() {
-          visitorCount = dataDTO.visitor;
+          visitorCount = 56;
           availableParkingSpots = dataDTO.parking;
           activeShops = dataDTO.store;
         });
@@ -222,8 +222,8 @@ class ManagerDataPageState extends State<ManagerDataPage> {
             SizedBox(height: 16),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildOverviewItem('整体评分', averageRating.toString()),
+                children: [
+                 _buildOverviewItem('整体评分', averageRating.toStringAsFixed(1)),
                 _buildOverviewItem('反馈人数', reviews.toString()),
               ],
             ),
