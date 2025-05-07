@@ -61,6 +61,7 @@ class _CarPageState extends State<CarPage> {
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
+            backgroundColor: Colors.white,
             title: const Text("停车信息"),
             content: Column(
               mainAxisSize: MainAxisSize.min,
@@ -85,7 +86,7 @@ class _CarPageState extends State<CarPage> {
                       child: Text(
                         "到这去",
                         style: TextStyle(
-                          color: Colors.deepPurple,
+                          color: Colors.brown[300],
                           decoration: TextDecoration.underline,
                         ),
                       ),
@@ -95,9 +96,20 @@ class _CarPageState extends State<CarPage> {
               ],
             ),
             actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text("确定"),
+              ElevatedButton(
+                onPressed:() => Navigator.of(context).pop(),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.brown[300], // 设置按钮背景为棕色
+                  foregroundColor: Colors.white, // 设置文字颜色为白色
+                  fixedSize: const Size(80, 30), // 自定义按钮的宽度和高度
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(40), // 设置圆角半径
+                  ),
+                ),
+                child: const Text(
+                  '确定',
+                  style: TextStyle(fontSize: 12), // 自定义文字大小
+                ),
               ),
             ],
           ),

@@ -229,13 +229,17 @@ class _OrderPageState extends State<OrderPage> {
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                   decoration: BoxDecoration(
-                    color: Color(0xFFFF6B35).withOpacity(0.1),
+                    color: order.type == 1 
+                        ? Color(0xFFFF6B35).withOpacity(0.1)
+                        : Colors.green.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
                     orderStatus[order.type],
                     style: TextStyle(
-                      color: Color(0xFFFF6B35),
+                      color: order.type == 1 
+                          ? Color(0xFFFF6B35)
+                          : Colors.green,
                       fontSize: 10,
                     ),
                   ),
