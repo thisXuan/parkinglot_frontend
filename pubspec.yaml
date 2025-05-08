@@ -96,6 +96,12 @@ flutter:
     - assets/wechat_icon.png
     - assets/ChatRobot.png
     - assets/Client.png
+    - assets/MemberActivity/exercise.png
+    - assets/MemberActivity/exhibition.jpeg
+    - assets/MemberActivity/food.jpeg
+    - assets/MemberActivity/golf.jpg
+    - assets/MemberActivity/spring.jpg
+    - assets/MemberActivity/wine.jpg
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg

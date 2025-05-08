@@ -7,6 +7,7 @@ import 'package:parkinglot_frontend/AccountManager/MyCollectionPage.dart';
 import 'package:parkinglot_frontend/AccountManager/OrderPage.dart';
 import 'package:parkinglot_frontend/AccountManager/PersonalInfoPage.dart';
 import 'package:parkinglot_frontend/AccountManager/SettingsPage.dart';
+import 'package:parkinglot_frontend/AccountManager/MemberActivityCenterPage.dart';
 import 'package:parkinglot_frontend/Tabs.dart';
 import 'package:parkinglot_frontend/api/user.dart';
 import 'package:parkinglot_frontend/utils/util.dart';
@@ -206,8 +207,13 @@ class MemberPageState extends State<MemeberPage> {
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: IconButton(
-                      icon: const Icon(Icons.chat_bubble_outline, color: Colors.white, size: 20),
-                      onPressed: () {},
+                      icon: const Icon(Icons.card_giftcard, color: Colors.white, size: 20),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => MemberActivityCenterPage()),
+                        );
+                      },
                     ),
                   ),
                   const SizedBox(width: 8),
